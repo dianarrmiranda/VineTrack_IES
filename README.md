@@ -2,6 +2,8 @@
 
 ## Resumo
 
+O VineTrack tem como objetivo facilitar a monitorização, gestão e análise de todas as operações vitivinícolas, visando aumentar a eficiência, melhorar a qualidade da produção e reduzir o impacto ambiental. Combinando tecnologia e práticas agrícolas modernas, a aplicação visa otimizar o processo de produção de vinho, permitindo aos agricultores alcançar os melhores resultados possíveis, independentemente do tamanho da vinha.
+
 ## Equipa
 
 | Role          | Nome          | **Email**            | NMEC   
@@ -17,4 +19,4 @@ To be done
 
 ## Recursos 
 
-Technical Report: [VineTrack - Google Docs](https://docs.google.com/document/d/1kwHJgfpsKO1W26nkLB9vtAvWkzWxJ7dQ2A9xzIZGTC4/edit)
+Relatório Especificação do Produto: [VineTrack - Google Docs](https://docs.google.com/document/d/1kwHJgfpsKO1W26nkLB9vtAvWkzWxJ7dQ2A9xzIZGTC4/edit)
