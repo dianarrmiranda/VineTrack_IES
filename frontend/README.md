@@ -23,6 +23,11 @@
 - **Start:** `yarn dev`
 - **Build:** `yarn build`
 
+### Docker version
+
+- **Build:** `docker build -t name .`
+- **Run:** `docker run -p 3030:3030 --network host name`
+
 ## Upgrade to PRO Version
 
 | Minimal Free     | [Minimal Pro](https://material-ui.com/store/items/minimal-dashboard/) |
