@@ -26,7 +26,7 @@
 ### Docker version
 
 - **Build:** `docker build -t name .`
-- **Run:** `docker run -p 3030:3030 --network host name`
+- **Run:** `docker run -p 3030:3030 name`
 
 ## Upgrade to PRO Version
 
