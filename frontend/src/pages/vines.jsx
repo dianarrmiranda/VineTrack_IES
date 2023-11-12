@@ -1,17 +1,17 @@
 import { Helmet } from "react-helmet-async";
 
-import { ProductsView } from "src/sections/products/view";
+import { VinesView } from "src/sections/vines/view";
 
 // ----------------------------------------------------------------------
 
-export default function ProductsPage() {
+export default function VinesPage() {
   return (
     <>
       <Helmet>
-        <title> Products | VineTrack </title>
+        <title> Vines | VineTrack </title>
       </Helmet>
 
-      <ProductsView />
+      <VinesView />
     </>
   );
 }
