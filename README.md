@@ -15,7 +15,7 @@ O VineTrack tem como objetivo facilitar a monitorização, gestão e análise de
 
 ## Architecture
 
-To be done
+![Architecture_Diagram](./reports/arquitetura.jpeg)
 
 ## Recursos 
 
