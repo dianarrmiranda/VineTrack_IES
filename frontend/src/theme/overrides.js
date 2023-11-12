@@ -21,7 +21,8 @@ export function overrides(theme) {
           margin: 0,
           padding: 0,
           width: '100%',
-          height: '100%',
+          height: 'auto',
+          
         },
         '#root': {
           width: '100%',
