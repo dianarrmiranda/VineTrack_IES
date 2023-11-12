@@ -132,6 +132,14 @@ export default function VinesView() {
           <Button variant="contained" color="primary" sx={{ mt: 2 }}>
             Add Vine
           </Button>
+          <Button
+            variant="contained"
+            color="inherit"
+            sx={{ mt: 2, ml: 2 }}
+            onClick={handleClose}
+          >
+            Cancel
+          </Button>
         </Box>
       </Modal>
     </Container>
