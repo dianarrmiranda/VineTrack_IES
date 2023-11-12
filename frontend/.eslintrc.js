@@ -25,8 +25,21 @@ module.exports = {
         "sourceType": "module"
     },
     "plugins": [
-        "react"
+        "react",
+        "perfectionist",
+        "react-hooks"
     ],
+    "settings": {
+        "react": {
+          "version": "detect"
+        }
+    },
     "rules": {
+        "react/react-in-jsx-scope": "off",
+        "react/display-name": "off",
+        "react-hooks/rules-of-hooks": "off",
+        "react-hooks/exhaustive-deps": "off",
+        "no-unused-vars": "off"
     }
+    
 }
