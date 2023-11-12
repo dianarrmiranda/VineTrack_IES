@@ -10,8 +10,22 @@ import { vines } from "src/_mock/vines";
 import VineCard from "../vine-card";
 import VineSort from "../vine-sort";
 import VineFilters from "../vine-filters";
+import { Box, Button, Modal, TextField } from "@mui/material";
+import Iconify from "src/components/iconify";
 
 // ----------------------------------------------------------------------
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 500,
+  bgcolor: "background.default",
+  borderRadius: "10px",
+  boxShadow: 24,
+  p: 4,
+};
 
 export default function VinesView() {
   const [openFilter, setOpenFilter] = useState(false);
@@ -24,12 +38,23 @@ export default function VinesView() {
     setOpenFilter(false);
   };
 
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   return (
     <Container>
       <Typography variant="h4" sx={{ mb: 5 }}>
         Vines
       </Typography>
-
+      <Button
+        variant="contained"
+        color="inherit"
+        startIcon={<Iconify icon="eva:plus-fill" />}
+        onClick={handleOpen}
+      >
+        Add Vine
+      </Button>
       <Stack
         direction="row"
         alignItems="center"
@@ -55,6 +80,60 @@ export default function VinesView() {
           </Grid>
         ))}
       </Grid>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography
+            id="modal-modal-title"
+            variant="h6"
+            component="h2"
+            sx={{ mb: 2 }}
+          >
+            Add a New Vine
+          </Typography>
+          <TextField
+            required
+            id="outlined-required"
+            label="Name of Vine"
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            required
+            id="outlined-required"
+            label="Location"
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            required
+            id="outlined-number"
+            type="number"
+            label="Size (m²)"
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            id="outlined-required"
+            label="Type of Vine"
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            id="outlined-required"
+            label="Planting Date"
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+          <Button variant="contained" color="primary" sx={{ mt: 2 }}>
+            Add Vine
+          </Button>
+        </Box>
+      </Modal>
     </Container>
   );
 }
