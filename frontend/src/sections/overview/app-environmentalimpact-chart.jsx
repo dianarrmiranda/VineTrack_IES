@@ -48,7 +48,7 @@ export default function AppEnvironmentalImpactChart({ title, subheader, chart, .
             <Box sx={{ p: 3, pb: 1 }}>
                 <Chart
                     dir="ltr"
-                    type="line"
+                    type="bar"
                     series={series.map((s) => ({ name: s.name, data: s.data }))}
                     options={chartOptions}
                     width="100%"
