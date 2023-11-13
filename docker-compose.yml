@@ -1,8 +1,8 @@
 version: "3.8"
 services:
   client:
-    build: ./frontend
+    build: ./projVineTracker/frontend
     ports:
       - 3030:3030
     volumes:
-      - ./frontend:/app
+      - ./projVineTracker/frontend:/app
