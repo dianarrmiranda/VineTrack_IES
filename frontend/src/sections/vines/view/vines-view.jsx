@@ -79,6 +79,8 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export default function VinesView() {
+  console.log(vines);
+
   const [openFilter, setOpenFilter] = useState(false);
 
   const handleOpenFilter = () => {

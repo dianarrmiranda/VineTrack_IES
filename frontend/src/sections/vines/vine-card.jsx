@@ -54,7 +54,13 @@ export default function VineCard({ vine }) {
       </Box>
 
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Link color="inherit" underline="hover" variant="subtitle2" noWrap>
+        <Link
+          color="inherit"
+          underline="hover"
+          variant="subtitle2"
+          noWrap
+          href={`/vineDetails/${vine.id}`}
+        >
           {vine.name}
         </Link>
 

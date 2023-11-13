@@ -7,6 +7,7 @@ export const IndexPage = lazy(() => import("src/pages/app"));
 export const UserPage = lazy(() => import("src/pages/user"));
 export const LoginPage = lazy(() => import("src/pages/login"));
 export const VinesPage = lazy(() => import("src/pages/vines"));
+export const VineDetailsPage = lazy(() => import("src/pages/vineDetails"));
 export const Page404 = lazy(() => import("src/pages/page-not-found"));
 
 // ----------------------------------------------------------------------
@@ -25,6 +26,7 @@ export default function Router() {
         { element: <IndexPage />, index: true },
         { path: "user", element: <UserPage /> },
         { path: "vines", element: <VinesPage /> },
+        { path: "vineDetails/:id", element: <VineDetailsPage /> },
       ],
     },
     {
