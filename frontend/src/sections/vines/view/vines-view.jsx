@@ -4,13 +4,26 @@ import Stack from "@mui/material/Stack";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Unstable_Grid2";
 import Typography from "@mui/material/Typography";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import { vines } from "src/_mock/vines";
 
 import VineCard from "../vine-card";
 import VineSort from "../vine-sort";
 import VineFilters from "../vine-filters";
-import { Box, Button, Modal, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  Modal,
+  OutlinedInput,
+  Select,
+  TextField,
+} from "@mui/material";
 import Iconify from "src/components/iconify";
 
 // ----------------------------------------------------------------------
@@ -27,6 +40,30 @@ const style = {
   p: 4,
 };
 
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+const grapes = [
+  "Concord",
+  "Chardonnay",
+  "Cabernet Sauvignon",
+  "Merlot",
+  "Thompson Seedless",
+  "Zinfandel",
+  "Muscat",
+  "Pinot Noir",
+  "Riesling",
+  "Shiraz/Syrah",
+];
+
 export default function VinesView() {
   const [openFilter, setOpenFilter] = useState(false);
 
@@ -41,6 +78,15 @@ export default function VinesView() {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const [grapeType, setGrapeType] = useState([]);
+
+  const handleChangeTypeGrapes = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setGrapeType(typeof value === "string" ? value.split(",") : value);
+  };
 
   return (
     <Container>
@@ -123,12 +169,39 @@ export default function VinesView() {
             fullWidth
             sx={{ mb: 2 }}
           />
-          <TextField
-            id="outlined-required"
-            label="Planting Date"
-            fullWidth
-            sx={{ mb: 2 }}
-          />
+          <div>
+            <InputLabel id="demo-multiple-checkbox-label">
+              Type of Grapes
+            </InputLabel>
+            <Select
+              labelId="demo-multiple-checkbox-label"
+              id="demo-multiple-checkbox"
+              multiple
+              value={grapeType}
+              onChange={handleChangeTypeGrapes}
+              input={<OutlinedInput label="Tag" />}
+              renderValue={(selected) => selected.join(", ")}
+              MenuProps={MenuProps}
+              fullWidth
+              sx={{ mb: 2 }}
+            >
+              {grapes.map((grape) => (
+                <MenuItem key={grape} value={grape}>
+                  <Checkbox checked={grapeType.indexOf(grape) > -1} />
+                  <ListItemText primary={grape} />
+                </MenuItem>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Planting Date"
+                slotProps={{ textField: { fullWidth: true } }}
+                sx={{ mb: 2 }}
+              />
+            </LocalizationProvider>
+          </div>
           <Button variant="contained" color="primary" sx={{ mt: 2 }}>
             Add Vine
           </Button>
