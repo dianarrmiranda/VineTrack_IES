@@ -24,7 +24,7 @@ export default function Router() {
       ),
       children: [
         { element: <IndexPage />, index: true },
-        { path: "user", element: <UserPage /> },
+        // { path: "user", element: <UserPage /> },
         { path: "vines", element: <VinesPage /> },
         { path: "vineDetails/:id", element: <VineDetailsPage /> },
       ],
