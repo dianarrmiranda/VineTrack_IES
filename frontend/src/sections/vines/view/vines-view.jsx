@@ -26,6 +26,8 @@ import {
 } from "@mui/material";
 import Iconify from "src/components/iconify";
 
+import { styled } from "@mui/material/styles";
+
 // ----------------------------------------------------------------------
 
 const style = {
@@ -64,6 +66,18 @@ const grapes = [
   "Shiraz/Syrah",
 ];
 
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
+
 export default function VinesView() {
   const [openFilter, setOpenFilter] = useState(false);
 
@@ -86,6 +100,17 @@ export default function VinesView() {
       target: { value },
     } = event;
     setGrapeType(typeof value === "string" ? value.split(",") : value);
+  };
+
+  const [fileName, setFileName] = useState("");
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    setFileName(file.name);
+  };
+  const handleClearClick = () => {
+    setFileName("");
+    // Aqui você pode também limpar o arquivo do input hidden
+    document.querySelector('input[type="file"]').value = "";
   };
 
   return (
@@ -202,13 +227,47 @@ export default function VinesView() {
               />
             </LocalizationProvider>
           </div>
-          <Button variant="contained" color="primary" sx={{ mt: 2 }}>
+          <InputLabel sx={{ mb: 1 }}> Image</InputLabel>
+          <Grid container spacing={2}>
+            <Grid item xs={4}>
+              <Button
+                component="label"
+                variant="outlined"
+                startIcon={<Iconify icon="ep:upload-filled" />}
+                onChange={handleFileChange}
+                fullWidth
+                sx={{ p: 2 }}
+              >
+                Upload
+                <VisuallyHiddenInput type="file" />
+              </Button>
+            </Grid>
+            <Grid item xs={8}>
+              {fileName && (
+                <TextField
+                  value={fileName}
+                  fullWidth
+                  disabled
+                  InputProps={{
+                    endAdornment: (
+                      <Iconify
+                        icon="twemoji:cross-mark"
+                        onClick={handleClearClick}
+                        cursor="pointer"
+                      />
+                    ),
+                  }}
+                />
+              )}
+            </Grid>
+          </Grid>
+          <Button variant="contained" color="primary" sx={{ mt: 3 }}>
             Add Vine
           </Button>
           <Button
             variant="contained"
             color="inherit"
-            sx={{ mt: 2, ml: 2 }}
+            sx={{ mt: 3, ml: 2 }}
             onClick={handleClose}
           >
             Cancel
