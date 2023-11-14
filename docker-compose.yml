@@ -6,3 +6,4 @@ services:
       - 3030:3030
     volumes:
       - ./projVineTracker/frontend:/app
+      - /app/node_modules
