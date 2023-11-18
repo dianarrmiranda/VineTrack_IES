@@ -1,11 +1,8 @@
 import { useState } from "react";
 
 import Box from "@mui/material/Box";
-import Link from "@mui/material/Link";
 import Card from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
-import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -19,7 +16,7 @@ import { bgGradient } from "src/theme/css";
 
 import Logo from "src/components/logo";
 import Iconify from "src/components/iconify";
-import { postData } from "src/utils";
+import { fecthData, postData } from "src/utils";
 import { Alert } from "@mui/material";
 
 // ----------------------------------------------------------------------
@@ -33,6 +30,7 @@ export default function RegisterUserView() {
   const [email, setEmail] = useState("");
   const [password, setPassowrd] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [username, setUsername] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -41,13 +39,20 @@ export default function RegisterUserView() {
   const [alertEmail, setAlertEmail] = useState(false);
   const [alertName, setAlertName] = useState(false);
   const [alertPasswordMacth, setAlertPasswordMacth] = useState(false);
+  const [alertUsername, setAlertUsername] = useState(false);
+  const [alertUsernameCheck, setAlertUsernameCheck] = useState(false);
 
   const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z])(?=.*[.!@#$%^&*()_+]).{8,}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
   const handleName = (event) => {
     setName(event.target.value);
-    if (name.length > 3) { setAlertName(false);}
+    if (username.length > 3) { setAlertUsername(false);}
+  };
+
+  const handleUsername = (event) => {
+    setUsername(event.target.value);
+    if (username.length > 3) { setAlertUsername(false);}
   };
 
   const handleEmail = (event) => {
@@ -79,33 +84,60 @@ export default function RegisterUserView() {
     if (name.length < 3) { setAlertName(true);}
     else { setAlertName(false);}
 
+    if (username.length < 3) { setAlertUsername(true);}
+
+    
+    const data = new FormData();
+    data.append("username", username);
+    const checkUserName = fetch("user/username", data);
+    console.log("check ", checkUserName);
+
+    if (checkUserName.ok) {
+      setAlertUsernameCheck(true);
+    } else {
+      setAlertUsernameCheck(false);
+    }
+
+
+
     if (passwordRegex.test(password) === true && password === confirmPassword && emailRegex.test(email) === true && name.length >= 3) {
 
       const formData = new FormData();
+      formData.append("username", username);
       formData.append("name", name);
       formData.append("email", email);
       formData.append("password", password);
       formData.append("role", "user");
-      const res = postData("/user/register", formData);
 
-      if (res.ok) {
+      const res = postData("user/register", formData);
+
+      res.then(response => {
+      console.log(response);
+
+      if (response) {
         console.log("Register successful");
         setName("");
         setEmail("");
         setPassowrd("");
         setConfirmPassword("");
 
-        const user = fetch("/user/login/${email}/${password}");
+        const formData = new FormData();
+        formData.append("email", email);
+        formData.append("password", password);
 
-        if (user.length > 0) {
-          console.log("Login successful");
-          localStorage.setItem("user", JSON.stringify(user));
-          router.push("/dashboard");
-        }
+        console.log("formData ", formData);
 
+        
+        localStorage.setItem("user", JSON.stringify(response));
+        router.push("/login");
+        
       } else {
-        console.error("Register failed");
+        console.log("Registration failed");
       }
+      })
+      .catch(error => {
+      console.error("Error:", error);
+      });
     }
   };
 
@@ -114,6 +146,10 @@ export default function RegisterUserView() {
   const renderForm = (
     <>
       <Stack spacing={3}>
+        <TextField name="username" label="Username" onChange={handleUsername}/>
+        {alertUsername && <Alert severity="warning">Username should be at least 3 characters long.</Alert>}
+        {alertUsernameCheck && <Alert severity="error">Username already exists.</Alert>}
+
         <TextField name="name" label="Name" onChange={handleName}/>
         {alertName && <Alert severity="warning">Name should be at least 3 characters long.</Alert>}
         

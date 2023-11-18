@@ -9,18 +9,24 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "user")
 public class User {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
+    private String username;
     private String email;
     private String password;
     private String role;
 
-    public Integer getId() {
+
+    public Integer getId(){
         return id;
+    }
+
+    public String getUserName(){
+        return username;
     }
 
     public String getName() {
@@ -41,6 +47,10 @@ public class User {
 
     public void setId(Integer id){
         this.id = id;
+    }
+
+    public void setUserName(String name){
+        this.name = name;
     }
 
     public void setName(String name){

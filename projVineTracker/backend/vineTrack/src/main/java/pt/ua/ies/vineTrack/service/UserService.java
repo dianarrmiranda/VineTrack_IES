@@ -23,6 +23,10 @@ public class UserService {
         return userRepo.findByEmail(email);
     }
 
+    public User getUserByUserName(String username){
+        return userRepo.findByUsername(username);
+    }
+
     public User getUserById(Integer id){
         return userRepo.findById(id).orElse(null);
     }
