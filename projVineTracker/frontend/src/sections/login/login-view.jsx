@@ -33,6 +33,10 @@ export default function LoginView() {
     router.push("/dashboard");
   };
 
+  const handleRegister = () => {
+    router.push("/register");
+  }
+
   const renderForm = (
     <>
       <Stack spacing={3}>
@@ -113,7 +117,7 @@ export default function LoginView() {
 
           <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
             Don’t have an account?
-            <Link variant="subtitle2" sx={{ ml: 0.5 }}>
+            <Link variant="subtitle2" sx={{ ml: 0.5 }} onClick={handleRegister} >
               Get started
             </Link>
           </Typography>

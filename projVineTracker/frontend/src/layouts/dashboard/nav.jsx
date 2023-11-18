@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 
 import Box from "@mui/material/Box";
@@ -22,11 +22,25 @@ import Scrollbar from "src/components/scrollbar";
 
 import { NAV } from "./config-layout";
 import navConfig from "./config-navigation";
+import { fecthData } from "src/utils";
 
 // ----------------------------------------------------------------------
 
 export default function Nav({ openNav, onCloseNav }) {
   const pathname = usePathname();
+
+  const [userInfo, setUserInfo] = useState([]);
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  useEffect(() => {
+    const initialize = async () => {
+      const user = JSON.parse(localStorage.getItem("user"));
+      user && fecthData(`/user/${user.id}`).then((res) => {
+        setUserInfo(res);
+      })
+    }
+    initialize();
+  }, []);
 
   const upLg = useResponsive("up", "lg");
 
@@ -53,10 +67,10 @@ export default function Nav({ openNav, onCloseNav }) {
       <Avatar src={account.photoURL} alt="photoURL" />
 
       <Box sx={{ ml: 2 }}>
-        <Typography variant="subtitle2">{account.displayName}</Typography>
+        <Typography variant="subtitle2">{user.name}</Typography>
 
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          {account.role}
+          {user.role}
         </Typography>
       </Box>
     </Box>
