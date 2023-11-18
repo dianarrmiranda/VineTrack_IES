@@ -2,8 +2,6 @@ version: "3.8"
 services:
   database:
     image: mysql:8.0.20
-    ports:
-      - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: VTdb
@@ -17,6 +15,8 @@ services:
       interval: 1s
       timeout: 5s
       retries: 20
+    networks:
+      - backend
   
   app:
     depends_on:
@@ -27,17 +27,19 @@ services:
       - 8080:8080
     environment:
       SPRING_APPLICATION_JSON: '{
-       "spring.datasource.url" : "jdbc:mysql://database:3306/VTdb?allowPublicKeyRetrieval=true&useSSL=false",
-       "spring.datasource.username" : "root",
-       "spring.datasource.password" : "root",
-       "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQLDialect",
-       "spring.jpa.hibernate.ddl-auto" : "update"
-     }'
+          "spring.datasource.url" : "jdbc:mysql://database:3306/VTdb?allowPublicKeyRetrieval=true&useSSL=false",
+          "spring.datasource.username" : "root",
+          "spring.datasource.password" : "root",
+          "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQLDialect",
+          "spring.jpa.hibernate.ddl-auto" : "update"
+        }'
     stdin_open: true
     tty: true
     volumes:
-      - ./projVineTracker/backend/vineTrack:/vinetrack
-      - /vinetrack/target
+      - ./projVineTracker/backend/vineTrack:/vineTrack
+    networks:
+      - backend
+      - frontend
 
   client:
     depends_on:
@@ -48,6 +50,12 @@ services:
     volumes:
       - ./projVineTracker/frontend:/app
       - /app/node_modules
+    networks:
+      - frontend
 
 volumes:
   db_file:
+
+networks:
+  backend:
+  frontend:
