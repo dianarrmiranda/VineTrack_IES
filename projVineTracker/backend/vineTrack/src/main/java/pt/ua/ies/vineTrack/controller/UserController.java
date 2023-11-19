@@ -21,12 +21,9 @@ import pt.ua.ies.vineTrack.entity.User;
 import org.json.JSONObject;
 import java.util.List;
 import java.security.SecureRandom;
-import java.security.spec.KeySpec;
 import java.util.Base64;
 import java.util.Base64.Encoder;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 
 @CrossOrigin("*")
 @RestController
