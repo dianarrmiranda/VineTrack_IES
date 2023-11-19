@@ -20,12 +20,15 @@ public class User {
     private String password;
     private String role;
 
+    private String salt;
+    private String token;
+
 
     public Integer getId(){
         return id;
     }
 
-    public String getUserName(){
+    public String getUsername(){
         return username;
     }
 
@@ -45,11 +48,19 @@ public class User {
         return role;
     }
 
+    public String getSalt(){
+        return salt;
+    }
+
+    public String getToken(){
+        return token;
+    }
+
     public void setId(Integer id){
         this.id = id;
     }
 
-    public void setUserName(String name){
+    public void setUsername(String name){
         this.name = name;
     }
 
@@ -67,6 +78,14 @@ public class User {
 
     public void setRole(String role){
         this.role=role;
+    }
+
+    public void setSalt(String salt){
+        this.salt=salt;
+    }
+
+    public void setToken(String token){
+        this.token=token;
     }
 
 }

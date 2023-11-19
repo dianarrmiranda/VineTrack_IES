@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../constants';
 
-const fecthData = async (endpoint) => {
+const fetchData = async (endpoint) => {
     try {
+        console.log("fetchData ", endpoint);
         const response = await axios.get(`${API_BASE_URL}/${endpoint}`);
         return response.data;
     }catch (error) {
@@ -37,4 +38,4 @@ const updateData = async (endpoint, data) => {
     }
 };
 
-export { fecthData, postData, deleteData, updateData };
+export { fetchData, postData, deleteData, updateData };

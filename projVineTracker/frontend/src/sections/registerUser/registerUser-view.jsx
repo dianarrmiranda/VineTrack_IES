@@ -16,7 +16,7 @@ import { bgGradient } from "src/theme/css";
 
 import Logo from "src/components/logo";
 import Iconify from "src/components/iconify";
-import { fecthData, postData } from "src/utils";
+import { fetchData, postData } from "src/utils";
 import { Alert } from "@mui/material";
 
 // ----------------------------------------------------------------------
@@ -41,13 +41,14 @@ export default function RegisterUserView() {
   const [alertPasswordMacth, setAlertPasswordMacth] = useState(false);
   const [alertUsername, setAlertUsername] = useState(false);
   const [alertUsernameCheck, setAlertUsernameCheck] = useState(false);
+  const [alertEmailCheck, setAlertEmailCheck] = useState(false);
 
   const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z])(?=.*[.!@#$%^&*()_+]).{8,}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
   const handleName = (event) => {
     setName(event.target.value);
-    if (username.length > 3) { setAlertUsername(false);}
+    if (name.length > 3) { setAlertUsername(false);}
   };
 
   const handleUsername = (event) => {
@@ -85,22 +86,20 @@ export default function RegisterUserView() {
     else { setAlertName(false);}
 
     if (username.length < 3) { setAlertUsername(true);}
+    else { setAlertUsername(false);}
 
-    
-    const data = new FormData();
-    data.append("username", username);
-    const checkUserName = fetch("user/username", data);
-    console.log("check ", checkUserName);
+    const checkUsername = fetchData(`user/username?username=${username}`);
 
-    if (checkUserName.ok) {
-      setAlertUsernameCheck(true);
-    } else {
-      setAlertUsernameCheck(false);
-    }
+    checkUsername.then((res) => {if (res) {setAlertUsernameCheck(true);} else {setAlertUsernameCheck(false);}});
+
+    const checkEmail = fetchData(`user/email?email=${email}`);
+
+
+    checkEmail.then((res) => {if (res) {setAlertEmailCheck(true);} else {setAlertEmailCheck(false);}});
 
 
 
-    if (passwordRegex.test(password) === true && password === confirmPassword && emailRegex.test(email) === true && name.length >= 3) {
+    if (passwordRegex.test(password) === true && password === confirmPassword && emailRegex.test(email) === true && name.length >= 3 && username.length >= 3) {
 
       const formData = new FormData();
       formData.append("username", username);
@@ -112,7 +111,6 @@ export default function RegisterUserView() {
       const res = postData("user/register", formData);
 
       res.then(response => {
-      console.log(response);
 
       if (response) {
         console.log("Register successful");
@@ -121,15 +119,9 @@ export default function RegisterUserView() {
         setPassowrd("");
         setConfirmPassword("");
 
-        const formData = new FormData();
-        formData.append("email", email);
-        formData.append("password", password);
-
-        console.log("formData ", formData);
-
-        
         localStorage.setItem("user", JSON.stringify(response));
-        router.push("/login");
+
+        router.push("/");
         
       } else {
         console.log("Registration failed");
@@ -155,6 +147,7 @@ export default function RegisterUserView() {
         
         <TextField name="email" label="Email address" onChange={handleEmail}/>
         {alertEmail && <Alert severity="warning">Email address is not valid.</Alert>}
+        {alertEmailCheck && <Alert severity="error">Email address already exists.</Alert>}
 
         <TextField
           name="password"

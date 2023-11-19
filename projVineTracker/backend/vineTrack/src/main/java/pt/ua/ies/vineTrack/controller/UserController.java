@@ -15,13 +15,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import org.json.JSONObject;
-
-
 import pt.ua.ies.vineTrack.service.UserService;
 import pt.ua.ies.vineTrack.entity.User;
 
+import org.json.JSONObject;
 import java.util.List;
+import java.security.SecureRandom;
+import java.security.spec.KeySpec;
+import java.util.Base64;
+import java.util.Base64.Encoder;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 @CrossOrigin("*")
 @RestController
@@ -32,27 +37,37 @@ public class UserController {
 
     @PostMapping(path = "/register")
     public @ResponseBody String registerUser(@RequestParam String username, @RequestParam String name, @RequestParam String email, @RequestParam String password, @RequestParam String role){
+        if (userService.getUserByEmail(email) != null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use!");
+        if (userService.getUserByUsername(username) != null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already in use!");
+
         try{
             User user = new User();
-
-            if (userService.getUserByEmail(email) != null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use!");
-            if (userService.getUserByUserName(username) != null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already in use!");
-
-            user.setUserName(username);
+            user.setUsername(username);
             user.setName(name);
             user.setEmail(email);
             user.setPassword(password);
             user.setRole(role);
+            
+
+            Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+            //Generate token
+            SecureRandom random2 = new SecureRandom();
+            byte bytes[] = new byte[64];
+            random2.nextBytes(bytes);
+            String tokenString = encoder.encodeToString(bytes);
+            user.setToken(tokenString);
+
             userService.save(user);
 
             JSONObject json = new JSONObject();
             json.put("id", user.getId());
-            json.put("username", user.getUserName());
+            json.put("username", user.getUsername());
             json.put("name", user.getName());
             json.put("email", user.getEmail());
             json.put("role", user.getRole());
+            json.put("token", user.getToken());
 
             return json.toString(1);
         }catch(Exception e){
@@ -62,9 +77,31 @@ public class UserController {
         
     }
 
-    @GetMapping(path = "/{id}")
-    public User viewUser(@PathVariable Integer id){
-        return userService.getUserById(id);
+    @GetMapping(path = "/view")
+    public @ResponseBody String viewUser(@RequestParam Integer id, @RequestParam String token){
+        User user;
+
+        try {
+            user = userService.getUserById(id);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal processing error!");
+        }
+
+        if (user == null)
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "User id has no account associated!");
+
+        if (!user.getToken().equals(token))
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "User token is incorrect!");
+
+        JSONObject json = new JSONObject();
+        json.put("id", user.getId());
+        json.put("username", user.getUsername());
+        json.put("name", user.getName());
+        json.put("email", user.getEmail());
+        json.put("role", user.getRole());
+        json.put("token", user.getToken());
+
+        return json.toString(1);
     }
 
     @GetMapping(path = "/all")
@@ -73,13 +110,38 @@ public class UserController {
     }
 
     @GetMapping(path = "/username")
-    public @ResponseBody User getUserByUsername(@RequestParam String username){
+    public @ResponseBody String getUserByUsername(@RequestParam String username){
         try {
 
-            User user = userService.getUserByUserName(username);
+            User user = userService.getUserByUsername(username);
+            if (user == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found!");
 
-            
-            return user;
+            JSONObject json = new JSONObject();
+            json.put("id", user.getId());
+            json.put("username", user.getUsername());
+
+            return json.toString(1);
+
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found!");
+        }
+    }
+
+    @GetMapping(path = "/email")
+    public @ResponseBody String getUserByEmail(@RequestParam String email){
+        try {
+
+            User user = userService.getUserByEmail(email);
+            if (user == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found!");
+
+            JSONObject json = new JSONObject();
+            json.put("id", user.getId());
+            json.put("email", user.getEmail());
+
+            return json.toString(1);
+
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found!");
         }
@@ -87,21 +149,40 @@ public class UserController {
 
     @GetMapping(path = "/login")
     public @ResponseBody String loginUser(@RequestParam String email, @RequestParam String password){
-        User user = userService.getUserByEmail(email);
-        System.out.println("user " + user);
-        if(user.getPassword().equals(password)){
-            System.out.println("user2 " + user);
-            JSONObject json = new JSONObject();
-            json.put("id", user.getId());
-            json.put("username", user.getUserName());
-            json.put("name", user.getName());
-            json.put("email", user.getEmail());
-            json.put("role", user.getRole());
+        User user;
 
-            return json.toString(1);
+        try {
+            user = userService.getUserByEmail(email);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal processing error!");
         }
 
-        return "Invalid credentials!";
+        if (user == null)
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "User email has no account associated!");
+
+        if (!user.getPassword().equals(password))
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "User password is incorrect!");
+
+        
+        
+        Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+
+        SecureRandom rand = new SecureRandom();
+        byte bytes[] = new byte[64];
+        rand.nextBytes(bytes);
+
+        user.setToken(encoder.encodeToString(bytes));
+        userService.save(user);
+
+        JSONObject json = new JSONObject();
+        json.put("id", user.getId());
+        json.put("username", user.getUsername());
+        json.put("name", user.getName());
+        json.put("email", user.getEmail());
+        json.put("role", user.getRole());
+        json.put("token", user.getToken());
+
+        return json.toString(1); 
     }
 
 

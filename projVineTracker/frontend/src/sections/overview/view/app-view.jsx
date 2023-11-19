@@ -1,21 +1,29 @@
-import { faker } from "@faker-js/faker";
-
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Unstable_Grid2";
 import Typography from "@mui/material/Typography";
 
-import Iconify from "src/components/iconify";
-import PropTypes from "prop-types";
-import AppTasks from "../app-tasks";
-
 import AppNutritionChart from "../app-typeOfGrapes-chart";
 import AppHumidityChart from "../app-production-chart";
-import AppTemperatureChart from "../app-temperature-chart";
 import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
-import AppTrafficBySite from "../app-traffic-by-site";
+import { useEffect, useState } from "react";
+import { fetchData } from "src/utils";
 // ----------------------------------------------------------------------
 
+
 export default function AppView() {
+
+  const [userInfo, setUserInfo] = useState([]);
+
+  useEffect(() => {
+    const initialize = async () => {
+      const user = JSON.parse(localStorage.getItem("user"));
+      user &&
+        fetchData(`user/view?id=${user.id}&token=${user.token}`).then((res) => {
+          setUserInfo(res);
+        });
+    };
+    initialize();
+  }, []);
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>

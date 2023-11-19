@@ -22,7 +22,8 @@ import Scrollbar from "src/components/scrollbar";
 
 import { NAV } from "./config-layout";
 import navConfig from "./config-navigation";
-import { fecthData } from "src/utils";
+import { fetchData } from "src/utils";
+import { Route } from "react-router-dom";
 
 // ----------------------------------------------------------------------
 
@@ -30,12 +31,14 @@ export default function Nav({ openNav, onCloseNav }) {
   const pathname = usePathname();
 
   const [userInfo, setUserInfo] = useState([]);
-  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const initialize = async () => {
       const user = JSON.parse(localStorage.getItem("user"));
-      user && fecthData(`/user/${user.id}`).then((res) => {
+      if (user === null ){
+        Route.push("/login");
+      }
+      user && fetchData(`user/view?id=${user.id}&token=${user.token}`).then((res) => {
         setUserInfo(res);
       })
     }
@@ -67,16 +70,17 @@ export default function Nav({ openNav, onCloseNav }) {
       <Avatar src={account.photoURL} alt="photoURL" />
 
       <Box sx={{ ml: 2 }}>
-        <Typography variant="subtitle2">{user.name}</Typography>
+        <Typography variant="subtitle2">{userInfo.name}</Typography>
 
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          {user.role}
+          {userInfo.role}
         </Typography>
       </Box>
     </Box>
   );
 
   const renderMenu = (
+    console.log("userInfo", userInfo),
     <Stack component="nav" spacing={0.5} sx={{ px: 2 }}>
       {navConfig.map((item) => (
         <NavItem key={item.title} item={item} />
