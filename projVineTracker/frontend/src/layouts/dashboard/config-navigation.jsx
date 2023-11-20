@@ -11,7 +11,6 @@ const icon = (name) => (
 );
 
 const user = JSON.parse(localStorage.getItem("user"));
-console.log(user);
 
 const navConfig = [
   {
@@ -31,7 +30,6 @@ const navConfig = [
   },
 
 ];
-
 
 if (user != null && user.length !== 0) {
   navConfig.push({

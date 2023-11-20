@@ -45,6 +45,7 @@ export default function RegisterUserView() {
 
   const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z])(?=.*[.!@#$%^&*()_+]).{8,}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const usernameRegex = /^[a-zA-Z0-9]+$/;
 
   const handleName = (event) => {
     setName(event.target.value);
@@ -53,7 +54,7 @@ export default function RegisterUserView() {
 
   const handleUsername = (event) => {
     setUsername(event.target.value);
-    if (username.length > 3) { setAlertUsername(false);}
+    if (username.length > 3 && usernameRegex.test(username) === true) { setAlertUsername(false);}
   };
 
   const handleEmail = (event) => {
@@ -85,7 +86,7 @@ export default function RegisterUserView() {
     if (name.length < 3) { setAlertName(true);}
     else { setAlertName(false);}
 
-    if (username.length < 3) { setAlertUsername(true);}
+    if (username.length < 3 && usernameRegex.test(username) === false) { setAlertUsername(true);}
     else { setAlertUsername(false);}
 
     const checkUsername = fetchData(`user/username?username=${username}`);
@@ -99,7 +100,7 @@ export default function RegisterUserView() {
 
 
 
-    if (passwordRegex.test(password) === true && password === confirmPassword && emailRegex.test(email) === true && name.length >= 3 && username.length >= 3) {
+    if (passwordRegex.test(password) === true && password === confirmPassword && emailRegex.test(email) === true && name.length >= 3 && username.length >= 3 && usernameRegex.test(username) === true && alertUsernameCheck === false && alertEmailCheck === false) {
 
       const formData = new FormData();
       formData.append("username", username);
@@ -121,7 +122,7 @@ export default function RegisterUserView() {
 
         localStorage.setItem("user", JSON.stringify(response));
 
-        router.push("/");
+        router.replace("/");
         
       } else {
         console.log("Registration failed");
@@ -139,7 +140,7 @@ export default function RegisterUserView() {
     <>
       <Stack spacing={3}>
         <TextField name="username" label="Username" onChange={handleUsername}/>
-        {alertUsername && <Alert severity="warning">Username should be at least 3 characters long.</Alert>}
+        {alertUsername && <Alert severity="warning">Username should be at least 3 characters long, no spaces and no specials characters.</Alert>}
         {alertUsernameCheck && <Alert severity="error">Username already exists.</Alert>}
 
         <TextField name="name" label="Name" onChange={handleName}/>

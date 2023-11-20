@@ -15,7 +15,20 @@ export default function AppView() {
   const [userInfo, setUserInfo] = useState([]);
 
   useEffect(() => {
-    const initialize = async () => {
+    // Check if it's the first visit to this page
+    if (!localStorage.getItem('firstLoadDone')) {
+      // Set the flag in localStorage to true
+      localStorage.setItem('firstLoadDone', 'true');
+      // Reload the page
+      window.location.reload();
+    }
+  }, []);
+
+
+    
+
+  useEffect(() => {
+    const initialize =  async () => {
       const user = JSON.parse(localStorage.getItem("user"));
       user &&
         fetchData(`user/view?id=${user.id}&token=${user.token}`).then((res) => {
@@ -24,6 +37,7 @@ export default function AppView() {
     };
     initialize();
   }, []);
+
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>

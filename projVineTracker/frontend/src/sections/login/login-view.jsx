@@ -45,10 +45,8 @@ export default function LoginView() {
     event.preventDefault();
     try {
       const res = fetchData(`user/login?email=${email}&password=${password}`);
-      console.log("res", res);
 
       res.then((response) => {
-        console.log("response", response);
         if (response.length !== 0) {
           console.log("Login successful");
           setEmail("");

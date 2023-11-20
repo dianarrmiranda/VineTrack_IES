@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Outlet, Navigate, useRoutes, useLocation } from "react-router-dom";
+import { Outlet, Navigate, useRoutes, useLocation, Link } from "react-router-dom";
 
 import DashboardLayout from "src/layouts/dashboard";
 
@@ -18,7 +18,7 @@ const ProtectedRoute = ({ children }) => {
  const location = useLocation();
 
  if (!isLoggedIn) {
-  return <Navigate to="/login" />;
+  return <Link to="/login" />;
  }
  return children;
 };

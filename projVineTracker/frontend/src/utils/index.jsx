@@ -3,7 +3,6 @@ import { API_BASE_URL } from '../constants';
 
 const fetchData = async (endpoint) => {
     try {
-        console.log("fetchData ", endpoint);
         const response = await axios.get(`${API_BASE_URL}/${endpoint}`);
         return response.data;
     }catch (error) {
