@@ -16,7 +16,6 @@ export default function VineDetailsView() {
 
   const vine = vines[0];
 
-  console.log(vine);
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>

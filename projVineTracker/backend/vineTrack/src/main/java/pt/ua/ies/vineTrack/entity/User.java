@@ -9,18 +9,27 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "user")
 public class User {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
+    private String username;
     private String email;
     private String password;
     private String role;
 
-    public Integer getId() {
+    private String salt;
+    private String token;
+
+
+    public Integer getId(){
         return id;
+    }
+
+    public String getUsername(){
+        return username;
     }
 
     public String getName() {
@@ -39,8 +48,20 @@ public class User {
         return role;
     }
 
+    public String getSalt(){
+        return salt;
+    }
+
+    public String getToken(){
+        return token;
+    }
+
     public void setId(Integer id){
         this.id = id;
+    }
+
+    public void setUsername(String username){
+        this.username = username;
     }
 
     public void setName(String name){
@@ -57,6 +78,14 @@ public class User {
 
     public void setRole(String role){
         this.role=role;
+    }
+
+    public void setSalt(String salt){
+        this.salt=salt;
+    }
+
+    public void setToken(String token){
+        this.token=token;
     }
 
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
@@ -10,6 +10,8 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
 import { account } from 'src/_mock/account';
+
+import { fetchData } from 'src/utils';
 
 // ----------------------------------------------------------------------
 
@@ -40,6 +42,18 @@ export default function AccountPopover() {
   const handleClose = () => {
     setOpen(null);
   };
+
+  const [userInfo, setUserInfo] = useState([]);
+
+  useEffect(() => {
+    const initialize = async () => {
+      const user = JSON.parse(localStorage.getItem("user"));
+      user && fetchData(`user/view?id=${user.id}&token=${user.token}`).then((res) => {
+        setUserInfo(res);
+      })
+    }
+    initialize();
+  }, []);
 
   return (
     <>
@@ -85,10 +99,10 @@ export default function AccountPopover() {
       >
         <Box sx={{ my: 1.5, px: 2 }}>
           <Typography variant="subtitle2" noWrap>
-            {account.displayName}
+            {userInfo.name}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {account.email}
+            {userInfo.email}
           </Typography>
         </Box>
 
