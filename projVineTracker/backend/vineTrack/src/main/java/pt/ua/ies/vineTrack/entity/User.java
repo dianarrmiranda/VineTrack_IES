@@ -1,9 +1,16 @@
 package pt.ua.ies.vineTrack.entity;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -14,15 +21,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private String username;
+    @Column(nullable = false)
     private String email;
+    @Column(nullable = false)
     private String password;
     private String role;
 
-    private String salt;
-    private String token;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "user_vine", 
+    joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), 
+    inverseJoinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"))
+    private List<Vine> vines;
 
+    private String token;
 
     public Integer getId(){
         return id;
@@ -48,12 +63,12 @@ public class User {
         return role;
     }
 
-    public String getSalt(){
-        return salt;
-    }
-
     public String getToken(){
         return token;
+    }
+
+    public List<Vine> getVines(){
+        return vines;
     }
 
     public void setId(Integer id){
@@ -80,12 +95,12 @@ public class User {
         this.role=role;
     }
 
-    public void setSalt(String salt){
-        this.salt=salt;
-    }
-
     public void setToken(String token){
         this.token=token;
+    }
+
+    public void setVines(List<Vine> vines){
+        this.vines=vines;
     }
 
 }

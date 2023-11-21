@@ -182,7 +182,6 @@ public class UserController {
         return json.toString(1); 
     }
 
-
     @PutMapping(path = "/update")
     public User updateUser(@RequestBody User user){
         return userService.updateUser(user);
