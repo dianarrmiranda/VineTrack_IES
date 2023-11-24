@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import pt.ua.ies.vineTrack.entity.Grape;
 import pt.ua.ies.vineTrack.repository.GrapeRepo;
 
+import java.util.List;
+
 @Service
 public class GrapeService {
 
@@ -14,6 +16,14 @@ public class GrapeService {
 
     public Grape save(Grape grape){
         return grapeRepo.save(grape);
+    }
+
+    public List<Grape> getAllGrapes(){
+        return grapeRepo.findAll();
+    }
+
+    public Grape getGrapeById(Integer id){
+        return grapeRepo.findById(id).orElse(null);
     }
 
     public String deleteGrapeById(Integer id){

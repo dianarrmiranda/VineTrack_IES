@@ -1,10 +1,7 @@
 package pt.ua.ies.vineTrack.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,20 +9,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import pt.ua.ies.vineTrack.entity.Vine;
-import pt.ua.ies.vineTrack.service.VineService;
+import pt.ua.ies.vineTrack.entity.Grape;
+import pt.ua.ies.vineTrack.service.GrapeService;
 
-@CrossOrigin("*")
 @RestController
-@RequestMapping(path = "/vines")
-public class VineController {
+@RequestMapping(path = "/grapes")
+public class GrapeController {
+
     @Autowired
-    private VineService vineService;
+    private GrapeService grapeService;
 
     @GetMapping()
-    public ResponseEntity<List<Vine>> getAllVines(){
+    public ResponseEntity<String> getAllGrapes(){
         try {
-            return ResponseEntity.ok(vineService.getAllVines());
+            return ResponseEntity.ok(grapeService.getAllGrapes().toString());
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
@@ -33,10 +30,13 @@ public class VineController {
     }
 
     @PostMapping(path = "/add")
-    public ResponseEntity<Vine> addVine(@Valid @RequestBody Vine vine){
-        return ResponseEntity.ok(vineService.save(vine));
-
+    public ResponseEntity<Grape> addGrape(@Valid @RequestBody Grape grape){
+        return ResponseEntity.ok(grapeService.save(grape));
     }
 
+    
 
+
+
+    
 }

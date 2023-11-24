@@ -2,6 +2,9 @@ package pt.ua.ies.vineTrack.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,6 +18,9 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "user")
+@JsonIdentityInfo(
+ generator = ObjectIdGenerators.PropertyGenerator.class, 
+ property = "id")
 public class User {
     
     @Id
@@ -32,8 +38,8 @@ public class User {
     private String role;
 
     @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "user_vine", 
-    joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), 
+    @JoinTable(name = "vines",
+    joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
     inverseJoinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"))
     private List<Vine> vines;
 
@@ -101,6 +107,11 @@ public class User {
 
     public void setVines(List<Vine> vines){
         this.vines=vines;
+    }
+
+    @Override
+    public String toString() {
+        return "User [id=" + id + ", name=" + name + ", username=" + username + ", email=" + email + ", role=" + role + ", vines=" + vines + ", token=" + token + "]";
     }
 
 }

@@ -32,6 +32,11 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @GetMapping()
+    public List<User> viewAllUsers(){
+        return userService.getAllUsers();
+    }
+
     @PostMapping(path = "/register")
     public @ResponseBody String registerUser(@RequestParam String username, @RequestParam String name, @RequestParam String email, @RequestParam String password, @RequestParam String role){
         if (userService.getUserByEmail(email) != null)
@@ -101,11 +106,7 @@ public class UserController {
         return json.toString(1);
     }
 
-    @GetMapping(path = "/all")
-    public List<User> viewAllUsers(){
-        return userService.getAllUsers();
-    }
-
+    
     @GetMapping(path = "/username")
     public @ResponseBody String getUserByUsername(@RequestParam String username){
         try {

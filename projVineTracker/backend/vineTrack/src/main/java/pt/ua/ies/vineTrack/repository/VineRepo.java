@@ -9,6 +9,5 @@ import pt.ua.ies.vineTrack.entity.Vine;
 public interface VineRepo extends JpaRepository<Vine, Integer>{
     Vine findByName(String name);
     Vine findByLocation(String location);
-    Vine findByUser(String id);
     
 } 
