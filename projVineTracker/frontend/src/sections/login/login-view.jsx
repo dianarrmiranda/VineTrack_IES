@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
@@ -19,8 +19,12 @@ import { bgGradient } from "src/theme/css";
 
 import Logo from "src/components/logo";
 import Iconify from "src/components/iconify";
+import { fetchData } from "src/utils";
+import { Alert } from "@mui/material";
 
 // ----------------------------------------------------------------------
+
+
 
 export default function LoginView() {
   const theme = useTheme();
@@ -28,19 +32,67 @@ export default function LoginView() {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassowrd] = useState("");
+  const [alertFail, setAlertFail ] = useState(false);
 
-  const handleClick = () => {
-    router.push("/dashboard");
+  useEffect(() => {
+    localStorage.removeItem("user");
+  }, []);
+
+
+  const handleClick = async(event) => {
+    event.preventDefault();
+    try {
+      const res = fetchData(`user/login?email=${email}&password=${password}`);
+
+      res.then((response) => {
+        if (response.length !== 0) {
+          console.log("Login successful");
+          setEmail("");
+          setPassowrd("");
+          setAlertFail(false);
+          localStorage.setItem("user", JSON.stringify(response));
+          router.push("/");
+        }else{
+          console.log("Login failed");
+          setAlertFail(true);
+        }
+      }).catch((error) => {
+        console.log("Login failed");
+          setAlertFail(true);
+          });
+
+    } catch (error) {
+      console.error('Error during API call', error);
+    }
+    
   };
+
+  const handleRegister = () => {
+    router.push("/register");
+  }
+
+  const handleEmail = (event) => {
+    setEmail(event.target.value);
+  };
+
+  const handlePassword = (event) => {
+    setPassowrd(event.target.value);
+  };
+
+
 
   const renderForm = (
     <>
       <Stack spacing={3}>
-        <TextField name="email" label="Email address" />
+      {alertFail && <Alert severity="error">Wrong Credentials.</Alert>}
+        <TextField name="email" label="Email address" onChange={handleEmail}/>
 
         <TextField
           name="password"
           label="Password"
+          onChange={handlePassword}
           type={showPassword ? "text" : "password"}
           InputProps={{
             endAdornment: (
@@ -69,6 +121,8 @@ export default function LoginView() {
           Forgot password?
         </Link>
       </Stack>
+
+      
 
       <LoadingButton
         fullWidth
@@ -113,7 +167,7 @@ export default function LoginView() {
 
           <Typography variant="body2" sx={{ mt: 2, mb: 5 }}>
             Don’t have an account?
-            <Link variant="subtitle2" sx={{ ml: 0.5 }}>
+            <Link variant="subtitle2" sx={{ ml: 0.5 }} onClick={handleRegister} >
               Get started
             </Link>
           </Typography>

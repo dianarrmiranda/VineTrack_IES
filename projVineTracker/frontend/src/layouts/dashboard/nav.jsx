@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 
 import Box from "@mui/material/Box";
@@ -22,11 +22,28 @@ import Scrollbar from "src/components/scrollbar";
 
 import { NAV } from "./config-layout";
 import navConfig from "./config-navigation";
+import { fetchData } from "src/utils";
+import { Route } from "react-router-dom";
 
 // ----------------------------------------------------------------------
 
 export default function Nav({ openNav, onCloseNav }) {
   const pathname = usePathname();
+
+  const [userInfo, setUserInfo] = useState([]);
+
+  useEffect(() => {
+    const initialize = async () => {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user === null ){
+        Route.push("/login");
+      }
+      user && fetchData(`user/view?id=${user.id}&token=${user.token}`).then((res) => {
+        setUserInfo(res);
+      })
+    }
+    initialize();
+  }, []);
 
   const upLg = useResponsive("up", "lg");
 
@@ -53,10 +70,10 @@ export default function Nav({ openNav, onCloseNav }) {
       <Avatar src={account.photoURL} alt="photoURL" />
 
       <Box sx={{ ml: 2 }}>
-        <Typography variant="subtitle2">{account.displayName}</Typography>
+        <Typography variant="subtitle2">{userInfo.name}</Typography>
 
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          {account.role}
+          {userInfo.role}
         </Typography>
       </Box>
     </Box>
