@@ -13,6 +13,16 @@ import { ColorPreview } from "src/components/color-utils";
 
 // ----------------------------------------------------------------------
 
+      ////{vine.colors.length > 0 && (
+      //   <Stack
+      //   direction="row"
+      //   alignItems="center"
+      //   justifyContent="space-between"
+      // >
+      //   <ColorPreview colors={vine.colors} />
+      //   {vine.size} m²
+      // </Stack>
+      //)}
 export default function VineCard({ vine }) {
   const renderStatus = (
     <Label
@@ -63,15 +73,7 @@ export default function VineCard({ vine }) {
         >
           {vine.name}
         </Link>
-
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <ColorPreview colors={vine.colors} />
-          {vine.size} m²
-        </Stack>
+      
       </Stack>
     </Card>
   );

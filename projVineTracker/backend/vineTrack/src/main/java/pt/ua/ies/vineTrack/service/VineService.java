@@ -66,7 +66,7 @@ public class VineService {
         Vine existing = vineRepo.findById(vine.getId()).orElse(null);
         existing.setName(vine.getName());
         existing.setDate(vine.getDate());
-        existing.setDescription(vine.getDescription());
+        existing.setSize(vine.getSize());
         existing.setImage(vine.getImage());
         existing.setLocation(vine.getLocation());
         existing.setTypeGrap(vine.getTypeGrap());
