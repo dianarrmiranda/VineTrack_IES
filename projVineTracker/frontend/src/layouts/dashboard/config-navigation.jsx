@@ -31,12 +31,4 @@ const navConfig = [
 
 ];
 
-if (user != null && user.length !== 0) {
-  navConfig.push({
-    title: "logout",
-    path: "/login",
-    icon: icon("ic_lock"),
-  });
-}
-
 export default navConfig;

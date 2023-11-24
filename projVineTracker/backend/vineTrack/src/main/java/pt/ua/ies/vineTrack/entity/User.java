@@ -30,11 +30,10 @@ public class User {
     @Column(nullable = false)
     private String name;
     @Column(nullable = false)
-    private String username;
-    @Column(nullable = false)
     private String email;
     @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
     private String role;
 
     @ManyToMany(cascade = CascadeType.ALL)
@@ -43,14 +42,8 @@ public class User {
     inverseJoinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"))
     private List<Vine> vines;
 
-    private String token;
-
     public Integer getId(){
         return id;
-    }
-
-    public String getUsername(){
-        return username;
     }
 
     public String getName() {
@@ -69,9 +62,6 @@ public class User {
         return role;
     }
 
-    public String getToken(){
-        return token;
-    }
 
     public List<Vine> getVines(){
         return vines;
@@ -79,10 +69,6 @@ public class User {
 
     public void setId(Integer id){
         this.id = id;
-    }
-
-    public void setUsername(String username){
-        this.username = username;
     }
 
     public void setName(String name){
@@ -101,17 +87,13 @@ public class User {
         this.role=role;
     }
 
-    public void setToken(String token){
-        this.token=token;
-    }
-
     public void setVines(List<Vine> vines){
         this.vines=vines;
     }
 
     @Override
     public String toString() {
-        return "User [id=" + id + ", name=" + name + ", username=" + username + ", email=" + email + ", role=" + role + ", vines=" + vines + ", token=" + token + "]";
+        return "User [id=" + id + ", name=" + name + ", email=" + email + ", role=" + role + ", vines=" + vines + "]";
     }
 
 }

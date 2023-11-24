@@ -17,12 +17,12 @@ import pt.ua.ies.vineTrack.service.VineService;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping(path = "/vines")
+@RequestMapping(path = "/vine")
 public class VineController {
     @Autowired
     private VineService vineService;
 
-    @GetMapping()
+    @GetMapping(path = "/all")
     public ResponseEntity<List<Vine>> getAllVines(){
         try {
             return ResponseEntity.ok(vineService.getAllVines());

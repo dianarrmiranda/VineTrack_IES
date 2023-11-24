@@ -30,7 +30,7 @@ import { Route } from "react-router-dom";
 export default function Nav({ openNav, onCloseNav }) {
   const pathname = usePathname();
 
-  const [userInfo, setUserInfo] = useState([]);
+  const [userInfo, setUserInfo] = useState({ id: null, name: null, role: null });
 
   useEffect(() => {
     const initialize = async () => {
@@ -38,8 +38,9 @@ export default function Nav({ openNav, onCloseNav }) {
       if (user === null ){
         Route.push("/login");
       }
-      user && fetchData(`user/view?id=${user.id}&token=${user.token}`).then((res) => {
-        setUserInfo(res);
+      user && fetchData(`user/view/${user.id}`).then((res) => {
+        const { id, name, role } = res;
+        setUserInfo({ id, name, role });
       })
     }
     initialize();

@@ -30,7 +30,6 @@ export default function RegisterUserView() {
   const [email, setEmail] = useState("");
   const [password, setPassowrd] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [username, setUsername] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -50,11 +49,6 @@ export default function RegisterUserView() {
   const handleName = (event) => {
     setName(event.target.value);
     if (name.length > 3) { setAlertUsername(false);}
-  };
-
-  const handleUsername = (event) => {
-    setUsername(event.target.value);
-    if (username.length > 3 && usernameRegex.test(username) === true) { setAlertUsername(false);}
   };
 
   const handleEmail = (event) => {
@@ -86,41 +80,34 @@ export default function RegisterUserView() {
     if (name.length < 3) { setAlertName(true);}
     else { setAlertName(false);}
 
-    if (username.length < 3 && usernameRegex.test(username) === false) { setAlertUsername(true);}
-    else { setAlertUsername(false);}
-
-    const checkUsername = fetchData(`user/username?username=${username}`);
-
-    checkUsername.then((res) => {if (res) {setAlertUsernameCheck(true);} else {setAlertUsernameCheck(false);}});
-
-    const checkEmail = fetchData(`user/email?email=${email}`);
-
-
-    checkEmail.then((res) => {if (res) {setAlertEmailCheck(true);} else {setAlertEmailCheck(false);}});
+    const checkEmail = fetchData(`user/email/${email}`);
+    checkEmail.then((res) => {if (res) { setAlertEmailCheck(true);} else {setAlertEmailCheck(false);}});
 
 
 
-    if (passwordRegex.test(password) === true && password === confirmPassword && emailRegex.test(email) === true && name.length >= 3 && username.length >= 3 && usernameRegex.test(username) === true && alertUsernameCheck === false && alertEmailCheck === false) {
+    if (passwordRegex.test(password) === true && password === confirmPassword && emailRegex.test(email) === true && name.length >= 3 && alertEmailCheck === false) {
 
-      const formData = new FormData();
-      formData.append("username", username);
-      formData.append("name", name);
-      formData.append("email", email);
-      formData.append("password", password);
-      formData.append("role", "user");
+      // Dados no formato raw JSON
+      const res = postData("user/add", {
+         name: name,
+         email: email,
+         password: password,
+         role: "user",
+      });
 
-      const res = postData("user/register", formData);
 
       res.then(response => {
-
-      if (response) {
+        console.log("resRegister ", response);
+        if (response) {
         console.log("Register successful");
         setName("");
         setEmail("");
         setPassowrd("");
         setConfirmPassword("");
 
-        localStorage.setItem("user", JSON.stringify(response));
+        const { id, name } = response;
+
+        localStorage.setItem("user", JSON.stringify({ id, name }));
 
         router.replace("/");
         
@@ -139,10 +126,6 @@ export default function RegisterUserView() {
   const renderForm = (
     <>
       <Stack spacing={3}>
-        <TextField name="username" label="Username" onChange={handleUsername}/>
-        {alertUsername && <Alert severity="warning">Username should be at least 3 characters long, no spaces and no specials characters.</Alert>}
-        {alertUsernameCheck && <Alert severity="error">Username already exists.</Alert>}
-
         <TextField name="name" label="Name" onChange={handleName}/>
         {alertName && <Alert severity="warning">Name should be at least 3 characters long.</Alert>}
         

@@ -41,7 +41,7 @@ public class Vine {
     joinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"),
     inverseJoinColumns = @JoinColumn(name = "grape_id", referencedColumnName = "id"))
     private List<Grape> typeGrap;
-
+     
     @Column(nullable = false)
     @ManyToMany(mappedBy = "vines")
     private List<User> users;

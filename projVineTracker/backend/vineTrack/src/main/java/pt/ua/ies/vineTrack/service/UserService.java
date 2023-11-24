@@ -14,38 +14,40 @@ public class UserService {
 
     @Autowired
     private UserRepo userRepo;
-
+    
     public User save(User user){
+        //Check if user already exists
+        User existingUser = userRepo.findByEmail(user.getEmail());
+        if(existingUser != null){
+            return null;
+        }
         return userRepo.save(user);
-    }
-
-    public User getUserByEmail(String email){
-        return userRepo.findByEmail(email);
-    }
-
-    public User getUserByUsername(String username){
-        return userRepo.findByUsername(username);
     }
 
     public User getUserById(Integer id){
         return userRepo.findById(id).orElse(null);
     }
 
-    public User getUserByName(String name){
-        return userRepo.findByName(name);
-    }
-
     public List<User> getAllUsers(){
         return userRepo.findAll();
     }
 
-    public String deleteUserById(Integer id){
-        userRepo.deleteById(id);
-        return "User removed! "+id;
+    public User loginUser(String email, String password){
+        User user = userRepo.findByEmail(email);
+        if(user.getPassword().equals(password)){
+            return user;
+        }
+        return null;
     }
 
-    public User getUserByRole(String role){
-        return userRepo.findByRole(role);
+    public User getUserByEmail(String email){
+        return userRepo.findByEmail(email);
+    }
+
+    public String deleteUserById(Integer id){
+
+        userRepo.deleteById(id);
+        return "User removed! "+id;
     }
 
     public User updateUser(User user){
