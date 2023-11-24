@@ -15,21 +15,30 @@ public class User {
     private Integer id;
 
     private String name;
+<<<<<<< Updated upstream
     private String username;
+=======
+    @Column(nullable = false)
+>>>>>>> Stashed changes
     private String email;
     private String password;
+    @Column(nullable = false)
     private String role;
 
+<<<<<<< Updated upstream
     private String salt;
     private String token;
 
+=======
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "vines",
+    joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+    inverseJoinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"))
+    private List<Vine> vines;
+>>>>>>> Stashed changes
 
     public Integer getId(){
         return id;
-    }
-
-    public String getUsername(){
-        return username;
     }
 
     public String getName() {
@@ -48,9 +57,12 @@ public class User {
         return role;
     }
 
+<<<<<<< Updated upstream
     public String getSalt(){
         return salt;
     }
+=======
+>>>>>>> Stashed changes
 
     public String getToken(){
         return token;
@@ -58,10 +70,6 @@ public class User {
 
     public void setId(Integer id){
         this.id = id;
-    }
-
-    public void setUsername(String username){
-        this.username = username;
     }
 
     public void setName(String name){
@@ -80,12 +88,22 @@ public class User {
         this.role=role;
     }
 
+<<<<<<< Updated upstream
     public void setSalt(String salt){
         this.salt=salt;
     }
 
     public void setToken(String token){
         this.token=token;
+=======
+    public void setVines(List<Vine> vines){
+        this.vines=vines;
+    }
+
+    @Override
+    public String toString() {
+        return "User [id=" + id + ", name=" + name + ", email=" + email + ", role=" + role + ", vines=" + vines + "]";
+>>>>>>> Stashed changes
     }
 
 }

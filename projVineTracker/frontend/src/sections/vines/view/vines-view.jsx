@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Stack from "@mui/material/Stack";
 import Container from "@mui/material/Container";
@@ -80,6 +80,19 @@ const VisuallyHiddenInput = styled("input")({
 
 export default function VinesView() {
   console.log(vines);
+
+ // useEffect(() => {
+ //   const initialize = async () => {
+ //     const user = JSON.parse(localStorage.getItem("user"));
+ //     if (user === null ){
+ //       Route.push("/login");
+ //     }
+ //     user && fetchData(`user/view?id=${user.id}&token=${user.token}`).then((res) => {
+ //       setUserInfo(res);
+ //     })
+ //   }
+ //   initialize();
+ // }, []);
 
   const [openFilter, setOpenFilter] = useState(false);
 
