@@ -11,6 +11,8 @@ public class Vine {
     private Integer id;
     String name;
     int size;
+    String phase;
+    int temperature;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
@@ -55,5 +57,21 @@ public class Vine {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getPhase() {
+        return phase;
+    }
+
+    public void setPhase(String phase) {
+        this.phase = phase;
+    }
+
+    public int getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(int temperature) {
+        this.temperature = temperature;
     }
 }

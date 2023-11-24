@@ -1,5 +1,5 @@
 FROM python:3
-COPY requirements.txt /tmp/
-RUN pip install --requirement /tmp/requirements.txt
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
 ADD . /
-CMD ["python3", "/main.py"]
+CMD ["python3", "-u", "main.py"]

@@ -9,7 +9,7 @@ class Send():
         self.channel = None
 
     def connect(self):
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters('172.17.0.2', port=5672))
+        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', port=5672))
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue=self.queue)
 

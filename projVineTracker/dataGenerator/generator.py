@@ -13,7 +13,7 @@ class Generator:
         self.numberOfVines = 0
         # ligação com a base de dados
         self.connection = mysql.connector.connect(
-            host='172.22.0.2',
+            host='database',
             user='root',
             password='root',
             database='VTdb'
