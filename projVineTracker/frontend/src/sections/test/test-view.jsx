@@ -25,7 +25,6 @@ export default function TestView() {
                 <div key={item.id}>
                     <h1>{item.name}</h1>
                     <p>{item.size}</p>
-                    <p>{item.user.name}</p>
                 </div>
             ))}
         </>
