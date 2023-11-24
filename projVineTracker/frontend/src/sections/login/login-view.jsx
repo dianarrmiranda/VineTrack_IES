@@ -44,15 +44,15 @@ export default function LoginView() {
   const handleClick = async(event) => {
     event.preventDefault();
     try {
-      const res = fetchData(`user/login?email=${email}&password=${password}`);
-
+      const res = fetchData(`user/login/${email}/${password}`);
       res.then((response) => {
-        if (response.length !== 0) {
+        if (response) {
           console.log("Login successful");
           setEmail("");
           setPassowrd("");
           setAlertFail(false);
-          localStorage.setItem("user", JSON.stringify(response));
+          const { id, name } = response;
+          localStorage.setItem("user", JSON.stringify({ id, name }));
           router.push("/");
         }else{
           console.log("Login failed");

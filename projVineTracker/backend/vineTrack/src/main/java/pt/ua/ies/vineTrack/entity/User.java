@@ -1,10 +1,17 @@
 package pt.ua.ies.vineTrack.entity;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.JoinColumn;
 
 @Entity
 @Table(name = "user")
@@ -15,21 +22,20 @@ public class User {
     private Integer id;
 
     private String name;
-    private String username;
+    @Column(nullable = false)
     private String email;
     private String password;
+    @Column(nullable = false)
     private String role;
 
-    private String salt;
-    private String token;
-
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "vines",
+    joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+    inverseJoinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"))
+    private List<Vine> vines;
 
     public Integer getId(){
         return id;
-    }
-
-    public String getUsername(){
-        return username;
     }
 
     public String getName() {
@@ -48,20 +54,8 @@ public class User {
         return role;
     }
 
-    public String getSalt(){
-        return salt;
-    }
-
-    public String getToken(){
-        return token;
-    }
-
     public void setId(Integer id){
         this.id = id;
-    }
-
-    public void setUsername(String username){
-        this.username = username;
     }
 
     public void setName(String name){
@@ -80,12 +74,13 @@ public class User {
         this.role=role;
     }
 
-    public void setSalt(String salt){
-        this.salt=salt;
+    public void setVines(List<Vine> vines){
+        this.vines=vines;
     }
 
-    public void setToken(String token){
-        this.token=token;
+    @Override
+    public String toString() {
+        return "User [id=" + id + ", name=" + name + ", email=" + email + ", role=" + role + ", vines=" + vines + "]";
     }
 
 }
