@@ -12,6 +12,8 @@ import IconButton from '@mui/material/IconButton';
 import { account } from 'src/_mock/account';
 
 import { fetchData } from 'src/utils';
+import { Route } from 'react-router-dom';
+import { useRouter } from 'src/routes/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -35,21 +37,24 @@ const MENU_OPTIONS = [
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
 
+  const router = useRouter();
+
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
   };
 
   const handleClose = () => {
-    setOpen(null);
+    router.push("/login");
   };
 
-  const [userInfo, setUserInfo] = useState([]);
+  const [userInfo, setUserInfo] = useState({});
 
   useEffect(() => {
     const initialize = async () => {
       const user = JSON.parse(localStorage.getItem("user"));
-      user && fetchData(`user/view?id=${user.id}&token=${user.token}`).then((res) => {
-        setUserInfo(res);
+      user && fetchData(`user/view/${user.id}`).then((res) => {
+        const { id, name, role } = res;
+        setUserInfo({ id, name, role });
       })
     }
     initialize();

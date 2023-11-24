@@ -12,27 +12,15 @@ import { fetchData } from "src/utils";
 
 export default function AppView() {
 
-  const [userInfo, setUserInfo] = useState([]);
-
-  useEffect(() => {
-    // Check if it's the first visit to this page
-    if (!localStorage.getItem('firstLoadDone')) {
-      // Set the flag in localStorage to true
-      localStorage.setItem('firstLoadDone', 'true');
-      // Reload the page
-      window.location.reload();
-    }
-  }, []);
-
-
-    
+  const [userInfo, setUserInfo] = useState({});
 
   useEffect(() => {
     const initialize =  async () => {
       const user = JSON.parse(localStorage.getItem("user"));
       user &&
-        fetchData(`user/view?id=${user.id}&token=${user.token}`).then((res) => {
-          setUserInfo(res);
+        fetchData(`user/view/${user.id}`).then((res) => {
+          const { id, name, role } = res;
+          setUserInfo({ id, name, role });
         });
     };
     initialize();
