@@ -9,9 +9,5 @@ public interface UserRepo extends JpaRepository<User, Integer>{
     User findByEmail(String email);
     User findByName(String name);
     User findByRole(String role);
-<<<<<<< Updated upstream
-    User findByUsername(String username);
-=======
     
->>>>>>> Stashed changes
 }

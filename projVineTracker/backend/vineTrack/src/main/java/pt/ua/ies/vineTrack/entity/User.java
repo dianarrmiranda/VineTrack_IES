@@ -1,10 +1,17 @@
 package pt.ua.ies.vineTrack.entity;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.JoinColumn;
 
 @Entity
 @Table(name = "user")
@@ -15,27 +22,17 @@ public class User {
     private Integer id;
 
     private String name;
-<<<<<<< Updated upstream
-    private String username;
-=======
     @Column(nullable = false)
->>>>>>> Stashed changes
     private String email;
     private String password;
     @Column(nullable = false)
     private String role;
 
-<<<<<<< Updated upstream
-    private String salt;
-    private String token;
-
-=======
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "vines",
     joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
     inverseJoinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"))
     private List<Vine> vines;
->>>>>>> Stashed changes
 
     public Integer getId(){
         return id;
@@ -55,17 +52,6 @@ public class User {
 
     public String getRole(){
         return role;
-    }
-
-<<<<<<< Updated upstream
-    public String getSalt(){
-        return salt;
-    }
-=======
->>>>>>> Stashed changes
-
-    public String getToken(){
-        return token;
     }
 
     public void setId(Integer id){
@@ -88,14 +74,6 @@ public class User {
         this.role=role;
     }
 
-<<<<<<< Updated upstream
-    public void setSalt(String salt){
-        this.salt=salt;
-    }
-
-    public void setToken(String token){
-        this.token=token;
-=======
     public void setVines(List<Vine> vines){
         this.vines=vines;
     }
@@ -103,7 +81,6 @@ public class User {
     @Override
     public String toString() {
         return "User [id=" + id + ", name=" + name + ", email=" + email + ", role=" + role + ", vines=" + vines + "]";
->>>>>>> Stashed changes
     }
 
 }
