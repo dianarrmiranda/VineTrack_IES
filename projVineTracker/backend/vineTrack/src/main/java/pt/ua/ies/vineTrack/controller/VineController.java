@@ -41,6 +41,9 @@ public class VineController {
         while (moistureValues.size() < 10) {
             moistureValues.add(0, 0.0);
         }
+        if (moistureValues.size() > 10) {
+            moistureValues = moistureValues.subList(moistureValues.size() - 10, moistureValues.size());
+        }
         System.out.println(moistureValues);
         return moistureValues;
     }
