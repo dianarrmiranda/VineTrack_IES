@@ -2,52 +2,59 @@ import React, { useState, useEffect, useRef } from 'react';
 import { fetchData } from "src/utils";
 import Stomp from 'stompjs';
 import SockJS from 'sockjs-client';
+import { func } from 'prop-types';
 
 export default function TestView() {
     // Fetch Data State
-    const [data, setData] = useState([]);
+    // const [data, setData] = useState([]);
 
-    useEffect(() => {
-        const fetchDataFromAPI = async () => {
-            try {
-                const response = await fetchData('vine/test');
-                setData(response);
-                console.log(response);
-            } catch (error) {
-                console.error('Error during API call', error);
-            }
-        };
+    // useEffect(() => {
+    //     const fetchDataFromAPI = async () => {
+    //         try {
+    //             const response = await fetchData('vine/test');
+    //             setData(response);
+    //             console.log(response);
+    //         } catch (error) {
+    //             console.error('Error during API call', error);
+    //         }
+    //     };
 
-        fetchDataFromAPI();
-    }, []);
+    //     fetchDataFromAPI();
+    // }, []);
 
-    // WebSocket
-    const [messages, setMessages] = useState([]);
+    // WebSocket, has to enable CORS
+    const [stompClient, setStompClient] = useState(null);
+    const [received, setReceived] = useState([]);
 
-    useEffect(() => {
-        const socket = new SockJS('http://localhost:8080/ws');
-        const stompClient = Stomp.over(socket);
-
-        stompClient.connect({}, () => {
-            stompClient.subscribe('/track/updates', (message) => {
-                setMessages((prevMessages) => [...prevMessages, message.body]);
+    const connect = () => {
+        const socket = new SockJS('http://localhost:8080/endpoint');
+        const stomp = Stomp.over(socket);
+        stomp.connect({}, frame => {
+            setStompClient(stomp);
+            console.log('Connected: ' + frame);
+            stomp.subscribe('/topic/update', greeting => {
+                console.log(greeting);
+                setReceived([...received, greeting.body]);
             });
         });
+    }
 
-        return () => {
-            if (stompClient.connected) {
-                stompClient.disconnect();
-            }
-        };
-    }, [messages]); // Include messages in the dependency array
+    const disconnect = () => {
+        if (stompClient) {
+            stompClient.disconnect();
+        }
+        console.log("Disconnected");
+    }
+
+
 
     return (
         <>
             <h2>Received:</h2>
             <ul>
-                {messages.map((message, index) => (
-                    <li key={index}>{message}</li>
-                ))}
+                <li>
+                    <button onClick={() => connect()}>Connect</button>
+                </li>
             </ul>
         </>
     );

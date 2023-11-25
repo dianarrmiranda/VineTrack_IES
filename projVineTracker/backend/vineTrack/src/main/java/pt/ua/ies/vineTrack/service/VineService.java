@@ -19,6 +19,10 @@ public class VineService {
         return vineRepo.findAll();
     }
 
+    public Vine getVineById(Integer id){
+        return vineRepo.findById(id).orElse(null);
+    }
+
     public List<Track> getTracksByVineId(Integer vineId){
         List<Track> tracks = trackService.getAllTracks();
         tracks.removeIf(track -> !track.getVine().getId().equals(vineId));

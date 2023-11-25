@@ -6,9 +6,9 @@ import pt.ua.ies.vineTrack.entity.Track;
 import pt.ua.ies.vineTrack.entity.Vine;
 import pt.ua.ies.vineTrack.service.VineService;
 
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
 
 @CrossOrigin("*")
 @RestController
@@ -24,13 +24,24 @@ public class VineController {
         return tracks.get(tracks.size() - 1);
     }
 
-    @GetMapping(path = "/test2/{vineId}")
-    public List<Track> getTracksByVineId(@PathVariable Integer vineId){
-        return vineService.getTracksByVineId(vineId);
-    }
+    @GetMapping(path = "/moisture/{vineId}")
+    public List<Double> getMoistureByVineId(@PathVariable int vineId){
+        List<Track> tracks = vineService.getTracksByVineId(vineId);
+        // we need to get only the moisture values
+        for (Track track : tracks) {
+            if (!track.getType().equals("moisture")) {
+                tracks.remove(track);
+            }
+        }
+        // now we need to order the tracks by date from the oldest to the newest
+        tracks.sort(Comparator.comparing(Track::getDate));
 
-    @GetMapping(path = "/test3")
-    public List<Track> getAllTracks(){
-        return vineService.getAllTracks();
+        // finally we need to get only the moisture values
+        List<Double> moistureValues = new ArrayList<>(tracks.stream().map(Track::getValue).toList());
+        while (moistureValues.size() < 10) {
+            moistureValues.add(0, 0.0);
+        }
+        System.out.println(moistureValues);
+        return moistureValues;
     }
 }

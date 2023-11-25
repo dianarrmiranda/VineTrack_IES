@@ -16,4 +16,8 @@ public class TrackService {
     public List<Track> getAllTracks(){
         return trackRepo.findAll();
     }
+
+    public Track saveTrack(Track track){
+        return trackRepo.save(track);
+    }
 }
