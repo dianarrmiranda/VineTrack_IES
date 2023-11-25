@@ -36,7 +36,7 @@ public class Vine {
     @Column(nullable = false)
     private String location;
     @Column(nullable = false)
-    private byte[] image;
+    private String image;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "vine_grape", 
@@ -69,7 +69,7 @@ public class Vine {
         return location;
     }
 
-    public byte[] getImage(){
+    public String getImage(){
         return image;
     }
 
@@ -101,7 +101,7 @@ public class Vine {
         this.location = location;
     }
 
-    public void setImage(byte[] image){
+    public void setImage(String image){
         this.image = image;
     }
 

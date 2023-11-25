@@ -81,6 +81,7 @@ export default function VinesView() {
   const [location, setLocation] = useState("");
   const [size, setSize] = useState("");
   const [grapeType, setGrapeType] = useState([]);
+  const [grapeTypeIds, setGrapeTypeIds] = useState([]);
   const [plantingDate, setPlantingDate] = useState("");
   const [fileName, setFileName] = useState("");
   const [file, setFile] = useState(null);
@@ -115,16 +116,24 @@ export default function VinesView() {
     setOpenFilter(false);
   };
 
-
   const handleChangeTypeGrapes = (event) => {
     const {
       target: { value },
     } = event;
-    console.log("value ", value);
     setGrapeType(
       typeof value === "string" ? value.split(",") : value
     );
 
+    const ids = [];
+    grapes.forEach((grape) => {
+      value.forEach((grapeName) => {
+        if (grape.name === grapeName) {
+          ids.push(grape.id);
+        }
+      });
+    });
+    setGrapeTypeIds(ids);
+    console.log("id ", ids);
   };
 
   const handleFileChange = (event) => {
@@ -138,8 +147,6 @@ export default function VinesView() {
   };
 
   const handleAddVine = () => {
-    console.log("vine added");
-
     if (name < 3) {
       setAlertName(true);
     }else{
@@ -150,7 +157,7 @@ export default function VinesView() {
     }else{
       setAlertLocation(false);
     }
-    if (size < 0 ) {
+    if (size < 0 || size === "" ) {
       setAlertSize(true);
     }else{
       setAlertSize(false);
@@ -163,22 +170,36 @@ export default function VinesView() {
     }
 
     if (name.length >= 3 && location.length >= 3 && size >= 0 && file !== null && regex.exec(fileName)) {
-
       const user = JSON.parse(localStorage.getItem("user"));
+      console.log( [grapeTypeIds.map((id) => ({ "id": id }))] )
+      const res = postData("vine/add", {
+        name: name,
+        size: size,
+        date: plantingDate,
+        location: location,
+        image: "11",
+        typeGrap: grapeTypeIds.map(id => ({ "id": id })),
+        users: [{"id": user.id}]
+      });
 
-      //const res = postData("vine/add", {
-      //  name: name,
-      //  size: size,
-      //  date: plantingDate,
-      //  location: location,
-      //  image: file,
-      //  typeGrap: grapeType,
-      //  users: [{id: user.id}]
-      //});
-
+      res.then((response) => {
+        console.log("resRegister ", response);
+        if (response) {
+          console.log("Register successful");
+          setName("");
+          setLocation("");
+          setSize("");
+          setPlantingDate("");
+          setFileName("");
+          setFile(null);
+          setGrapeType([]);
+          setGrapeTypeIds([]);
+          setOpen(false);
+          handleClose();
+        }
+      }
+      );
     }
-
-    handleClose();
   }
 
   return (
@@ -282,8 +303,8 @@ export default function VinesView() {
               sx={{ mb: 2 }}
             >
               {grapes.map((grape) => (
-                <MenuItem key={grape.id} value={grape}>
-                  <Checkbox checked={grapeType.indexOf(grape) > -1} />
+                <MenuItem key={grape.id} value={grape.name}>
+                  <Checkbox checked={grapeType.indexOf(grape.name) > -1} />
                   <ListItemText primary={grape.name} />
                 </MenuItem>
               ))}
@@ -295,7 +316,9 @@ export default function VinesView() {
                 label="Planting Date"
                 slotProps={{ textField: { fullWidth: true } }}
                 sx={{ mb: 2 }}
-                onChange={(e) => setPlantingDate(e.target.value)}
+                onChange={(newValue) => {
+                  setPlantingDate(newValue);
+                }}
               />
             </LocalizationProvider>
           </div>
