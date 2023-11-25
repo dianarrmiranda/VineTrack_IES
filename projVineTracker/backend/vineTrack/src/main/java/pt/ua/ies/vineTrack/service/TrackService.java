@@ -16,8 +16,4 @@ public class TrackService {
     public List<Track> getAllTracks(){
         return trackRepo.findAll();
     }
-
-    public List<Track> getTracksByVineId(Vine vine){
-        return trackRepo.findByVine(vine);
-    }
 }

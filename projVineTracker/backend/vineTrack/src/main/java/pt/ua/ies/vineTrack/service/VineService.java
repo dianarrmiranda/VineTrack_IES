@@ -21,10 +21,7 @@ public class VineService {
 
     public List<Track> getTracksByVineId(Integer vineId){
         List<Track> tracks = trackService.getAllTracks();
-        System.out.println("tracks: " + tracks);
         tracks.removeIf(track -> !track.getVine().getId().equals(vineId));
-        System.out.println(vineId);
-        System.out.println("tracks: " + tracks);
         return tracks;
     }
 

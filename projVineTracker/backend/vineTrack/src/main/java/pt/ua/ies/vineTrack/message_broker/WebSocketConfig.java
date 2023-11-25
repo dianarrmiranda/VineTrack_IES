@@ -1,4 +1,4 @@
-package pt.ua.ies.vineTrack.message_brocker;
+package pt.ua.ies.vineTrack.message_broker;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

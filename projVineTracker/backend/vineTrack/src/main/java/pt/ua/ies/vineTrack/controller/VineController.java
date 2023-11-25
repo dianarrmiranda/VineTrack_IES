@@ -6,7 +6,9 @@ import pt.ua.ies.vineTrack.entity.Track;
 import pt.ua.ies.vineTrack.entity.Vine;
 import pt.ua.ies.vineTrack.service.VineService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin("*")
 @RestController
@@ -16,8 +18,10 @@ public class VineController {
     private VineService vineService;
 
     @GetMapping(path = "/test")
-    public List<Vine> getAllVines(){
-        return vineService.getAllVines();
+    public Track getAllVines(){
+        // Returns the last track
+        List<Track> tracks = vineService.getTracksByVineId(1);
+        return tracks.get(tracks.size() - 1);
     }
 
     @GetMapping(path = "/test2/{vineId}")
