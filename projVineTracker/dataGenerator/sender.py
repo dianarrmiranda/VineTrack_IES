@@ -11,7 +11,7 @@ class Send():
     def connect(self):
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', port=5672))
         self.channel = self.connection.channel()
-        self.channel.queue_declare(queue=self.queue)
+        self.channel.queue_declare(queue=self.queue, durable=True)
 
     def disconnect(self):
         self.connection.close()

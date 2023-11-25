@@ -11,7 +11,6 @@ export default function TestView() {
 
                 // Assuming the response is JSON data; modify this part based on your API response format
                 setData(response);
-                console.log(response);
             } catch (error) {
                 console.error('Error during API call', error);
             }
@@ -22,8 +21,13 @@ export default function TestView() {
 
     return (
         <>
-            <h1>Test</h1>
-            <p>{data.value}</p>
+            {data.map((item) => (
+                <div key={item.id}>
+                    <h1>{item.name}</h1>
+                    <p>{item.size}</p>
+                    <p>{item.user.name}</p>
+                </div>
+            ))}
         </>
     );
 }
