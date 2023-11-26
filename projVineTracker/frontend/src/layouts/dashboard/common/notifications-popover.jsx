@@ -27,6 +27,7 @@ import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 
 // ----------------------------------------------------------------------
+
 /*
 const NOTIFICATIONS = [
   {
@@ -75,10 +76,27 @@ const NOTIFICATIONS = [
     isUnRead: false,
   },
 ];
+
  */
 
+
 export default function NotificationsPopover() {
-  const [notifications, setNotifications] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+
+  const user = JSON.parse(localStorage.getItem('user'));
+  useEffect(() => {
+    const res = fetchData(`notifications/${user.id}`);
+    res.then((response) => {
+      if (response) {
+        console.log("Notifications fetched");
+        console.log(response);
+        setNotifications(response);
+      } else {
+        console.log("Notifications failed");
+      }
+    });
+  }, []);
+
 
   const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
 
@@ -101,18 +119,6 @@ export default function NotificationsPopover() {
     );
   };
 
-  useEffect(() => {
-    const res = fetchData(`vine/notifications`);
-    res.then((response) => {
-      if (response) {
-        console.log("Notifications fetched");
-        console.log(response);
-        setNotifications(response);
-      } else {
-        console.log("Notifications failed");
-      }
-    });
-  }, []);
 
   return (
     <>
