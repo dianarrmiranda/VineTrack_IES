@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { set, sub } from 'date-fns';
 import { faker } from '@faker-js/faker';
@@ -18,13 +18,16 @@ import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 
+import { fetchData } from "src/utils";
+
+
 import { fToNow } from 'src/utils/format-time';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 
 // ----------------------------------------------------------------------
-
+/*
 const NOTIFICATIONS = [
   {
     id: faker.string.uuid(),
@@ -72,9 +75,10 @@ const NOTIFICATIONS = [
     isUnRead: false,
   },
 ];
+ */
 
 export default function NotificationsPopover() {
-  const [notifications, setNotifications] = useState(NOTIFICATIONS);
+  const [notifications, setNotifications] = useState(null);
 
   const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
 
@@ -96,6 +100,19 @@ export default function NotificationsPopover() {
       }))
     );
   };
+
+  useEffect(() => {
+    const res = fetchData(`vine/notifications`);
+    res.then((response) => {
+      if (response) {
+        console.log("Notifications fetched");
+        console.log(response);
+        setNotifications(response);
+      } else {
+        console.log("Notifications failed");
+      }
+    });
+  }, []);
 
   return (
     <>

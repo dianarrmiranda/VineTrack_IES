@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import pt.ua.ies.vineTrack.service.UserService;
 import pt.ua.ies.vineTrack.entity.User;
+import pt.ua.ies.vineTrack.entity.Notification;
+import pt.ua.ies.vineTrack.service.NotificationService;
 
 import java.util.List;
 
@@ -25,6 +27,9 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping(path = "/all")
     public ResponseEntity<List<User>> getAllUsers(){
@@ -66,6 +71,13 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping(path = "/notifications/{userId}")
+    // get all notifications for a user
+    public List<Notification> getNotificationsByUserId(@PathVariable int userId){
+        return notificationService.getNotificationsByUserId(userId);
+    }
+
 
     @PutMapping(path = "/update")
     public User updateUser(@RequestBody User user){
