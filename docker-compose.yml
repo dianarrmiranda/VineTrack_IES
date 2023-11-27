@@ -31,7 +31,18 @@ services:
           "spring.datasource.username" : "root",
           "spring.datasource.password" : "root",
           "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQLDialect",
-          "spring.jpa.hibernate.ddl-auto" : "update"
+          "spring.jpa.hibernate.ddl-auto" : "update",
+          "springdoc.swagger-ui.path" : "/swagger-ui-custom.html",
+          "springdoc.api-docs.path" : "/api-docs",
+          "springdoc.version" : "@springdoc.version@",
+          "spring.jpa.hibernate.ddl-auto" : "none",
+          "api.version" : "1.0-SNAPSHOT",
+          "tos.uri" : "terms-of-service",
+          "api.server.url" : "http://localhost:8080/",
+          "api.description" : "Monitoring your Vines.",
+          "springdoc.swagger-ui.operationsSorter" : "alpha",
+          "springdoc.swagger-ui.tagsSorter" : "alpha",
+          "api.title" : "VineTrack REST API"
         }'
     stdin_open: true
     tty: true
