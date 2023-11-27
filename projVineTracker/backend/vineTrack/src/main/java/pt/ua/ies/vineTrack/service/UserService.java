@@ -74,6 +74,7 @@ public class UserService {
         // get the vines of the user
         for (Vine vine : vines) {
             if(vine.getUsers().contains(user)){
+                System.out.println("vine: " + vine);
                 userVines.add(vine);
             }
         }

@@ -83,18 +83,31 @@ const NOTIFICATIONS = [
 export default function NotificationsPopover() {
   const [notifications, setNotifications] = useState([]);
 
-  const vine = JSON.parse(localStorage.getItem('vine'));
   const user = JSON.parse(localStorage.getItem('user'));
-  console.log(user);
-  console.log(vine); // está a dar null
+  console.log(user.id);
 
   useEffect(() => {
-    const res = fetchData(`notifications/${user.id}`);
+    const res = fetchData(`user/notifications/${user.id}`);
     res.then((response) => {
       if (response) {
         console.log("Notifications fetched");
         console.log(response);
-        setNotifications(response);
+        const notifications = response;
+        const notificationsData = notifications.map((value) => {
+          var temp = {
+            id: value.id,
+            title: value.vine.name,
+            description: value.description,
+            avatar: value.avatar,
+            type: '',
+            createdAt: value.date,
+            isUnRead: value.isUnRead,
+          }
+          console.log(temp);
+          return temp;
+        })
+        console.log(notificationsData);
+        setNotifications(notificationsData);
       } else {
         console.log("Notifications failed");
       }
@@ -174,23 +187,11 @@ export default function NotificationsPopover() {
               </ListSubheader>
             }
           >
-            {notifications.slice(0, 2).map((notification) => (
+            {notifications.map((notification) => (
               <NotificationItem key={notification.id} notification={notification} />
             ))}
           </List>
 
-          <List
-            disablePadding
-            subheader={
-              <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
-                Before that
-              </ListSubheader>
-            }
-          >
-            {notifications.slice(2, 5).map((notification) => (
-              <NotificationItem key={notification.id} notification={notification} />
-            ))}
-          </List>
         </Scrollbar>
 
         <Divider sx={{ borderStyle: 'dashed' }} />

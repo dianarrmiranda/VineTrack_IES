@@ -51,7 +51,9 @@ public class RabbitmqHandler {
                 // for now we will consider that the expected value is 40
                 if (value < 40) {
                     Boolean isUnRead = true;
-                    Notification notification = new Notification("moisture", "/assets/images/notifications/water.png", isUnRead, vine);
+                    Notification notification = new Notification("moisture", "/public/assets/images/notifications/water.png", isUnRead, vine);
+                    // set description to  'Levels of the soil humidity are low.'
+                    notification.setDescription("Levels of the soil humidity are low.");
                     notificationService.saveNotification(notification);
                 }
 

@@ -15,6 +15,8 @@ public class Notification {
     // an image fot the avatar
     private String avatar; // a path to the image
     private Boolean isUnRead;
+    private LocalDateTime date;
+    private String description;
 
 
     // one user can take many notifications (1:N)
@@ -32,6 +34,8 @@ public class Notification {
         this.avatar = avatar;
         this.isUnRead = isUnRead;
         this.vine = vine;
+        this.date = LocalDateTime.now();
+        this.description = "Default";
     }
 
     // getters and setters
@@ -73,6 +77,22 @@ public class Notification {
 
     public void setVine(Vine vine) {
         this.vine = vine;
+    }
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description=description;
     }
 
 }

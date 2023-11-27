@@ -139,9 +139,10 @@ public class Vine {
         this.size = size;
     }
 
+
     @Override
     public String toString() {
-        return "Vine [id=" + id + ", name=" + name + ", description=" + description + ", date=" + date + ", location="
-                + location + ", image=" + image + ", typeGrap=" + typeGrap + ", users=" + users + "]";
+        return name;
     }
+
 }

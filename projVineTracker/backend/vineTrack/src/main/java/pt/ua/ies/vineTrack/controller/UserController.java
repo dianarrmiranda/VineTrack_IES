@@ -19,6 +19,7 @@ import pt.ua.ies.vineTrack.entity.Notification;
 import pt.ua.ies.vineTrack.service.NotificationService;
 import pt.ua.ies.vineTrack.entity.Vine;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -76,16 +77,19 @@ public class UserController {
     @GetMapping(path = "/notifications/{userId}")
     // get all notifications from a vine
     public List<Notification> getNotificationsByUserId(@PathVariable Integer userId){
-        System.out.println("Try get notifications");
-        try {
-            User user = userService.getUserById(userId);
-            List<Vine> vines = userService.getVinesByUser(user);
-            List<Notification> notifications = notificationService.getNotificationsByVine(vines.get(0));
-            System.out.println(notifications);
-            return notifications;
-        } catch (Exception e) {
-            return null;
+        User user = userService.getUserById(userId);
+        List<Vine> vines = userService.getVinesByUser(user);
+        List<Notification> notifications = new ArrayList<>();
+        for (Vine vine : vines) {
+                notifications.addAll(notificationService.getNotificationsByVine(vine));
         }
+        System.out.println(notifications);
+        // invert the list
+        List<Notification> invertedNotifications = new ArrayList<>();
+        for (int i = notifications.size() - 1; i >= 0; i--) {
+            invertedNotifications.add(notifications.get(i));
+        }
+        return invertedNotifications;
     }
 
 
