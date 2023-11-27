@@ -5,7 +5,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,7 +35,7 @@ public class Vine {
     @Column(nullable = false)
     private String image;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany()
     @JoinTable(name = "vine_grape", 
     joinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"),
     inverseJoinColumns = @JoinColumn(name = "grape_id", referencedColumnName = "id"))
@@ -55,11 +54,11 @@ public class Vine {
         return name;
     }
 
-    public String getDescription(){
-        return description;
+    public Double getSize(){
+        return size;
     }
 
-    public String getDate(){
+    public Date getDate(){
         return date;
     }
 
@@ -87,11 +86,11 @@ public class Vine {
         this.name = name;
     }
 
-    public void setDescription(String description){
-        this.description = description;
+    public void setSize(Double size){
+        this.size = size;
     }
 
-    public void setDate(String date){
+    public void setDate(Date date){
         this.date = date;
     }
 
