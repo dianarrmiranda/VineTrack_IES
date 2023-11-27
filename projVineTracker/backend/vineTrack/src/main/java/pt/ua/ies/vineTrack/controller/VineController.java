@@ -8,6 +8,7 @@ import pt.ua.ies.vineTrack.entity.Track;
 import pt.ua.ies.vineTrack.entity.User;
 import pt.ua.ies.vineTrack.entity.Vine;
 import pt.ua.ies.vineTrack.service.GrapeService;
+import pt.ua.ies.vineTrack.service.TrackService;
 import pt.ua.ies.vineTrack.service.UserService;
 import pt.ua.ies.vineTrack.service.VineService;
 
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.io.IOException;
@@ -42,6 +44,8 @@ public class VineController {
     private UserService userService;
     @Autowired
     private GrapeService grapeService;
+    @Autowired
+    private TrackService trackService;
 
     @GetMapping(path = "/test")
     public Track getAllVinesTest(){
@@ -52,6 +56,7 @@ public class VineController {
 
     @GetMapping(path = "/moisture/{vineId}")
     public List<Double> getMoistureByVineId(@PathVariable int vineId){
+        System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         // we need to get only the moisture values
         for (Track track : tracks) {
@@ -121,6 +126,12 @@ public class VineController {
             }
 
             vineService.save(vine);
+
+            // add 2 tracks to the vine
+            Track track1 = new Track("moisture", LocalDateTime.now(), 0.0, vine);
+            Track track2 = new Track("moisture", LocalDateTime.now(), 0.0, vine);
+            trackService.saveTrack(track1);
+            trackService.saveTrack(track2);
 
             if (!img.isEmpty()){
                 try {

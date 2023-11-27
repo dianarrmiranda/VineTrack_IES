@@ -19,8 +19,8 @@ import jakarta.persistence.JoinColumn;
 @Entity
 @Table(name = "vine")
 @JsonIdentityInfo(
- generator = ObjectIdGenerators.PropertyGenerator.class, 
- property = "id")
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class Vine {
 
     @Id
@@ -36,15 +36,15 @@ public class Vine {
     private String location;
     private String image;
 
-    String phase;
-    int temperature;
+    String phase = "bud";
+    int temperature = 15;
 
     @ManyToMany()
-    @JoinTable(name = "vine_grape", 
-    joinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"),
-    inverseJoinColumns = @JoinColumn(name = "grape_id", referencedColumnName = "id"))
+    @JoinTable(name = "vine_grape",
+            joinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "grape_id", referencedColumnName = "id"))
     private List<Grape> typeGrap;
-     
+
     @Column(nullable = false)
     @ManyToMany(mappedBy = "vines")
     private List<User> users;

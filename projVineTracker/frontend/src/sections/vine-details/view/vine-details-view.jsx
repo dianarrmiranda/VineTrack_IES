@@ -31,8 +31,9 @@ export default function VineDetailsView() {
     initialize();
   }, []);
 
+
   useEffect(() => {
-    const res = fetchData(`vine/moisture/${vine.id}`);
+    const res = fetchData(`vine/moisture/${id}`);
     res.then((response) => {
       if (response) {
         console.log("Moisture data fetched");
