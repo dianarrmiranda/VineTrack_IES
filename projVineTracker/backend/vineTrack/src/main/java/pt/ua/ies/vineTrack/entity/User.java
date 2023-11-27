@@ -2,10 +2,6 @@ package pt.ua.ies.vineTrack.entity;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,20 +15,15 @@ import jakarta.persistence.JoinColumn;
 
 @Entity
 @Table(name = "user")
-@JsonIdentityInfo(
- generator = ObjectIdGenerators.PropertyGenerator.class, 
- property = "id")
 public class User {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
     private String name;
     @Column(nullable = false)
     private String email;
-    @Column(nullable = false)
     private String password;
     @Column(nullable = false)
     private String role;
@@ -61,10 +52,6 @@ public class User {
 
     public String getRole(){
         return role;
-    }
-
-    public List<Vine> getVines(){
-        return vines;
     }
 
     public void setId(Integer id){

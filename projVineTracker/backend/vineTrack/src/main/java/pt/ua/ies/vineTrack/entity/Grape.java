@@ -29,7 +29,6 @@ public class Grape {
     @ManyToMany(mappedBy = "typeGrap")
     private List<Vine> vine;
 
-
     public Integer getId(){
         return id;
     }
