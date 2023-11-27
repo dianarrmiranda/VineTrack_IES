@@ -71,6 +71,41 @@ export default function VinesView() {
   const [grapes, setGrapes] = useState([]);
   
   const [openFilter, setOpenFilter] = useState(false);
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
+  const [size, setSize] = useState("");
+  const [grapeType, setGrapeType] = useState([]);
+  const [grapeTypeIds, setGrapeTypeIds] = useState([]);
+  const [plantingDate, setPlantingDate] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [file, setFile] = useState(null);
+
+  const [alertName, setAlertName] = useState(false);
+  const [alertLocation, setAlertLocation] = useState(false);
+  const [alertSize, setAlertSize] = useState(false);
+  const [alertImage, setAlertImage] = useState(false);
+  const [alertImageSize, setAlertImageSize] = useState(false);
+
+  useEffect(() => {
+      const initialize = async () => {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user === null ){
+          Route.push("/login");
+        }
+        user && fetchData(`user/view/${user.id}`).then((res) => {
+          const { vines } = res;
+          setVines({vines}.vines);
+        })
+        fetchData(`grape/all`).then((res) => {
+          setGrapes(res);
+        })
+      }
+      initialize();
+    }, []);
 
   const handleOpenFilter = () => {
     setOpenFilter(true);
@@ -87,7 +122,6 @@ export default function VinesView() {
     setGrapeType(typeof value === "string" ? value.split(",") : value);
   };
 
-  const [fileName, setFileName] = useState("");
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     setFileName(file.name);
