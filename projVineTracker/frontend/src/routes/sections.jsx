@@ -15,6 +15,8 @@ import PropTypes from 'prop-types';
 
 const ProtectedRoute = ({ children }) => {
  const isLoggedIn = localStorage.getItem("user") !== null;
+const location = useLocation();
+
  if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
  }

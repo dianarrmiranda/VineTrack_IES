@@ -1,11 +1,13 @@
 package pt.ua.ies.vineTrack.entity;
 
+
 import java.sql.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -37,6 +39,7 @@ public class Vine {
     private String image;
 
     @ManyToMany()
+
     @JoinTable(name = "vine_grape", 
     joinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"),
     inverseJoinColumns = @JoinColumn(name = "grape_id", referencedColumnName = "id"))
@@ -59,7 +62,11 @@ public class Vine {
         return size;
     }
 
-    public Date getDate(){
+    public String getDescription(){
+        return description;
+    }
+
+    public String getDate(){
         return date;
     }
 
@@ -91,7 +98,11 @@ public class Vine {
         this.size = size;
     }
 
-    public void setDate(Date date){
+    public void setDescription(String description){
+        this.description = description;
+    }
+
+    public void setDate(String date){
         this.date = date;
     }
 

@@ -84,6 +84,7 @@ export default function RegisterUserView() {
 
     if (passwordRegex.test(password) === true && password === confirmPassword && emailRegex.test(email) === true && name.length >= 3 && alertEmailCheck === false) {
 
+      // Dados no formato raw JSON
       const res = postData("user/add", {
          name: name,
          email: email,

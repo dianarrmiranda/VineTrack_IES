@@ -68,7 +68,6 @@ const VisuallyHiddenInput = styled("input")({
 
 export default function VinesView() {
 
-
   const [vines, setVines] = useState([]);
   const [grapes, setGrapes] = useState([]);
   
