@@ -98,32 +98,29 @@ class Generator:
             values = self.cursor.fetchall()
             values = values[::-1]
 
-            print("Decrease value: ", decreaseValue)
-
-            if values[1][-1] < 35:
+            if values[1][-2] < 35:
                 # vai haver uma probabilidade de 50% de regar
-                print("Vai regar")
                 if random.randint(0, 1) == 1:
-                    newValue = values[1][-1] + random.uniform(15, 25)
+                    newValue = values[1][-2] + random.uniform(15, 25)
 
                 else:
-                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-1])
+                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-2])
 
-            elif values[1][-1] - values[0][-1] > 0:
+            elif values[1][-2] - values[0][-2] > 0:
                 # vai aumentar até cheagar ao valor de humidade ideal
                 ideal = {'bud': [70, 80], 'flower': [80, 90], 'fruit': [80, 90], 'maturity': [60, 70]}
 
                 idealValues = ideal[phase]
 
                 # já está no valor ideal
-                if idealValues[0] < values[1][-1] < idealValues[1]:
-                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-1])
+                if idealValues[0] < values[1][-2] < idealValues[1]:
+                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-2])
 
                 else:
                     newValue = random.uniform(idealValues[0], idealValues[1])
 
             else:
-                newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-1])
+                newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-2])
 
             newValue = round(newValue, 2)
             message = {
