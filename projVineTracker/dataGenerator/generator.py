@@ -22,6 +22,16 @@ class Generator:
         self.numberOfVines = self.cursor.execute('SELECT COUNT(*) FROM vine')
         self.numberOfVines = self.cursor.fetchone()[0]
 
+    def decrease_moisture(self, min, max, previousValue):
+        value = random.uniform(min, max)
+        if value < 0:
+            value = 0
+        value = round(value, 2)
+        newValue = previousValue - value
+        if newValue < 0:
+            newValue = 0
+        return newValue
+
     async def moisture(self):
 
         for sensor in self.data:
@@ -72,13 +82,7 @@ class Generator:
                     newValue = values[1][-1] + random.uniform(15, 25)
 
                 else:
-                    value = random.uniform(decreaseValue[0], decreaseValue[1])
-                    if value < 0:
-                        value = 0
-                    value = round(value, 2)
-                    newValue = values[1][-1] - value
-                    if newValue < 0:
-                        newValue = 0
+                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-1])
 
             elif values[1][-1] - values[0][-1] > 0:
                 # vai aumentar até cheagar ao valor de humidade ideal
@@ -88,25 +92,13 @@ class Generator:
 
                 # já está no valor ideal
                 if idealValues[0] < values[1][-1] < idealValues[1]:
-                    value = random.uniform(decreaseValue[0], decreaseValue[1])
-                    if value < 0:
-                        value = 0
-                    value = round(value, 2)
-                    newValue = values[1][-1] - value #  novo valor da humidade a enviar
-                    if newValue < 0:
-                        newValue = 0
+                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-1])
 
                 else:
                     newValue = random.uniform(idealValues[0], idealValues[1])
 
             else:
-                value = random.uniform(decreaseValue[0], decreaseValue[1])
-                if value < 0:
-                    value = 0
-                value = round(value, 2)
-                newValue = values[1][-1] - value #  novo valor da humidade a enviar
-                if newValue < 0:
-                    newValue = 0
+                newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-1])
 
             newValue = round(newValue, 2)
             message = {
