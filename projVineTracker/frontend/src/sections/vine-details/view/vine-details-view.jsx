@@ -7,18 +7,29 @@ import AppHumidityChart from "../app-humidity-chart";
 import AppTemperatureChart from "../app-temperature-chart";
 import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 
-import { vines } from "src/_mock/vines";
 import { fetchData } from "src/utils";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
-  //const { id } = useParams();
-  //const vine = vines.find((v) => v.id === id);
 
-  const vine = vines[0];
+  const { id } = useParams();
+  const [vine, setVine] = useState({});
   
   const [moistureData, setMoistureData] = useState(null);
+
+  useEffect(() => {
+    const initialize = async () => {
+      const res = fetchData(`vine/${id}`);
+
+      res.then((data) => {
+        setVine(data);
+      });
+    }
+
+    initialize();
+  }, []);
 
   useEffect(() => {
     const res = fetchData(`vine/moisture/${vine.id}`);

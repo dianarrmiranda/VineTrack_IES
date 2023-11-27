@@ -47,6 +47,11 @@ export default function AccountPopover() {
     router.push("/login");
   };
 
+  const handleLogout = async () => {
+    localStorage.removeItem("user");
+    router.push("/login");
+  }
+
   const [userInfo, setUserInfo] = useState({});
 
   useEffect(() => {
@@ -124,7 +129,7 @@ export default function AccountPopover() {
         <MenuItem
           disableRipple
           disableTouchRipple
-          onClick={handleClose}
+          onClick={handleLogout}
           sx={{ typography: 'body2', color: 'error.main', py: 1.5 }}
         >
           Logout

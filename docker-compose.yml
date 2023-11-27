@@ -36,7 +36,8 @@ services:
   
   app:
     depends_on:
-      - database
+      database : 
+        condition: service_healthy	
     build: ./projVineTracker/backend/vineTrack
     restart: on-failure
     ports:
@@ -48,6 +49,7 @@ services:
           "spring.datasource.password" : "root",
           "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQLDialect",
           "spring.jpa.hibernate.ddl-auto" : "update",
+          "management.endpoints.web.exposure.include" : "health",
           "spring.rabbitmq.host" : "rabbitmq",
           "spring.rabbitmq.port" : "5672",
           "spring.rabbitmq.username" : "guest",
@@ -57,13 +59,21 @@ services:
     tty: true
     volumes:
       - ./projVineTracker/backend/vineTrack:/vineTrack
+      - backendData:/root/.m2
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider localhost:8080/actuator/health || exit 1
+      interval: 2s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
     networks:
       - backend
       - frontend
 
   client:
     depends_on:
-      - app
+      app: 
+        condition: service_healthy
     build: ./projVineTracker/frontend
     ports:
       - 3030:3030
@@ -87,6 +97,7 @@ services:
 
 volumes:
   db_file:
+  backendData:
 
 networks:
   backend:
