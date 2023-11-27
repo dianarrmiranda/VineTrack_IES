@@ -38,17 +38,14 @@ export default function RegisterUserView() {
   const [alertEmail, setAlertEmail] = useState(false);
   const [alertName, setAlertName] = useState(false);
   const [alertPasswordMacth, setAlertPasswordMacth] = useState(false);
-  const [alertUsername, setAlertUsername] = useState(false);
-  const [alertUsernameCheck, setAlertUsernameCheck] = useState(false);
   const [alertEmailCheck, setAlertEmailCheck] = useState(false);
 
   const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z])(?=.*[.!@#$%^&*()_+]).{8,}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  const usernameRegex = /^[a-zA-Z0-9]+$/;
 
   const handleName = (event) => {
     setName(event.target.value);
-    if (name.length > 3) { setAlertUsername(false);}
+    if (name.length > 3) { setAlertName(false);}
   };
 
   const handleEmail = (event) => {
@@ -95,9 +92,7 @@ export default function RegisterUserView() {
          role: "user",
       });
 
-
       res.then(response => {
-        console.log("resRegister ", response);
         if (response) {
         console.log("Register successful");
         setName("");
