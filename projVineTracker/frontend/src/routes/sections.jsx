@@ -1,5 +1,5 @@
-import { lazy, Suspense, useEffect, useState } from "react";
-import { Outlet, Navigate, useRoutes, useLocation, Link } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Outlet, Navigate, useRoutes } from "react-router-dom";
 
 import DashboardLayout from "src/layouts/dashboard";
 
@@ -15,8 +15,6 @@ import PropTypes from 'prop-types';
 
 const ProtectedRoute = ({ children }) => {
  const isLoggedIn = localStorage.getItem("user") !== null;
-const location = useLocation();
-
  if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
  }

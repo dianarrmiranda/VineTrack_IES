@@ -7,14 +7,26 @@ import AppHumidityChart from "../app-humidity-chart";
 import AppTemperatureChart from "../app-temperature-chart";
 import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 
-import { vines } from "src/_mock/vines";
+import { useParams } from "react-router-dom";
+import { fetchData } from "src/utils";
+import { useEffect, useState } from "react";
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
-  //const { id } = useParams();
-  //const vine = vines.find((v) => v.id === id);
+  const { id } = useParams();
+  const [vine, setVine] = useState({});
+  
+  useEffect(() => {
+    const initialize = async () => {
+      const res = fetchData(`vine/${id}`);
 
-  const vine = vines[0];
+      res.then((data) => {
+        setVine(data);
+      });
+    }
+
+    initialize();
+  }, []);
 
   return (
     <Container maxWidth="xl">

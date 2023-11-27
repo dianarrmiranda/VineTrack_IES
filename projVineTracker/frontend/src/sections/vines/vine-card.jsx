@@ -4,12 +4,10 @@ import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import Card from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-
-import { fCurrency } from "src/utils/format-number";
 
 import Label from "src/components/label";
-import { ColorPreview } from "src/components/color-utils";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 // ----------------------------------------------------------------------
 
@@ -24,6 +22,22 @@ import { ColorPreview } from "src/components/color-utils";
       // </Stack>
       //)}
 export default function VineCard({ vine }) {
+
+  const [image, setImage] = useState(null);
+
+  useEffect(() => {
+    axios.get(`http://localhost:8080/vine/image/${vine.id}`, {
+      responseType: 'arraybuffer',
+    })
+    .then((response) => {
+      let image = btoa(
+        new Uint8Array(response.data)
+          .reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
+      setImage(`data:;base64,${image}`);
+    });
+   }, [vine.id]);
+    
   const renderStatus = (
     <Label
       variant="filled"
@@ -44,7 +58,7 @@ export default function VineCard({ vine }) {
     <Box
       component="img"
       alt={vine.name}
-      src={vine.cover}
+      src={image}
       sx={{
         top: 0,
         width: 1,

@@ -133,7 +133,6 @@ export default function VinesView() {
       });
     });
     setGrapeTypeIds(ids);
-    console.log("id ", ids);
   };
 
   const handleFileChange = (event) => {
@@ -171,19 +170,20 @@ export default function VinesView() {
 
     if (name.length >= 3 && location.length >= 3 && size >= 0 && file !== null && regex.exec(fileName)) {
       const user = JSON.parse(localStorage.getItem("user"));
-      console.log( [grapeTypeIds.map((id) => ({ "id": id }))] )
-      const res = postData("vine/add", {
-        name: name,
-        size: size,
-        date: plantingDate,
-        location: location,
-        image: "11",
-        typeGrap: grapeTypeIds.map(id => ({ "id": id })),
-        users: [{"id": user.id}]
-      });
+      
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("location", location);
+      formData.append("size", size);
+      formData.append("date", plantingDate);
+      formData.append("img", file);
+      formData.append("users", user.id);
+      formData.append("typeGrap", grapeTypeIds.map(id => id));
+      formData.append("file", file, file.name);
+
+      const res = postData("vine/add", formData);
 
       res.then((response) => {
-        console.log("resRegister ", response);
         if (response) {
           console.log("Register successful");
           setName("");
@@ -196,6 +196,11 @@ export default function VinesView() {
           setGrapeTypeIds([]);
           setOpen(false);
           handleClose();
+
+          fetchData(`user/view/${user.id}`).then((res) => {
+            const { vines } = res;
+            setVines({vines}.vines);
+          })
         }
       }
       );

@@ -1,14 +1,10 @@
 package pt.ua.ies.vineTrack.entity;
 
-
-import java.util.List;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 
@@ -25,9 +21,6 @@ public class Grape {
     @Column(nullable = false)
     private String type;
     private String color;
-
-    @ManyToMany(mappedBy = "typeGrap")
-    private List<Vine> vine;
 
     public Integer getId(){
         return id;
