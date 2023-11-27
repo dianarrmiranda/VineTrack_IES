@@ -22,7 +22,18 @@ class Generator:
         self.numberOfVines = self.cursor.execute('SELECT COUNT(*) FROM vine')
         self.numberOfVines = self.cursor.fetchone()[0]
 
+    def decrease_moisture(self, min, max, previousValue):
+        value = random.uniform(min, max)
+        if value < 0:
+            value = 0
+        value = round(value, 2)
+        newValue = previousValue - value
+        if newValue < 0:
+            newValue = 0
+        return newValue
+
     async def moisture(self):
+
         for sensor in self.data:
             if sensor['sensor'] == 'moisture':
                 maxValue = sensor['range']['max']
@@ -30,6 +41,15 @@ class Generator:
                 phases = sensor['decrease']['phase']
 
         while True:
+
+            # values were added, we need to connect again
+            self.connection = mysql.connector.connect(
+                host='database',
+                user='root',
+                password='root',
+                database='VTdb'
+            )
+            
             self.id += 1
             if self.id > self.numberOfVines:
                 self.id = 1
@@ -52,22 +72,41 @@ class Generator:
             # obter a fase da vinha
             # usar as descidas do ficheiro de dados para simular a descida da humidade (random)
             # caso regue?
-            self.cursor.execute('SELECT * FROM track where vine_id = 1 ORDER BY date DESC LIMIT 2')
+            self.cursor = self.connection.cursor()
+            self.cursor.execute(f'SELECT * FROM track where vine_id = {self.id} ORDER BY date DESC LIMIT 2')
             values = self.cursor.fetchall()
             values = values[::-1]
-            if values[0][-1] - values[1][-1] > 0:
-                # está a diminuir a humidade
-                # obter um valor aleatório entre os valores de descida
-                value = random.uniform(decreaseValue[0], decreaseValue[1])
-                value = round(value, 2)
 
-                newValue = values[1][-1] - value #  novo valor da humidade a enviar
-                newValue = round(newValue, 2)
-                message = {
-                    'id': self.id,
-                    'sensor': 'moisture',
-                    'value': newValue
-                }
-                self.sender.send(message)
+            if values[1][-1] < 35:
+                # vai haver uma probabilidade de 50% de regar
+                if random.randint(0, 1) == 1:
+                    newValue = values[1][-1] + random.uniform(15, 25)
 
-            await asyncio.sleep(60/self.numberOfVines) # sleep por 1 minuto para cada vinha
+                else:
+                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-1])
+
+            elif values[1][-1] - values[0][-1] > 0:
+                # vai aumentar até cheagar ao valor de humidade ideal
+                ideal = {'bud': [70, 80], 'flower': [80, 90], 'fruit': [80, 90], 'maturity': [60, 70]}
+
+                idealValues = ideal[phase]
+
+                # já está no valor ideal
+                if idealValues[0] < values[1][-1] < idealValues[1]:
+                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-1])
+
+                else:
+                    newValue = random.uniform(idealValues[0], idealValues[1])
+
+            else:
+                newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-1])
+
+            newValue = round(newValue, 2)
+            message = {
+                'id': self.id,
+                'sensor': 'moisture',
+                'value': newValue
+            }
+            self.sender.send(message)
+
+            await asyncio.sleep(60/self.numberOfVines) # envia dados a cada minuto para cada vinha
