@@ -18,10 +18,15 @@ import pt.ua.ies.vineTrack.entity.User;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin("*")
 @RestController
 @RequestMapping(path = "/user")
+@ResponseStatus(HttpStatus.OK)
 public class UserController {
     @Autowired
     private UserService userService;
