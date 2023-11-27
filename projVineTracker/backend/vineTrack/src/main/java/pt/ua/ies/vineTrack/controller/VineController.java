@@ -5,11 +5,12 @@ import org.springframework.web.bind.annotation.*;
 
 import pt.ua.ies.vineTrack.entity.Grape;
 import pt.ua.ies.vineTrack.entity.Track;
+import pt.ua.ies.vineTrack.entity.User;
 import pt.ua.ies.vineTrack.entity.Vine;
+import pt.ua.ies.vineTrack.service.GrapeService;
 import pt.ua.ies.vineTrack.service.UserService;
 import pt.ua.ies.vineTrack.service.VineService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -26,7 +27,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Date;
 import java.util.ArrayList;
 
 @CrossOrigin("*")
@@ -41,7 +44,7 @@ public class VineController {
     private GrapeService grapeService;
 
     @GetMapping(path = "/test")
-    public Track getAllVines(){
+    public Track getAllVinesTest(){
         // Returns the last track
         List<Track> tracks = vineService.getTracksByVineId(1);
         return tracks.get(tracks.size() - 1);

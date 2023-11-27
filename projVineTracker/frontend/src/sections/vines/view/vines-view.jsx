@@ -7,12 +7,11 @@ import Typography from "@mui/material/Typography";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
-import { vines } from "src/_mock/vines";
-
 import VineCard from "../vine-card";
 import VineSort from "../vine-sort";
 import VineFilters from "../vine-filters";
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
@@ -27,6 +26,8 @@ import {
 import Iconify from "src/components/iconify";
 
 import { styled } from "@mui/material/styles";
+import { Route } from "react-router-dom";
+import { fetchData, postData } from "src/utils";
 
 // ----------------------------------------------------------------------
 
@@ -119,16 +120,28 @@ export default function VinesView() {
     const {
       target: { value },
     } = event;
-    setGrapeType(typeof value === "string" ? value.split(",") : value);
+    setGrapeType(
+      typeof value === "string" ? value.split(",") : value
+    );
+
+    const ids = [];
+    grapes.forEach((grape) => {
+      value.forEach((grapeName) => {
+        if (grape.name === grapeName) {
+          ids.push(grape.id);
+        }
+      });
+    });
+    setGrapeTypeIds(ids);
   };
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
+    setFile(file);
     setFileName(file.name);
   };
   const handleClearClick = () => {
     setFileName("");
-    // Aqui você pode também limpar o arquivo do input hidden
     document.querySelector('input[type="file"]').value = "";
   };
 
@@ -259,14 +272,20 @@ export default function VinesView() {
             label="Name of Vine"
             fullWidth
             sx={{ mb: 2 }}
+            onChange={(e) => setName(e.target.value)}
+            value={name}
           />
+          {alertName && (<Alert severity="error" sx={{ mb: 2 }}> Name must be at least 3 characters long </Alert> )}
           <TextField
             required
             id="outlined-required"
             label="Location"
             fullWidth
             sx={{ mb: 2 }}
+            onChange={(e) => setLocation(e.target.value)}
+            value={location}
           />
+          {alertLocation && (<Alert severity="error" sx={{ mb: 2 }}> Location must be at least 3 characters long </Alert> )}
           <TextField
             required
             id="outlined-number"
@@ -274,13 +293,10 @@ export default function VinesView() {
             label="Size (m²)"
             fullWidth
             sx={{ mb: 2 }}
+            onChange={(e) => setSize(e.target.value)}
+            value={size}
           />
-          <TextField
-            id="outlined-required"
-            label="Type of Vine"
-            fullWidth
-            sx={{ mb: 2 }}
-          />
+          {alertSize && (<Alert severity="error" sx={{ mb: 2 }}> Size must be a positive number </Alert> )}
           <div>
             <InputLabel id="demo-multiple-checkbox-label">
               Type of Grapes
@@ -298,9 +314,9 @@ export default function VinesView() {
               sx={{ mb: 2 }}
             >
               {grapes.map((grape) => (
-                <MenuItem key={grape} value={grape}>
-                  <Checkbox checked={grapeType.indexOf(grape) > -1} />
-                  <ListItemText primary={grape} />
+                <MenuItem key={grape.id} value={grape.name}>
+                  <Checkbox checked={grapeType.indexOf(grape.name) > -1} />
+                  <ListItemText primary={grape.name} />
                 </MenuItem>
               ))}
             </Select>
@@ -311,12 +327,15 @@ export default function VinesView() {
                 label="Planting Date"
                 slotProps={{ textField: { fullWidth: true } }}
                 sx={{ mb: 2 }}
+                onChange={(newValue) => {
+                  setPlantingDate(newValue);
+                }}
               />
             </LocalizationProvider>
           </div>
           <InputLabel sx={{ mb: 1 }}> Image</InputLabel>
           <Grid container spacing={2}>
-            <Grid item xs={4}>
+            <Grid  xs={4}>
               <Button
                 component="label"
                 variant="outlined"
@@ -329,7 +348,7 @@ export default function VinesView() {
                 <VisuallyHiddenInput type="file" />
               </Button>
             </Grid>
-            <Grid item xs={8}>
+            <Grid  xs={8}>
               {fileName && (
                 <TextField
                   value={fileName}

@@ -29,11 +29,11 @@ public class Vine {
 
     @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private Double size;
     private Date date;
     @Column(nullable = false)
     private String location;
-    @Column(nullable = false)
     private String image;
 
     String phase;
