@@ -1,7 +1,5 @@
 package pt.ua.ies.vineTrack.entity;
 
-
-import java.sql.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -30,13 +28,13 @@ public class Vine {
 
     @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
-    private Double size;
-    private Date date;
+    private String description;
+    private String date;
     @Column(nullable = false)
     private String location;
+    @Column(nullable = false)
     private String image;
-
+  
     @ManyToMany()
     @JoinTable(name = "vine_grape", 
     joinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"),
@@ -55,7 +53,7 @@ public class Vine {
     public String getName(){
         return name;
     }
-
+  
     public Double getSize(){
         return size;
     }
@@ -93,6 +91,7 @@ public class Vine {
     }
 
     public void setDate(Date date){
+
         this.date = date;
     }
 
@@ -114,7 +113,7 @@ public class Vine {
 
     @Override
     public String toString() {
-        return "Vine [id=" + id + ", name=" + name + ", size=" + size + ", date=" + date + ", location="
+        return "Vine [id=" + id + ", name=" + name + ", description=" + description + ", date=" + date + ", location="
                 + location + ", image=" + image + ", typeGrap=" + typeGrap + ", users=" + users + "]";
     }
 
