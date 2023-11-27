@@ -10,13 +10,12 @@ export const VinesPage = lazy(() => import("src/pages/vines"));
 export const VineDetailsPage = lazy(() => import("src/pages/vineDetails"));
 export const Page404 = lazy(() => import("src/pages/page-not-found"));
 export const RegisterPage = lazy(() => import("src/pages/register"));
+export const TestPage = lazy(() => import("src/pages/test"));
 
 import PropTypes from 'prop-types';
 
 const ProtectedRoute = ({ children }) => {
  const isLoggedIn = localStorage.getItem("user") !== null;
-const location = useLocation();
-
  if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
  }
@@ -63,6 +62,10 @@ const Routes = () => {
     path: "register",
     element: <RegisterPage />,
    },
+    {
+      path: "test",
+      element: <TestPage />,
+    },
  ]);
 
  return routes;

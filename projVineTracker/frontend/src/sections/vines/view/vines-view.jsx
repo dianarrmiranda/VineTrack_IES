@@ -7,12 +7,11 @@ import Typography from "@mui/material/Typography";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
-import { vines } from "src/_mock/vines";
-
 import VineCard from "../vine-card";
 import VineSort from "../vine-sort";
 import VineFilters from "../vine-filters";
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
@@ -27,6 +26,8 @@ import {
 import Iconify from "src/components/iconify";
 
 import { styled } from "@mui/material/styles";
+import { Route } from "react-router-dom";
+import { fetchData, postData } from "src/utils";
 
 // ----------------------------------------------------------------------
 
@@ -53,19 +54,6 @@ const MenuProps = {
   },
 };
 
-const grapes = [
-  "Concord",
-  "Chardonnay",
-  "Cabernet Sauvignon",
-  "Merlot",
-  "Thompson Seedless",
-  "Zinfandel",
-  "Muscat",
-  "Pinot Noir",
-  "Riesling",
-  "Shiraz/Syrah",
-];
-
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -79,22 +67,46 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export default function VinesView() {
-  console.log(vines);
 
- // useEffect(() => {
- //   const initialize = async () => {
- //     const user = JSON.parse(localStorage.getItem("user"));
- //     if (user === null ){
- //       Route.push("/login");
- //     }
- //     user && fetchData(`user/view?id=${user.id}&token=${user.token}`).then((res) => {
- //       setUserInfo(res);
- //     })
- //   }
- //   initialize();
- // }, []);
-
+  const [vines, setVines] = useState([]);
+  const [grapes, setGrapes] = useState([]);
+  
   const [openFilter, setOpenFilter] = useState(false);
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
+  const [size, setSize] = useState("");
+  const [grapeType, setGrapeType] = useState([]);
+  const [grapeTypeIds, setGrapeTypeIds] = useState([]);
+  const [plantingDate, setPlantingDate] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [file, setFile] = useState(null);
+
+  const [alertName, setAlertName] = useState(false);
+  const [alertLocation, setAlertLocation] = useState(false);
+  const [alertSize, setAlertSize] = useState(false);
+  const [alertImage, setAlertImage] = useState(false);
+  const [alertImageSize, setAlertImageSize] = useState(false);
+
+  useEffect(() => {
+      const initialize = async () => {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user === null ){
+          Route.push("/login");
+        }
+        user && fetchData(`user/view/${user.id}`).then((res) => {
+          const { vines } = res;
+          setVines({vines}.vines);
+        })
+        fetchData(`grape/all`).then((res) => {
+          setGrapes(res);
+        })
+      }
+      initialize();
+    }, []);
 
   const handleOpenFilter = () => {
     setOpenFilter(true);
@@ -104,29 +116,102 @@ export default function VinesView() {
     setOpenFilter(false);
   };
 
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const [grapeType, setGrapeType] = useState([]);
-
   const handleChangeTypeGrapes = (event) => {
     const {
       target: { value },
     } = event;
-    setGrapeType(typeof value === "string" ? value.split(",") : value);
+    setGrapeType(
+      typeof value === "string" ? value.split(",") : value
+    );
+
+    const ids = [];
+    grapes.forEach((grape) => {
+      value.forEach((grapeName) => {
+        if (grape.name === grapeName) {
+          ids.push(grape.id);
+        }
+      });
+    });
+    setGrapeTypeIds(ids);
   };
 
-  const [fileName, setFileName] = useState("");
   const handleFileChange = (event) => {
     const file = event.target.files[0];
+    setFile(file);
     setFileName(file.name);
   };
   const handleClearClick = () => {
     setFileName("");
-    // Aqui você pode também limpar o arquivo do input hidden
     document.querySelector('input[type="file"]').value = "";
   };
+
+  const handleAddVine = () => {
+    if (name < 3) {
+      setAlertName(true);
+    }else{
+      setAlertName(false);
+    }
+    if (location < 3) {
+      setAlertLocation(true);
+    }else{
+      setAlertLocation(false);
+    }
+    if (size < 0 || size === "" ) {
+      setAlertSize(true);
+    }else{
+      setAlertSize(false);
+    }
+    const regex = /(\.jpg|\.jpeg|\.png)$/i;
+    if (file === null || !regex.exec(fileName)) {
+      setAlertImage(true);
+    }else{
+      setAlertImage(false);
+    }
+    //max tamanho imagem 1MB
+    if (file !== null && file.size > 1000000) {
+      setAlertImageSize(true);
+    }else{
+      setAlertImageSize(false);
+    }
+
+    if (name.length >= 3 && location.length >= 3 && size >= 0 && file !== null && regex.exec(fileName) && file.size <= 1000000) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("location", location);
+      formData.append("size", size);
+      formData.append("date", plantingDate);
+      formData.append("img", file);
+      formData.append("users", user.id);
+      formData.append("typeGrap", grapeTypeIds.map(id => id));
+      formData.append("file", file, file.name);
+
+      const res = postData("vine/add", formData);
+
+      res.then((response) => {
+        if (response) {
+          console.log("Register successful");
+          setName("");
+          setLocation("");
+          setSize("");
+          setPlantingDate("");
+          setFileName("");
+          setFile(null);
+          setGrapeType([]);
+          setGrapeTypeIds([]);
+          setOpen(false);
+          handleClose();
+
+          fetchData(`user/view/${user.id}`).then((res) => {
+            const { vines } = res;
+            setVines({vines}.vines);
+          })
+        }
+      }
+      );
+    }
+  }
 
   return (
     <Container>
@@ -187,14 +272,20 @@ export default function VinesView() {
             label="Name of Vine"
             fullWidth
             sx={{ mb: 2 }}
+            onChange={(e) => setName(e.target.value)}
+            value={name}
           />
+          {alertName && (<Alert severity="error" sx={{ mb: 2 }}> Name must be at least 3 characters long </Alert> )}
           <TextField
             required
             id="outlined-required"
             label="Location"
             fullWidth
             sx={{ mb: 2 }}
+            onChange={(e) => setLocation(e.target.value)}
+            value={location}
           />
+          {alertLocation && (<Alert severity="error" sx={{ mb: 2 }}> Location must be at least 3 characters long </Alert> )}
           <TextField
             required
             id="outlined-number"
@@ -202,13 +293,10 @@ export default function VinesView() {
             label="Size (m²)"
             fullWidth
             sx={{ mb: 2 }}
+            onChange={(e) => setSize(e.target.value)}
+            value={size}
           />
-          <TextField
-            id="outlined-required"
-            label="Type of Vine"
-            fullWidth
-            sx={{ mb: 2 }}
-          />
+          {alertSize && (<Alert severity="error" sx={{ mb: 2 }}> Size must be a positive number </Alert> )}
           <div>
             <InputLabel id="demo-multiple-checkbox-label">
               Type of Grapes
@@ -226,9 +314,9 @@ export default function VinesView() {
               sx={{ mb: 2 }}
             >
               {grapes.map((grape) => (
-                <MenuItem key={grape} value={grape}>
-                  <Checkbox checked={grapeType.indexOf(grape) > -1} />
-                  <ListItemText primary={grape} />
+                <MenuItem key={grape.id} value={grape.name}>
+                  <Checkbox checked={grapeType.indexOf(grape.name) > -1} />
+                  <ListItemText primary={grape.name} />
                 </MenuItem>
               ))}
             </Select>
@@ -239,12 +327,15 @@ export default function VinesView() {
                 label="Planting Date"
                 slotProps={{ textField: { fullWidth: true } }}
                 sx={{ mb: 2 }}
+                onChange={(newValue) => {
+                  setPlantingDate(newValue);
+                }}
               />
             </LocalizationProvider>
           </div>
           <InputLabel sx={{ mb: 1 }}> Image</InputLabel>
           <Grid container spacing={2}>
-            <Grid item xs={4}>
+            <Grid  xs={4}>
               <Button
                 component="label"
                 variant="outlined"
@@ -257,7 +348,7 @@ export default function VinesView() {
                 <VisuallyHiddenInput type="file" />
               </Button>
             </Grid>
-            <Grid item xs={8}>
+            <Grid  xs={8}>
               {fileName && (
                 <TextField
                   value={fileName}
@@ -276,7 +367,9 @@ export default function VinesView() {
               )}
             </Grid>
           </Grid>
-          <Button variant="contained" color="primary" sx={{ mt: 3 }}>
+          {alertImage && (<Alert severity="error" sx={{ mb: 2 }}> Please upload a valid image </Alert> )}
+          {alertImageSize && (<Alert severity="error" sx={{ mb: 2 }}> Please upload an image with a maximum size of 1MB </Alert> )}
+          <Button variant="contained" color="primary" sx={{ mt: 3 }} onClick={handleAddVine}>
             Add Vine
           </Button>
           <Button

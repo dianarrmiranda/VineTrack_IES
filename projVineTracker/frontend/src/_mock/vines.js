@@ -30,7 +30,7 @@ export const vines = [...Array(5)].map((_, index) => {
   const setIndex = index + 1;
 
   return {
-    id: faker.string.uuid(),
+    id: index + 1,
     cover: `/assets/images/vines/vine_${setIndex}.jpg`,
     name: VINE_NAME[index],
     size: faker.number.int({ min: 100, max: 100000 }),
