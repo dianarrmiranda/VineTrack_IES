@@ -9,7 +9,6 @@ class Generator:
         self.sender = Send()
         self.sender.connect()
         self.vines = []
-        self.id = 0
         self.numberOfVines = 0
         # ligação com a base de dados
         self.connection = mysql.connector.connect(
@@ -21,6 +20,14 @@ class Generator:
         self.cursor = self.connection.cursor()
         self.numberOfVines = self.cursor.execute('SELECT COUNT(*) FROM vine')
         self.numberOfVines = self.cursor.fetchone()[0]
+
+        # obter os ids das vinhas por ordem que foram adicionadas, do mais antigo para o mais recente
+        self.cursor = self.connection.cursor()
+        self.cursor.execute('SELECT id FROM vine ORDER BY id ASC')
+        self.allIds = self.cursor.fetchall()
+        self.idIndex = 0
+        self.id = self.allIds[self.idIndex][0]
+
 
     def decrease_moisture(self, min, max, previousValue):
         value = random.uniform(min, max)
@@ -49,17 +56,32 @@ class Generator:
                 password='root',
                 database='VTdb'
             )
-            
-            self.id += 1
-            if self.id > self.numberOfVines:
-                self.id = 1
+            self.cursor = self.connection.cursor()
+            self.numberOfVines = self.cursor.execute('SELECT COUNT(*) FROM vine')
+            self.numberOfVines = self.cursor.fetchone()[0]
+
+            self.cursor = self.connection.cursor()
+            self.cursor.execute('SELECT id FROM vine ORDER BY id ASC')
+            self.allIds = self.cursor.fetchall()
+
+            if self.idIndex < len(self.allIds) - 1:
+                self.idIndex += 1
+            else:
+                self.idIndex = 0
+
+            self.id = self.allIds[self.idIndex][0]
+
+            print(f'Vine {self.id} - Moisture')
 
             # vine = self.vines[self.id]
             self.cursor = self.connection.cursor()
             self.cursor.execute('SELECT * FROM vine WHERE id = %s', (self.id,))
-            info = self.cursor.fetchall()[0]
-            phase = info[6]
-            temperature = info[8]
+            info = self.cursor.fetchall()
+            if len(info) == 0:
+                continue
+            info = info[0]
+            phase = info[5]
+            temperature = info[7]
             if temperature < 12:
                 decreaseValue = phases[phase]['cool']
             elif temperature < 18:
@@ -76,8 +98,11 @@ class Generator:
             values = self.cursor.fetchall()
             values = values[::-1]
 
+            print("Decrease value: ", decreaseValue)
+
             if values[1][-1] < 35:
                 # vai haver uma probabilidade de 50% de regar
+                print("Vai regar")
                 if random.randint(0, 1) == 1:
                     newValue = values[1][-1] + random.uniform(15, 25)
 
