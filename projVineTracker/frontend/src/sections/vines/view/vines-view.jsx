@@ -89,6 +89,7 @@ export default function VinesView() {
   const [alertLocation, setAlertLocation] = useState(false);
   const [alertSize, setAlertSize] = useState(false);
   const [alertImage, setAlertImage] = useState(false);
+  const [alertImageSize, setAlertImageSize] = useState(false);
 
   useEffect(() => {
       const initialize = async () => {
@@ -166,8 +167,14 @@ export default function VinesView() {
     }else{
       setAlertImage(false);
     }
+    //max tamanho imagem 1MB
+    if (file !== null && file.size > 1000000) {
+      setAlertImageSize(true);
+    }else{
+      setAlertImageSize(false);
+    }
 
-    if (name.length >= 3 && location.length >= 3 && size >= 0 && file !== null && regex.exec(fileName)) {
+    if (name.length >= 3 && location.length >= 3 && size >= 0 && file !== null && regex.exec(fileName) && file.size <= 1000000) {
       const user = JSON.parse(localStorage.getItem("user"));
       
       const formData = new FormData();
@@ -361,6 +368,7 @@ export default function VinesView() {
             </Grid>
           </Grid>
           {alertImage && (<Alert severity="error" sx={{ mb: 2 }}> Please upload a valid image </Alert> )}
+          {alertImageSize && (<Alert severity="error" sx={{ mb: 2 }}> Please upload an image with a maximum size of 1MB </Alert> )}
           <Button variant="contained" color="primary" sx={{ mt: 3 }} onClick={handleAddVine}>
             Add Vine
           </Button>
