@@ -128,6 +128,74 @@ export default function VinesView() {
     document.querySelector('input[type="file"]').value = "";
   };
 
+  const handleAddVine = () => {
+    if (name < 3) {
+      setAlertName(true);
+    }else{
+      setAlertName(false);
+    }
+    if (location < 3) {
+      setAlertLocation(true);
+    }else{
+      setAlertLocation(false);
+    }
+    if (size < 0 || size === "" ) {
+      setAlertSize(true);
+    }else{
+      setAlertSize(false);
+    }
+    const regex = /(\.jpg|\.jpeg|\.png)$/i;
+    if (file === null || !regex.exec(fileName)) {
+      setAlertImage(true);
+    }else{
+      setAlertImage(false);
+    }
+    //max tamanho imagem 1MB
+    if (file !== null && file.size > 1000000) {
+      setAlertImageSize(true);
+    }else{
+      setAlertImageSize(false);
+    }
+
+    if (name.length >= 3 && location.length >= 3 && size >= 0 && file !== null && regex.exec(fileName) && file.size <= 1000000) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("location", location);
+      formData.append("size", size);
+      formData.append("date", plantingDate);
+      formData.append("img", file);
+      formData.append("users", user.id);
+      formData.append("typeGrap", grapeTypeIds.map(id => id));
+      formData.append("file", file, file.name);
+
+      const res = postData("vine/add", formData);
+
+      res.then((response) => {
+        if (response) {
+          console.log("Register successful");
+          setName("");
+          setLocation("");
+          setSize("");
+          setPlantingDate("");
+          setFileName("");
+          setFile(null);
+          setGrapeType([]);
+          setGrapeTypeIds([]);
+          setOpen(false);
+          handleClose();
+
+          fetchData(`user/view/${user.id}`).then((res) => {
+            const { vines } = res;
+            setVines({vines}.vines);
+          })
+        }
+      }
+      );
+    }
+  }
+
   return (
     <Container>
       <Typography variant="h4" sx={{ mb: 5 }}>
@@ -276,7 +344,9 @@ export default function VinesView() {
               )}
             </Grid>
           </Grid>
-          <Button variant="contained" color="primary" sx={{ mt: 3 }}>
+          {alertImage && (<Alert severity="error" sx={{ mb: 2 }}> Please upload a valid image </Alert> )}
+          {alertImageSize && (<Alert severity="error" sx={{ mb: 2 }}> Please upload an image with a maximum size of 1MB </Alert> )}
+          <Button variant="contained" color="primary" sx={{ mt: 3 }} onClick={handleAddVine}>
             Add Vine
           </Button>
           <Button
