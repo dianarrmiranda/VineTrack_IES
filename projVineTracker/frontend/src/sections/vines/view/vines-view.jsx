@@ -80,12 +80,6 @@ export default function VinesView() {
     setOpenFilter(false);
   };
 
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const [grapeType, setGrapeType] = useState([]);
-
   const handleChangeTypeGrapes = (event) => {
     const {
       target: { value },
