@@ -6,6 +6,10 @@ import org.springframework.stereotype.Service;
 import pt.ua.ies.vineTrack.repository.UserRepo;
 import pt.ua.ies.vineTrack.entity.User;
 
+import pt.ua.ies.vineTrack.entity.Vine;
+import pt.ua.ies.vineTrack.service.VineService;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -14,6 +18,9 @@ public class UserService {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private VineService vineService;
     
     public User save(User user){
         //Check if user already exists
@@ -57,6 +64,21 @@ public class UserService {
         existingUser.setPassword(user.getPassword());
         existingUser.setRole(user.getRole());
         return userRepo.save(existingUser);
+    }
+
+    // return the vines of a user
+    public List<Vine> getVinesByUser(User user){
+        // get all the vines
+        List<Vine> vines = vineService.getAllVines();
+        List<Vine> userVines = new ArrayList<>();
+        // get the vines of the user
+        for (Vine vine : vines) {
+            if(vine.getUsers().contains(user)){
+                userVines.add(vine);
+            }
+        }
+
+        return userVines;
     }
     
 }

@@ -16,10 +16,11 @@ public class Notification {
     private String avatar; // a path to the image
     private Boolean isUnRead;
 
+
     // one user can take many notifications (1:N)
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "vine_id")
+    private Vine vine;
 
 
     // constructors

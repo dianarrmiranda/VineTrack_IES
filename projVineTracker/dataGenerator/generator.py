@@ -38,8 +38,9 @@ class Generator:
             self.cursor = self.connection.cursor()
             self.cursor.execute('SELECT * FROM vine WHERE id = %s', (self.id,))
             info = self.cursor.fetchall()[0]
-            phase = info[4]
-            temperature = info[5]
+            phase = info[6]
+            temperature = info[8]
+            temperature = int(temperature)
             if temperature < 12:
                 decreaseValue = phases[phase]['cool']
             elif temperature < 18:

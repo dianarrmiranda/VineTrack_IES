@@ -83,7 +83,11 @@ const NOTIFICATIONS = [
 export default function NotificationsPopover() {
   const [notifications, setNotifications] = useState([]);
 
+  const vine = JSON.parse(localStorage.getItem('vine'));
   const user = JSON.parse(localStorage.getItem('user'));
+  console.log(user);
+  console.log(vine); // está a dar null
+
   useEffect(() => {
     const res = fetchData(`notifications/${user.id}`);
     res.then((response) => {

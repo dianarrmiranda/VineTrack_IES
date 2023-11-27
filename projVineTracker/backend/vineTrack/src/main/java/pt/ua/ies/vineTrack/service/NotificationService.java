@@ -6,6 +6,7 @@ import pt.ua.ies.vineTrack.entity.Vine;
 import pt.ua.ies.vineTrack.repository.NotificationRepo;
 import pt.ua.ies.vineTrack.entity.Notification;
 
+
 import java.util.List;
 
 @Service
@@ -21,9 +22,7 @@ public class NotificationService {
         return notificationRepo.save(notification);
     }
 
-    public List<Notification> getNotificationsByUserId(Integer userId){
-        List<Notification> notifications = notificationService.getAllNotifications();
-        notifications.removeIf(notification -> !notification.getUser().getId().equals(userId));
-        return notifications;
+    public List<Notification> getNotificationsByVine(Vine vine){
+        return notificationRepo.getNotificationsByVine(vine);
     }
 }

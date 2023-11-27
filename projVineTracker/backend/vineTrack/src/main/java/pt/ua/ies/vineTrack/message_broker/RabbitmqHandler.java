@@ -23,6 +23,9 @@ public class RabbitmqHandler {
     private VineService vineService;
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private TrackService trackService;
 
     @RabbitListener(queues = Config.QUEUE_NAME)
@@ -48,8 +51,8 @@ public class RabbitmqHandler {
                 // for now we will consider that the expected value is 40
                 if (value < 40) {
                     Boolean isUnRead = true;
-                    Notification notification = new Notification('moisture', '/assets/images/notifications/water.png', isUnRead, vine);
-                    NotificationService.saveNotification(notification);
+                    Notification notification = new Notification("moisture", "/assets/images/notifications/water.png", isUnRead, vine);
+                    notificationService.saveNotification(notification);
                 }
 
                 break;
