@@ -36,19 +36,15 @@ public class Vine {
     private String location;
     private String image;
 
-    String phase;
-    int temperature;
+    String phase = "bud";
+
+    int temperature = 16;
 
     @ManyToMany()
     @JoinTable(name = "vine_grape", 
     joinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"),
     inverseJoinColumns = @JoinColumn(name = "grape_id", referencedColumnName = "id"))
     private List<Grape> typeGrap;
-     
-    @Column(nullable = false)
-    @ManyToMany(mappedBy = "vines")
-    private List<User> users;
-
 
     public Integer getId(){
         return id;
@@ -76,10 +72,6 @@ public class Vine {
 
     public List<Grape> getTypeGrap(){
         return typeGrap;
-    }
-
-    public List<User> getUsers(){
-        return users;
     }
 
     public void setId(Integer id){
@@ -110,10 +102,6 @@ public class Vine {
         this.typeGrap = typeGrap;
     }
 
-    public void setUsers(List<User> users){
-        this.users = users;
-    }
-
     public String getPhase() {
         return phase;
     }
@@ -134,6 +122,6 @@ public class Vine {
     @Override
     public String toString() {
         return "Vine [id=" + id + ", name=" + name + ", size=" + size + ", date=" + date + ", location="
-                + location + ", image=" + image + ", typeGrap=" + typeGrap + ", users=" + users + "]";
+                + location + ", image=" + image + ", typeGrap=" + typeGrap + "]";
     }
 }
