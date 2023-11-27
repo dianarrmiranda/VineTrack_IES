@@ -8,6 +8,8 @@ import AppTemperatureChart from "../app-temperature-chart";
 import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 
 import { vines } from "src/_mock/vines";
+import { fetchData } from "src/utils";
+import { useEffect, useState } from "react";
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
@@ -15,6 +17,30 @@ export default function VineDetailsView() {
   //const vine = vines.find((v) => v.id === id);
 
   const vine = vines[0];
+  
+  const [moistureData, setMoistureData] = useState(null);
+
+  useEffect(() => {
+    const res = fetchData(`vine/moisture/${vine.id}`);
+    res.then((response) => {
+      if (response) {
+        console.log("Moisture data fetched");
+        
+        // moisture is a list of doubles
+        const moisture = response;
+        const moistureData = moisture.map((value, index) => {
+          return value;
+        });
+        setMoistureData(moistureData);
+      } else {
+        console.log("Moisture data failed");
+      }
+    });
+  }
+  , []);
+
+  console.log("Moist: ", moistureData);
+
 
   return (
     <Container maxWidth="xl">
@@ -33,24 +59,23 @@ export default function VineDetailsView() {
             subheader=" in Percentage (%)"
             chart={{
               labels: [
-                "01/01/2023",
-                "02/01/2023",
-                "03/01/2023",
-                "04/01/2023",
-                "05/01/2023",
-                "06/01/2023",
-                "07/01/2023",
-                "08/01/2023",
-                "09/01/2023",
-                "10/01/2023",
-                "11/01/2023",
+                "1h 30min ago",
+                "1h 20min ago",
+                "1h 10min ago",
+                "1h ago",
+                "50min ago",
+                "40min ago",
+                "30min ago",
+                "20min ago",
+                "10min ago",
+                "NOW",
               ],
               series: [
                 {
                   name: "Humidity",
                   type: "line",
                   fill: "solid",
-                  data: [70, 78, 68, 50, 45, 35, 34, 45, 50, 60, 70],
+                  data: moistureData,
                 },
               ],
             }}

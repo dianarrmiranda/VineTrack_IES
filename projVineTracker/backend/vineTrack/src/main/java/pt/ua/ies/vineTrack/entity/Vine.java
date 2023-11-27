@@ -1,9 +1,6 @@
 package pt.ua.ies.vineTrack.entity;
 
-<<<<<<< HEAD
 import java.sql.Date;
-=======
->>>>>>> a03035a2 (Revert "5 registar dados básicos da vinha")
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -32,23 +29,17 @@ public class Vine {
 
     @Column(nullable = false)
     private String name;
-<<<<<<< HEAD
     private Double size;
     private Date date;
-=======
-    private String description;
-    private String date;
->>>>>>> a03035a2 (Revert "5 registar dados básicos da vinha")
     @Column(nullable = false)
     private String location;
     @Column(nullable = false)
     private String image;
 
-<<<<<<< HEAD
+    String phase;
+    int temperature;
+
     @ManyToMany()
-=======
-    @ManyToMany(cascade = CascadeType.ALL)
->>>>>>> a03035a2 (Revert "5 registar dados básicos da vinha")
     @JoinTable(name = "vine_grape", 
     joinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"),
     inverseJoinColumns = @JoinColumn(name = "grape_id", referencedColumnName = "id"))
@@ -67,19 +58,11 @@ public class Vine {
         return name;
     }
 
-<<<<<<< HEAD
     public Double getSize(){
         return size;
     }
 
     public Date getDate(){
-=======
-    public String getDescription(){
-        return description;
-    }
-
-    public String getDate(){
->>>>>>> a03035a2 (Revert "5 registar dados básicos da vinha")
         return date;
     }
 
@@ -107,19 +90,11 @@ public class Vine {
         this.name = name;
     }
 
-<<<<<<< HEAD
     public void setSize(Double size){
         this.size = size;
     }
 
     public void setDate(Date date){
-=======
-    public void setDescription(String description){
-        this.description = description;
-    }
-
-    public void setDate(String date){
->>>>>>> a03035a2 (Revert "5 registar dados básicos da vinha")
         this.date = date;
     }
 
@@ -139,15 +114,26 @@ public class Vine {
         this.users = users;
     }
 
-    @Override
-    public String toString() {
-        return "Vine [id=" + id + ", name=" + name + ", description=" + description + ", date=" + date + ", location="
-                + location + ", image=" + image + ", typeGrap=" + typeGrap + ", users=" + users + "]";
+    public String getPhase() {
+        return phase;
+    }
+
+    public void setPhase(String phase) {
+        this.phase = phase;
+    }
+
+    public int getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(int temperature) {
+        this.temperature = temperature;
     }
 
 
-    
-
-
-
+    @Override
+    public String toString() {
+        return "Vine [id=" + id + ", name=" + name + ", size=" + size + ", date=" + date + ", location="
+                + location + ", image=" + image + ", typeGrap=" + typeGrap + ", users=" + users + "]";
+    }
 }
