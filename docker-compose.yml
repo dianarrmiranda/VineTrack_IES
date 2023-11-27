@@ -17,6 +17,22 @@ services:
       retries: 20
     networks:
       - backend
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+        - 5672:5672
+        - 15672:15672
+    networks:
+      - backend
   
   app:
     depends_on:
@@ -31,7 +47,11 @@ services:
           "spring.datasource.username" : "root",
           "spring.datasource.password" : "root",
           "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQLDialect",
-          "spring.jpa.hibernate.ddl-auto" : "update"
+          "spring.jpa.hibernate.ddl-auto" : "update",
+          "spring.rabbitmq.host" : "rabbitmq",
+          "spring.rabbitmq.port" : "5672",
+          "spring.rabbitmq.username" : "guest",
+          "spring.rabbitmq.password" : "guest"
         }'
     stdin_open: true
     tty: true
@@ -52,6 +72,18 @@ services:
       - /app/node_modules
     networks:
       - frontend
+
+  generator:
+    build: ./projVineTracker/dataGenerator
+    restart: on-failure
+    depends_on:
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    networks:
+      - backend
 
 volumes:
   db_file:

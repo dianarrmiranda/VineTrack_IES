@@ -23,7 +23,7 @@ export default function AppHumidityChart({ title, subheader, chart, ...other }) 
     },
     labels,
     xaxis: {
-      type: 'datetime',
+      type: 'time',
     },
     tooltip: {
       shared: true,

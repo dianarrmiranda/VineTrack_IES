@@ -36,6 +36,10 @@ public class Vine {
     @Column(nullable = false)
     private String image;
 
+    int size;
+    String phase;
+    int temperature;
+
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "vine_grape", 
     joinColumns = @JoinColumn(name = "vine_id", referencedColumnName = "id"),
@@ -111,15 +115,33 @@ public class Vine {
         this.users = users;
     }
 
+    public String getPhase() {
+        return phase;
+    }
+
+    public void setPhase(String phase) {
+        this.phase = phase;
+    }
+
+    public int getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(int temperature) {
+        this.temperature = temperature;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
     @Override
     public String toString() {
         return "Vine [id=" + id + ", name=" + name + ", description=" + description + ", date=" + date + ", location="
                 + location + ", image=" + image + ", typeGrap=" + typeGrap + ", users=" + users + "]";
     }
-
-
-    
-
-
-
 }
