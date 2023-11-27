@@ -53,19 +53,6 @@ const MenuProps = {
   },
 };
 
-const grapes = [
-  "Concord",
-  "Chardonnay",
-  "Cabernet Sauvignon",
-  "Merlot",
-  "Thompson Seedless",
-  "Zinfandel",
-  "Muscat",
-  "Pinot Noir",
-  "Riesling",
-  "Shiraz/Syrah",
-];
-
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -79,21 +66,10 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export default function VinesView() {
-  console.log(vines);
 
- // useEffect(() => {
- //   const initialize = async () => {
- //     const user = JSON.parse(localStorage.getItem("user"));
- //     if (user === null ){
- //       Route.push("/login");
- //     }
- //     user && fetchData(`user/view?id=${user.id}&token=${user.token}`).then((res) => {
- //       setUserInfo(res);
- //     })
- //   }
- //   initialize();
- // }, []);
-
+  const [vines, setVines] = useState([]);
+  const [grapes, setGrapes] = useState([]);
+  
   const [openFilter, setOpenFilter] = useState(false);
 
   const handleOpenFilter = () => {
