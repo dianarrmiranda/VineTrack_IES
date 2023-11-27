@@ -36,8 +36,8 @@ public class Vine {
     private String location;
     private String image;
 
-    String phase;
-    int temperature;
+    String phase = "bud";
+    int temperature = 15;
 
     @ManyToMany()
     @JoinTable(name = "vine_grape",
