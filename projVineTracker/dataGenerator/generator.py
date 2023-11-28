@@ -9,7 +9,6 @@ class Generator:
         self.sender = Send()
         self.sender.connect()
         self.vines = []
-        self.id = 0
         self.numberOfVines = 0
         # ligação com a base de dados
         self.connection = mysql.connector.connect(
@@ -21,6 +20,14 @@ class Generator:
         self.cursor = self.connection.cursor()
         self.numberOfVines = self.cursor.execute('SELECT COUNT(*) FROM vine')
         self.numberOfVines = self.cursor.fetchone()[0]
+
+        # obter os ids das vinhas por ordem que foram adicionadas, do mais antigo para o mais recente
+        self.cursor = self.connection.cursor()
+        self.cursor.execute('SELECT id FROM vine ORDER BY id ASC')
+        self.allIds = self.cursor.fetchall()
+        self.idIndex = 0
+        self.id = self.allIds[self.idIndex][0]
+
 
     def decrease_moisture(self, min, max, previousValue):
         value = random.uniform(min, max)
@@ -49,18 +56,32 @@ class Generator:
                 password='root',
                 database='VTdb'
             )
-            
-            self.id += 1
-            if self.id > self.numberOfVines:
-                self.id = 1
+            self.cursor = self.connection.cursor()
+            self.numberOfVines = self.cursor.execute('SELECT COUNT(*) FROM vine')
+            self.numberOfVines = self.cursor.fetchone()[0]
+
+            self.cursor = self.connection.cursor()
+            self.cursor.execute('SELECT id FROM vine ORDER BY id ASC')
+            self.allIds = self.cursor.fetchall()
+
+            if self.idIndex < len(self.allIds) - 1:
+                self.idIndex += 1
+            else:
+                self.idIndex = 0
+
+            self.id = self.allIds[self.idIndex][0]
+
+            print(f'Vine {self.id} - Moisture')
 
             # vine = self.vines[self.id]
             self.cursor = self.connection.cursor()
             self.cursor.execute('SELECT * FROM vine WHERE id = %s', (self.id,))
-            info = self.cursor.fetchall()[0]
-            phase = info[6]
-            temperature = info[8]
-            temperature = int(temperature)
+            info = self.cursor.fetchall()
+            if len(info) == 0:
+                continue
+            info = info[0]
+            phase = info[5]
+            temperature = info[7]
             if temperature < 12:
                 decreaseValue = phases[phase]['cool']
             elif temperature < 18:
@@ -77,29 +98,29 @@ class Generator:
             values = self.cursor.fetchall()
             values = values[::-1]
 
-            if values[1][-1] < 35:
+            if values[1][-2] < 35:
                 # vai haver uma probabilidade de 50% de regar
                 if random.randint(0, 1) == 1:
-                    newValue = values[1][-1] + random.uniform(15, 25)
+                    newValue = values[1][-2] + random.uniform(15, 25)
 
                 else:
-                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-1])
+                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-2])
 
-            elif values[1][-1] - values[0][-1] > 0:
+            elif values[1][-2] - values[0][-2] > 0:
                 # vai aumentar até cheagar ao valor de humidade ideal
                 ideal = {'bud': [70, 80], 'flower': [80, 90], 'fruit': [80, 90], 'maturity': [60, 70]}
 
                 idealValues = ideal[phase]
 
                 # já está no valor ideal
-                if idealValues[0] < values[1][-1] < idealValues[1]:
-                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-1])
+                if idealValues[0] < values[1][-2] < idealValues[1]:
+                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-2])
 
                 else:
                     newValue = random.uniform(idealValues[0], idealValues[1])
 
             else:
-                newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-1])
+                newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-2])
 
             newValue = round(newValue, 2)
             message = {
