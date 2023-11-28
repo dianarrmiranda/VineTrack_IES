@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
 
 @Component
 public class RabbitmqHandler {
-    //@Autowired
-    //private SimpMessagingTemplate template;
+    @Autowired
+    private SimpMessagingTemplate template; // for sending messages to the client through websocket
     @Autowired
     private VineService vineService;
 
@@ -31,7 +31,7 @@ public class RabbitmqHandler {
     @RabbitListener(queues = Config.QUEUE_NAME)
     public void receiveMessage(String message) {
         System.out.println("Received <" + message + ">");
-        //this.template.convertAndSend("/topic/update", message);
+        this.template.convertAndSend("/topic/update", message);
         JSONObject params = new JSONObject(message);
         String type = params.getString("sensor");
 

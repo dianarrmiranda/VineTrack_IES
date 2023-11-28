@@ -10,6 +10,8 @@ import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 import { fetchData } from "src/utils";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import SockJS from "sockjs-client";
+import Stomp from "stompjs";
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
@@ -52,6 +54,24 @@ export default function VineDetailsView() {
   , []);
 
   console.log("Moist: ", moistureData);
+
+  // websocket
+  const [messages, setMessages] = useState(null);
+  useEffect(() => {
+    const ws = new SockJS("http://localhost:8080/vt_ws");
+    const client = Stomp.over(ws);
+    client.connect({}, () => {
+      client.subscribe("/topic/updates", (message) => {
+        const data = JSON.parse(message.body);
+        console.log("Message: ", data);
+        setMessages(data);
+      });
+    });
+  }
+  , []);
+
+  console.log("Messages: ", messages);
+  
 
 
   return (
