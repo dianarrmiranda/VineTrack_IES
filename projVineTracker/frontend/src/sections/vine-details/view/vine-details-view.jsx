@@ -60,11 +60,10 @@ export default function VineDetailsView() {
   useEffect(() => {
     const ws = new SockJS("http://localhost:8080/vt_ws");
     const client = Stomp.over(ws);
-    client.connect({}, () => {
-      client.subscribe("/topic/updates", (message) => {
-        const data = JSON.parse(message.body);
-        console.log("Message: ", data);
-        setMessages(data);
+    client.connect({}, function () {
+      client.subscribe('/topic/update', function (data) {
+          console.log(data);
+          setMessages(data);
       });
     });
   }
