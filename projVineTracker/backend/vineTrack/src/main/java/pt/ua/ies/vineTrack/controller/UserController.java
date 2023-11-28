@@ -15,7 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import pt.ua.ies.vineTrack.service.UserService;
 import pt.ua.ies.vineTrack.entity.User;
+import pt.ua.ies.vineTrack.entity.Notification;
+import pt.ua.ies.vineTrack.service.NotificationService;
+import pt.ua.ies.vineTrack.entity.Vine;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -30,6 +34,9 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping(path = "/all")
     public ResponseEntity<List<User>> getAllUsers(){
@@ -71,6 +78,26 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping(path = "/notifications/{userId}")
+    // get all notifications from a vine
+    public List<Notification> getNotificationsByUserId(@PathVariable Integer userId){
+        User user = userService.getUserById(userId);
+        List<Vine> vines = userService.getVinesByUser(user);
+        List<Notification> notifications = new ArrayList<>();
+        for (Vine vine : vines) {
+                notifications.addAll(notificationService.getNotificationsByVine(vine));
+        }
+        System.out.println(notifications);
+        // invert the list
+        List<Notification> invertedNotifications = new ArrayList<>();
+        for (int i = notifications.size() - 1; i >= 0; i--) {
+            invertedNotifications.add(notifications.get(i));
+        }
+        return invertedNotifications;
+    }
+
+
 
     @PutMapping(path = "/update")
     public User updateUser(@RequestBody User user){

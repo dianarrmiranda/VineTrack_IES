@@ -133,7 +133,7 @@ public class Vine {
 
     @Override
     public String toString() {
-        return "Vine [id=" + id + ", name=" + name + ", size=" + size + ", date=" + date + ", location="
-                + location + ", image=" + image + ", typeGrap=" + typeGrap + ", users=" + users + "]";
+        return name;
     }
+
 }

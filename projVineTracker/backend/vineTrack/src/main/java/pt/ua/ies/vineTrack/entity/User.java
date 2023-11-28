@@ -90,9 +90,12 @@ public class User {
         this.vines=vines;
     }
 
+    /*
     @Override
     public String toString() {
         return "User [id=" + id + ", name=" + name + ", email=" + email + ", role=" + role + ", vines=" + vines + "]";
     }
+
+     */
 
 }

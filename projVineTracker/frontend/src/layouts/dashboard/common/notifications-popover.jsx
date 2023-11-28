@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { set, sub } from 'date-fns';
 import { faker } from '@faker-js/faker';
@@ -18,6 +18,9 @@ import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 
+import { fetchData } from "src/utils";
+
+
 import { fToNow } from 'src/utils/format-time';
 
 import Iconify from 'src/components/iconify';
@@ -25,6 +28,7 @@ import Scrollbar from 'src/components/scrollbar';
 
 // ----------------------------------------------------------------------
 
+/*
 const NOTIFICATIONS = [
   {
     id: faker.string.uuid(),
@@ -73,8 +77,43 @@ const NOTIFICATIONS = [
   },
 ];
 
+ */
+
+
 export default function NotificationsPopover() {
-  const [notifications, setNotifications] = useState(NOTIFICATIONS);
+  const [notifications, setNotifications] = useState([]);
+
+  const user = JSON.parse(localStorage.getItem('user'));
+  console.log(user.id);
+
+  useEffect(() => {
+    const res = fetchData(`user/notifications/${user.id}`);
+    res.then((response) => {
+      if (response) {
+        console.log("Notifications fetched");
+        console.log(response);
+        const notifications = response;
+        const notificationsData = notifications.map((value) => {
+          var temp = {
+            id: value.id,
+            title: value.vine.name,
+            description: value.description,
+            avatar: value.avatar,
+            type: '',
+            createdAt: value.date,
+            isUnRead: value.isUnRead,
+          }
+          console.log(temp);
+          return temp;
+        })
+        console.log(notificationsData);
+        setNotifications(notificationsData);
+      } else {
+        console.log("Notifications failed");
+      }
+    });
+  }, []);
+
 
   const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
 
@@ -96,6 +135,7 @@ export default function NotificationsPopover() {
       }))
     );
   };
+
 
   return (
     <>
@@ -147,23 +187,11 @@ export default function NotificationsPopover() {
               </ListSubheader>
             }
           >
-            {notifications.slice(0, 2).map((notification) => (
+            {notifications.map((notification) => (
               <NotificationItem key={notification.id} notification={notification} />
             ))}
           </List>
 
-          <List
-            disablePadding
-            subheader={
-              <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
-                Before that
-              </ListSubheader>
-            }
-          >
-            {notifications.slice(2, 5).map((notification) => (
-              <NotificationItem key={notification.id} notification={notification} />
-            ))}
-          </List>
         </Scrollbar>
 
         <Divider sx={{ borderStyle: 'dashed' }} />

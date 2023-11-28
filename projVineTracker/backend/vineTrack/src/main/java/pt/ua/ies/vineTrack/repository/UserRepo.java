@@ -3,7 +3,9 @@ package pt.ua.ies.vineTrack.repository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import pt.ua.ies.vineTrack.entity.User;
+import pt.ua.ies.vineTrack.entity.Vine;
 
+import java.util.List;
 @Repository
 public interface UserRepo extends JpaRepository<User, Integer>{
     User findByEmail(String email);

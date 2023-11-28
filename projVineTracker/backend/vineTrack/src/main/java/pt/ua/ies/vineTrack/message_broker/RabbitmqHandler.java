@@ -7,8 +7,11 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import pt.ua.ies.vineTrack.entity.Track;
 import pt.ua.ies.vineTrack.entity.Vine;
+import pt.ua.ies.vineTrack.entity.Notification;
 import pt.ua.ies.vineTrack.service.TrackService;
 import pt.ua.ies.vineTrack.service.VineService;
+import pt.ua.ies.vineTrack.service.NotificationService;
+
 
 import java.time.LocalDateTime;
 
@@ -18,6 +21,9 @@ public class RabbitmqHandler {
     //private SimpMessagingTemplate template;
     @Autowired
     private VineService vineService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Autowired
     private TrackService trackService;
@@ -40,6 +46,17 @@ public class RabbitmqHandler {
                 Track track = new Track(type, date, value, vine);
 
                 trackService.saveTrack(track);
+
+                // receive message, if the value is bellow expected save notification to the database
+                // for now we will consider that the expected value is 40
+                if (value < 40) {
+                    Boolean isUnRead = true;
+                    Notification notification = new Notification("moisture", "/public/assets/images/notifications/water.png", isUnRead, vine);
+                    // set description to  'Levels of the soil humidity are low.'
+                    notification.setDescription("Levels of the soil humidity are low.");
+                    notificationService.saveNotification(notification);
+                }
+
                 break;
             default:
                 break;
