@@ -21,7 +21,7 @@ export default function VineDetailsView() {
 
   useEffect(() => {
     const initialize = async () => {
-      const res = fetchData(`vine/${id}`);
+      const res = fetchData(`vines/${id}`);
 
       res.then((data) => {
         setVine(data);
@@ -33,7 +33,7 @@ export default function VineDetailsView() {
 
 
   useEffect(() => {
-    const res = fetchData(`vine/moisture/${id}`);
+    const res = fetchData(`vines/moisture/${id}`);
     res.then((response) => {
       if (response) {
         console.log("Moisture data fetched");

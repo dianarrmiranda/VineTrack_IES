@@ -101,22 +101,21 @@ export default function VinesView() {
   const [alertNewTypeGrape, setAlertNewTypeGrape] = useState(false);
 
   useEffect(() => {
-    const initialize = async () => {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (user === null) {
-        Route.push("/login");
-      }
-      user &&
-        fetchData(`user/view/${user.id}`).then((res) => {
+      const initialize = async () => {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user === null ){
+          Route.push("/login");
+        }
+        user && fetchData(`users/${user.id}`).then((res) => {
           const { vines } = res;
-          setVines({ vines }.vines);
-        });
-      fetchData(`grape/all`).then((res) => {
-        setGrapes(res);
-      });
-    };
-    initialize();
-  }, []);
+          setVines({vines}.vines);
+        })
+        fetchData(`grapes`).then((res) => {
+          setGrapes(res);
+        })
+      }
+      initialize();
+    }, []);
 
   const handleOpenFilter = () => {
     setOpenFilter(true);
@@ -205,7 +204,7 @@ export default function VinesView() {
       );
       formData.append("file", file, file.name);
 
-      const res = postData("vine/add", formData);
+      const res = postData("vines", formData);
 
       res.then((response) => {
         if (response) {
@@ -221,7 +220,7 @@ export default function VinesView() {
           setOpen(false);
           handleClose();
 
-          fetchData(`user/view/${user.id}`).then((res) => {
+          fetchData(`users/${user.id}`).then((res) => {
             const { vines } = res;
             setVines({ vines }.vines);
           });

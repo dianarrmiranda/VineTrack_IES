@@ -80,7 +80,7 @@ export default function RegisterUserView() {
     if (name.length < 3) { setAlertName(true);}
     else { setAlertName(false);}
 
-    const checkEmail = fetchData(`user/email/${email}`);
+    const checkEmail = fetchData(`users/email/${email}`);
     checkEmail.then((res) => {if (res) { setAlertEmailCheck(true);} else {setAlertEmailCheck(false);}});
 
 
@@ -88,7 +88,7 @@ export default function RegisterUserView() {
     if (passwordRegex.test(password) === true && password === confirmPassword && emailRegex.test(email) === true && name.length >= 3 && alertEmailCheck === false) {
 
       // Dados no formato raw JSON
-      const res = postData("user/add", {
+      const res = postData("users", {
          name: name,
          email: email,
          password: password,

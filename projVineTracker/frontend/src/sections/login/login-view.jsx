@@ -44,7 +44,7 @@ export default function LoginView() {
   const handleClick = async(event) => {
     event.preventDefault();
     try {
-      const res = fetchData(`user/login/${email}/${password}`);
+      const res = fetchData(`users/login/${email}/${password}`);
       res.then((response) => {
         if (response) {
           console.log("Login successful");
