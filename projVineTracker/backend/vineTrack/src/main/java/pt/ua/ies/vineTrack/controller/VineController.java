@@ -136,7 +136,7 @@ public class VineController {
             if (!img.isEmpty()){
                 try {
                     byte[] bytes = img.getBytes();
-                    Path path = Paths.get("src/main/resources/static/vines/" + vine.getId() + ".jpeg");
+                    Path path = Paths.get("src/main/resources/static/vines/" + vine.getId() + "_" + vine.getName() + ".jpeg");
                     Files.write(path, bytes);
                     vine.setImage(path.toString());
                 } catch (IOException e) {
