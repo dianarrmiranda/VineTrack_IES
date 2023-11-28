@@ -67,14 +67,17 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 export default function VinesView() {
-
   const [vines, setVines] = useState([]);
   const [grapes, setGrapes] = useState([]);
-  
+
   const [openFilter, setOpenFilter] = useState(false);
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const [open1, setOpen1] = useState(false);
+  const handleOpen1 = () => setOpen1(true);
+  const handleClose1 = () => setOpen1(false);
 
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
@@ -85,11 +88,17 @@ export default function VinesView() {
   const [fileName, setFileName] = useState("");
   const [file, setFile] = useState(null);
 
+  const [ grapeNewName, setGrapeNewName] = useState("");
+  const [ grapeNewType, setGrapeNewType ] = useState("");
+
   const [alertName, setAlertName] = useState(false);
   const [alertLocation, setAlertLocation] = useState(false);
   const [alertSize, setAlertSize] = useState(false);
   const [alertImage, setAlertImage] = useState(false);
   const [alertImageSize, setAlertImageSize] = useState(false);
+
+  const [alertNewNameGrape, setAlertNewNameGrape] = useState(false);
+  const [alertNewTypeGrape, setAlertNewTypeGrape] = useState(false);
 
   useEffect(() => {
       const initialize = async () => {
@@ -120,9 +129,7 @@ export default function VinesView() {
     const {
       target: { value },
     } = event;
-    setGrapeType(
-      typeof value === "string" ? value.split(",") : value
-    );
+    setGrapeType(typeof value === "string" ? value.split(",") : value);
 
     const ids = [];
     grapes.forEach((grape) => {
@@ -148,35 +155,42 @@ export default function VinesView() {
   const handleAddVine = () => {
     if (name < 3) {
       setAlertName(true);
-    }else{
+    } else {
       setAlertName(false);
     }
     if (location < 3) {
       setAlertLocation(true);
-    }else{
+    } else {
       setAlertLocation(false);
     }
-    if (size < 0 || size === "" ) {
+    if (size < 0 || size === "") {
       setAlertSize(true);
-    }else{
+    } else {
       setAlertSize(false);
     }
     const regex = /(\.jpg|\.jpeg|\.png)$/i;
     if (file === null || !regex.exec(fileName)) {
       setAlertImage(true);
-    }else{
+    } else {
       setAlertImage(false);
     }
     //max tamanho imagem 1MB
     if (file !== null && file.size > 1000000) {
       setAlertImageSize(true);
-    }else{
+    } else {
       setAlertImageSize(false);
     }
 
-    if (name.length >= 3 && location.length >= 3 && size >= 0 && file !== null && regex.exec(fileName) && file.size <= 1000000) {
+    if (
+      name.length >= 3 &&
+      location.length >= 3 &&
+      size >= 0 &&
+      file !== null &&
+      regex.exec(fileName) &&
+      file.size <= 1000000
+    ) {
       const user = JSON.parse(localStorage.getItem("user"));
-      
+
       const formData = new FormData();
       formData.append("name", name);
       formData.append("location", location);
@@ -184,7 +198,10 @@ export default function VinesView() {
       formData.append("date", plantingDate);
       formData.append("img", file);
       formData.append("users", user.id);
-      formData.append("typeGrap", grapeTypeIds.map(id => id));
+      formData.append(
+        "typeGrap",
+        grapeTypeIds.map((id) => id)
+      );
       formData.append("file", file, file.name);
 
       const res = postData("vines", formData);
@@ -205,13 +222,27 @@ export default function VinesView() {
 
           fetchData(`users/${user.id}`).then((res) => {
             const { vines } = res;
-            setVines({vines}.vines);
-          })
+            setVines({ vines }.vines);
+          });
         }
-      }
-      );
+      });
     }
-  }
+  };
+
+  const handleAddGrape = () => {
+    if (grapeNewName.length < 3){
+      setAlertNewNameGrape(true)
+    }else {
+      setAlertNewNameGrape(false)
+    }
+    if (grapeNewType.length < 3){
+      setAlertNewTypeGrape(true)
+    }else {
+      setAlertNewTypeGrape(false)
+    }
+
+  };
+
 
   return (
     <Container>
@@ -275,7 +306,12 @@ export default function VinesView() {
             onChange={(e) => setName(e.target.value)}
             value={name}
           />
-          {alertName && (<Alert severity="error" sx={{ mb: 2 }}> Name must be at least 3 characters long </Alert> )}
+          {alertName && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {" "}
+              Name must be at least 3 characters long{" "}
+            </Alert>
+          )}
           <TextField
             required
             id="outlined-required"
@@ -285,7 +321,12 @@ export default function VinesView() {
             onChange={(e) => setLocation(e.target.value)}
             value={location}
           />
-          {alertLocation && (<Alert severity="error" sx={{ mb: 2 }}> Location must be at least 3 characters long </Alert> )}
+          {alertLocation && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {" "}
+              Location must be at least 3 characters long{" "}
+            </Alert>
+          )}
           <TextField
             required
             id="outlined-number"
@@ -296,7 +337,12 @@ export default function VinesView() {
             onChange={(e) => setSize(e.target.value)}
             value={size}
           />
-          {alertSize && (<Alert severity="error" sx={{ mb: 2 }}> Size must be a positive number </Alert> )}
+          {alertSize && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {" "}
+              Size must be a positive number{" "}
+            </Alert>
+          )}
           <div>
             <InputLabel id="demo-multiple-checkbox-label">
               Type of Grapes
@@ -319,6 +365,10 @@ export default function VinesView() {
                   <ListItemText primary={grape.name} />
                 </MenuItem>
               ))}
+              <MenuItem onClick={handleOpen1}>
+                <Iconify icon="eva:plus-fill" />
+                <ListItemText primary="  Add a New Grape" />
+              </MenuItem>
             </Select>
           </div>
           <div>
@@ -335,7 +385,7 @@ export default function VinesView() {
           </div>
           <InputLabel sx={{ mb: 1 }}> Image</InputLabel>
           <Grid container spacing={2}>
-            <Grid  xs={4}>
+            <Grid xs={4}>
               <Button
                 component="label"
                 variant="outlined"
@@ -348,7 +398,7 @@ export default function VinesView() {
                 <VisuallyHiddenInput type="file" />
               </Button>
             </Grid>
-            <Grid  xs={8}>
+            <Grid xs={8}>
               {fileName && (
                 <TextField
                   value={fileName}
@@ -367,9 +417,24 @@ export default function VinesView() {
               )}
             </Grid>
           </Grid>
-          {alertImage && (<Alert severity="error" sx={{ mb: 2 }}> Please upload a valid image </Alert> )}
-          {alertImageSize && (<Alert severity="error" sx={{ mb: 2 }}> Please upload an image with a maximum size of 1MB </Alert> )}
-          <Button variant="contained" color="primary" sx={{ mt: 3 }} onClick={handleAddVine}>
+          {alertImage && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {" "}
+              Please upload a valid image{" "}
+            </Alert>
+          )}
+          {alertImageSize && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {" "}
+              Please upload an image with a maximum size of 1MB{" "}
+            </Alert>
+          )}
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3 }}
+            onClick={handleAddVine}
+          >
             Add Vine
           </Button>
           <Button
@@ -377,6 +442,55 @@ export default function VinesView() {
             color="inherit"
             sx={{ mt: 3, ml: 2 }}
             onClick={handleClose}
+          >
+            Cancel
+          </Button>
+        </Box>
+      </Modal>
+      <Modal
+        open={open1}
+        onClose={handleClose1}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography
+            id="modal-modal-title"
+            variant="h6"
+            component="h2"
+            sx={{ mb: 2 }}
+          >
+            Add a New Grape
+          </Typography>
+          <TextField
+            required
+            id="outlined-required"
+            label="Name"
+            fullWidth
+            sx={{ mb: 2 }}
+            onChange={(e) => setGrapeNewName(e.target.value)}
+          />
+          <TextField
+            required
+            id="outlined-required"
+            label="Type"
+            fullWidth
+            sx={{ mb: 2 }}
+            onChange={(e) => setGrapeNewType(e.target.value)}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3 }}
+            onClick={handleAddGrape}
+          >
+            Add Grape
+          </Button>
+          <Button
+            variant="contained"
+            color="inherit"
+            sx={{ mt: 3, ml: 2 }}
+            onClick={handleClose1}
           >
             Cancel
           </Button>

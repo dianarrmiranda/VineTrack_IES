@@ -24,7 +24,6 @@ public class Grape {
     private String name;
     @Column(nullable = false)
     private String type;
-    private String color;
 
     @ManyToMany(mappedBy = "typeGrap")
     private List<Vine> vine;
@@ -41,11 +40,6 @@ public class Grape {
         return type;
     }
 
-    public String getColor(){
-        return color;
-    }
-
-
     public void setId(Integer id){
         this.id = id;
     }
@@ -58,13 +52,10 @@ public class Grape {
         this.type = type;
     }
 
-    public void setColor(String color){
-        this.color = color;
-    }
 
     @Override
     public String toString() {
-        return "Grape [id=" + id + ", name=" + name + ", type=" + type + ", color=" + color + "]";
+        return "Grape [id=" + id + ", name=" + name + ", type=" + type + "]";
     }
 
 
