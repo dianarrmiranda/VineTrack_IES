@@ -17,13 +17,13 @@ import pt.ua.ies.vineTrack.service.GrapeService;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping(path = "/grape")
+@RequestMapping(path = "/grapes")
 public class GrapeController {
 
     @Autowired
     private GrapeService grapeService;
 
-    @GetMapping(path = "/all")
+    @GetMapping()
     public ResponseEntity<List<Grape>> getAllGrapes(){
         try {
             return ResponseEntity.ok(grapeService.getAllGrapes());
@@ -33,7 +33,7 @@ public class GrapeController {
 
     }
 
-    @PostMapping(path = "/add")
+    @PostMapping()
     public ResponseEntity<Grape> addGrape(@Valid @RequestBody Grape grape){
         return ResponseEntity.ok(grapeService.save(grape));
     }

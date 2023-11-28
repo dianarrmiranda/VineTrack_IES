@@ -87,7 +87,7 @@ export default function NotificationsPopover() {
   console.log(user.id);
 
   useEffect(() => {
-    const res = fetchData(`user/notifications/${user.id}`);
+    const res = fetchData(`users/notifications/${user.id}`);
     res.then((response) => {
       if (response) {
         console.log("Notifications fetched");

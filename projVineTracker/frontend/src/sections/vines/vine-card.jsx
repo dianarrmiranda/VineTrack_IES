@@ -26,7 +26,7 @@ export default function VineCard({ vine }) {
   const [image, setImage] = useState(null);
 
   useEffect(() => {
-    axios.get(`http://localhost:8080/vine/image/${vine.id}`, {
+    axios.get(`http://localhost:8080/vines/image/${vine.id}`, {
       responseType: 'arraybuffer',
     })
     .then((response) => {

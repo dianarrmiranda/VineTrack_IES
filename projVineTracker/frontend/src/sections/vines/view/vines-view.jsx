@@ -97,11 +97,11 @@ export default function VinesView() {
         if (user === null ){
           Route.push("/login");
         }
-        user && fetchData(`user/view/${user.id}`).then((res) => {
+        user && fetchData(`users/${user.id}`).then((res) => {
           const { vines } = res;
           setVines({vines}.vines);
         })
-        fetchData(`grape/all`).then((res) => {
+        fetchData(`grapes`).then((res) => {
           setGrapes(res);
         })
       }
@@ -187,7 +187,7 @@ export default function VinesView() {
       formData.append("typeGrap", grapeTypeIds.map(id => id));
       formData.append("file", file, file.name);
 
-      const res = postData("vine/add", formData);
+      const res = postData("vines", formData);
 
       res.then((response) => {
         if (response) {
@@ -203,7 +203,7 @@ export default function VinesView() {
           setOpen(false);
           handleClose();
 
-          fetchData(`user/view/${user.id}`).then((res) => {
+          fetchData(`users/${user.id}`).then((res) => {
             const { vines } = res;
             setVines({vines}.vines);
           })

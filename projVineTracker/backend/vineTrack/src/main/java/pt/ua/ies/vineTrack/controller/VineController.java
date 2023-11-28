@@ -36,7 +36,7 @@ import java.util.ArrayList;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping(path = "/vine")
+@RequestMapping(path = "/vines")
 public class VineController {
     @Autowired
     private VineService vineService;
@@ -79,7 +79,7 @@ public class VineController {
         return moistureValues;
     }
 
-    @GetMapping(path = "/all")
+    @GetMapping()
     public ResponseEntity<List<Vine>> getAllVines(){
         try {
             return ResponseEntity.ok(vineService.getAllVines());
@@ -89,7 +89,7 @@ public class VineController {
 
     }
 
-    @PostMapping(path = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Vine> addVine(@RequestParam String name, @RequestParam String location, @RequestParam Double size, @RequestParam java.util.Date date, @RequestParam(required = false) MultipartFile img, @RequestParam List<Integer> users, @RequestParam List<Integer> typeGrap){
 
         try {
@@ -151,7 +151,7 @@ public class VineController {
         }
     }
 
-    @GetMapping(path = "{id}")
+    @GetMapping(path = "/{id}")
     public ResponseEntity<Vine> getVineById(@PathVariable Integer id){
         try {
             return ResponseEntity.ok(vineService.getVineById(id));
@@ -169,7 +169,7 @@ public class VineController {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image);
     }
 
-    @DeleteMapping(path = "{id}")
+    @DeleteMapping(path = "/{id}")
     public ResponseEntity<String> deleteVineById(@PathVariable Integer id){
         try {
             for (User user : vineService.getVineById(id).getUsers()) {

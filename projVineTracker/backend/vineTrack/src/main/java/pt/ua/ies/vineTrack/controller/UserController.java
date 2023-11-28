@@ -22,14 +22,12 @@ import pt.ua.ies.vineTrack.entity.Vine;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping(path = "/user")
+@RequestMapping(path = "/users")
 @ResponseStatus(HttpStatus.OK)
 public class UserController {
     @Autowired
@@ -38,7 +36,7 @@ public class UserController {
     @Autowired
     private NotificationService notificationService;
 
-    @GetMapping(path = "/all")
+    @GetMapping()
     public ResponseEntity<List<User>> getAllUsers(){
         try {
             return ResponseEntity.ok(userService.getAllUsers());
@@ -47,12 +45,12 @@ public class UserController {
         }
     }
 
-    @PostMapping(path = "/add")
+    @PostMapping()
     public ResponseEntity<User> addUser(@Valid @RequestBody User user){
         return ResponseEntity.ok(userService.save(user));
     }
 
-    @GetMapping(path = "/view/{id}")
+    @GetMapping(path = "/{id}")
     public ResponseEntity<User> viewUser(@PathVariable Integer id){
         try {
             return ResponseEntity.ok(userService.getUserById(id));
@@ -99,12 +97,12 @@ public class UserController {
 
 
 
-    @PutMapping(path = "/update")
+    @PutMapping()
     public User updateUser(@RequestBody User user){
         return userService.updateUser(user);
     }
 
-    @DeleteMapping(path = "/delete/{id}")
+    @DeleteMapping(path = "/{id}")
     public String deleteUser(@PathVariable Integer id){
         return userService.deleteUserById(id);
     }
