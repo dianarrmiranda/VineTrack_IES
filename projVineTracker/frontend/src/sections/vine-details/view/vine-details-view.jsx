@@ -51,25 +51,32 @@ export default function VineDetailsView() {
       }
     });
   }
-  , []);
+  , [id]);
 
-  console.log("Moist: ", moistureData);
+
 
   // websocket
-  const [messages, setMessages] = useState(null);
+  const [latestValue, setLatestValue] = useState(null);
   useEffect(() => {
     const ws = new SockJS("http://localhost:8080/vt_ws");
     const client = Stomp.over(ws);
     client.connect({}, function () {
       client.subscribe('/topic/update', function (data) {
-          console.log(data);
-          setMessages(data);
+        if (JSON.parse(data.body).id == id) {
+          setLatestValue(JSON.parse(data.body).value);
+          const newMoistureData = [...moistureData];
+          newMoistureData.shift();
+          newMoistureData.push(JSON.parse(data.body).value);
+          console.log("New moisture data: ", newMoistureData);
+          setMoistureData(newMoistureData);
+        }
       });
     });
   }
-  , []);
+  , [id, moistureData]);
 
-  console.log("Messages: ", messages);
+  console.log("Moisture", moistureData);
+  console.log("Latest value: ", latestValue);
   
 
 
