@@ -175,7 +175,7 @@ export default function VinesView() {
       setAlertImage(false);
     }
     //max tamanho imagem 1MB
-    if (file !== null && file.size > 1000000) {
+    if (file !== null && file.size > 1000024) {
       setAlertImageSize(true);
     } else {
       setAlertImageSize(false);
@@ -241,6 +241,27 @@ export default function VinesView() {
       setAlertNewTypeGrape(false)
     }
 
+    if (grapeNewName.length >= 3 && grapeNewType.length >= 3){
+      
+      const res = postData("grapes", {
+        name: grapeNewName,
+        type: grapeNewType
+     });
+
+      res.then((response) => {
+        if (response) {
+          console.log("Register successful");
+          setGrapeNewName("");
+          setGrapeNewType("");
+          setOpen1(false);
+          handleClose1();
+
+          fetchData(`grapes`).then((res) => {
+            setGrapes(res);
+          });
+        }
+      });
+    }
   };
 
 
@@ -365,7 +386,7 @@ export default function VinesView() {
                   <ListItemText primary={grape.name} />
                 </MenuItem>
               ))}
-              <MenuItem onClick={handleOpen1}>
+              <MenuItem onClick={handleOpen1} sx={{mt: 2}} >
                 <Iconify icon="eva:plus-fill" />
                 <ListItemText primary="  Add a New Grape" />
               </MenuItem>
