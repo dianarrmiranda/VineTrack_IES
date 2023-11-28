@@ -18,7 +18,7 @@ export default function AppView() {
     const initialize =  async () => {
       const user = JSON.parse(localStorage.getItem("user"));
       user &&
-        fetchData(`user/view/${user.id}`).then((res) => {
+        fetchData(`users/${user.id}`).then((res) => {
           const { id, name, role } = res;
           setUserInfo({ id, name, role });
         });
