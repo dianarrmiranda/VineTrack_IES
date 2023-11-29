@@ -20,6 +20,64 @@ import { fToNow } from 'src/utils/format-time';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 
+// websocket
+import SockJS from "sockjs-client";
+import Stomp from "stompjs";
+
+// ----------------------------------------------------------------------
+
+/*
+const NOTIFICATIONS = [
+  {
+    id: faker.string.uuid(),
+    title: 'Quinta do Vale Encantado',
+    description: 'Levels of the soil humidity are low.',
+    avatar: '/assets/images/notifications/water.png',
+    type: '',
+    createdAt: set(new Date(), { hours: 14, minutes: 30 }),
+    isUnRead: true,
+  },
+  {
+    id: faker.string.uuid(),
+    title: 'Château du Rêve',
+    description: 'Rain is expected in the next few hours.',
+    avatar: '/assets/images/notifications/rain.png',
+    type: '',
+    createdAt: sub(new Date(), { hours: 3, minutes: 30 }),
+    isUnRead: true,
+  },
+  {
+    id: faker.string.uuid(),
+    title: 'Domaine BelleVigne',
+    description: 'All nutrients are at the right levels.',
+    avatar: '/assets/images/notifications/nutrients.png',
+    type: '',
+    createdAt: sub(new Date(), { days: 1, hours: 3, minutes: 30 }),
+    isUnRead: false,
+  },
+  {
+    id: faker.string.uuid(),
+    title: 'Quinta do Vale Encantado',
+    description: 'Potassium levels are low.',
+    avatar: '/assets/images/notifications/nutrients.png',
+    type: '',
+    createdAt: sub(new Date(), { days: 1, hours: 2, minutes: 30 }),
+    isUnRead: false,
+  },
+  {
+    id: faker.string.uuid(),
+    title: 'Bodega El Dorado',
+    description: 'Vines on sector 3 are ready for harvest.',
+    avatar: '/assets/images/notifications/harvest.png',
+    type: '',
+    createdAt: sub(new Date(), { days: 1, hours: 1, minutes: 30 }),
+    isUnRead: false,
+  },
+];
+
+ */
+
+
 export default function NotificationsPopover() {
   const [unreadNotifications, setUnreadNotifications] = useState([]);
   const [readNotifications, setReadNotifications] = useState([]);
@@ -61,6 +119,29 @@ export default function NotificationsPopover() {
       }
     });
   }, []);
+
+
+  // websocket
+  const [latestNotification, setLatestNotification] = useState(null);
+  useEffect(() => {
+    const ws = new SockJS("http://localhost:8080/vt_ws");
+    const client = Stomp.over(ws);
+    client.connect({}, function () {
+      client.subscribe('/topic/notification', function (data) {
+        console.log("New notification: ", JSON.parse(data.body));
+        setLatestNotification(JSON.parse(data.body));
+        const newNotifications = [...notifications];
+        newNotifications.push(JSON.parse(data.body));
+        console.log("New notifications: ", newNotifications);
+        setNotifications(newNotifications);
+      }
+      );
+    });
+  }
+    , [notifications]);
+
+
+
 
   const [open, setOpen] = useState(null);
 

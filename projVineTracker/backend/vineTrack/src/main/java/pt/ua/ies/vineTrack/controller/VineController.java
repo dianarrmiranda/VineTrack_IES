@@ -4,10 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import pt.ua.ies.vineTrack.entity.Grape;
+import pt.ua.ies.vineTrack.entity.Notification;
 import pt.ua.ies.vineTrack.entity.Track;
 import pt.ua.ies.vineTrack.entity.User;
 import pt.ua.ies.vineTrack.entity.Vine;
 import pt.ua.ies.vineTrack.service.GrapeService;
+import pt.ua.ies.vineTrack.service.NotificationService;
 import pt.ua.ies.vineTrack.service.TrackService;
 import pt.ua.ies.vineTrack.service.UserService;
 import pt.ua.ies.vineTrack.service.VineService;
@@ -27,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,6 +49,8 @@ public class VineController {
     private GrapeService grapeService;
     @Autowired
     private TrackService trackService;
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping(path = "/test")
     public Track getAllVinesTest(){
@@ -174,6 +179,16 @@ public class VineController {
         try {
             for (User user : vineService.getVineById(id).getUsers()) {
                 user.getVines().remove(vineService.getVineById(id));
+            }
+
+            for (Track track : trackService.getAllTracks()){
+                if (track.getVine().getId() == id){
+                    trackService.deleteTrackById(track.getId());
+                }
+            }
+
+            for (Notification noti : notificationService.getNotificationsByVine(vineService.getVineById(id))){
+                notificationService.deleteNotificationById(noti.getId());
             }
 
             return ResponseEntity.ok(vineService.deleteVineById(id));

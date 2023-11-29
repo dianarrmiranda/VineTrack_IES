@@ -26,6 +26,11 @@ public class NotificationService {
         return notificationRepo.getNotificationsByVine(vine);
     }
 
+    public String deleteNotificationById(Integer id){
+        notificationRepo.deleteById(id);
+        return "Notification removed! "+id;
+    }
+
     public Notification getNotificationById(Integer id){
         return notificationRepo.findById(id).orElseThrow();
     }
