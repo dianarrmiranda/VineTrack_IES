@@ -17,6 +17,11 @@ public class TrackService {
         return trackRepo.findAll();
     }
 
+    public String deleteTrackById(Integer id){
+        trackRepo.deleteById(id);
+        return "Track removed! "+id;
+    }
+
     public Track saveTrack(Track track){
         return trackRepo.save(track);
     }

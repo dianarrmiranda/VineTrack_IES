@@ -25,4 +25,9 @@ public class NotificationService {
     public List<Notification> getNotificationsByVine(Vine vine){
         return notificationRepo.getNotificationsByVine(vine);
     }
+
+    public String deleteNotificationById(Integer id){
+        notificationRepo.deleteById(id);
+        return "Notification removed! "+id;
+    }
 }
