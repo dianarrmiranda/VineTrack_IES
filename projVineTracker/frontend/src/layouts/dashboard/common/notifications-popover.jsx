@@ -26,6 +26,10 @@ import { fToNow } from 'src/utils/format-time';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 
+// websocket
+import SockJS from "sockjs-client";
+import Stomp from "stompjs";
+
 // ----------------------------------------------------------------------
 
 /*
@@ -113,6 +117,26 @@ export default function NotificationsPopover() {
       }
     });
   }, []);
+
+
+  // websocket
+  const [latestNotification, setLatestNotification] = useState(null);
+  useEffect(() => {
+    const ws = new SockJS("http://localhost:8080/vt_ws");
+    const client = Stomp.over(ws);
+    client.connect({}, function () {
+      client.subscribe('/topic/notification', function (data) {
+        console.log("New notification: ", JSON.parse(data.body));
+        setLatestNotification(JSON.parse(data.body));
+        const newNotifications = [...notifications];
+        newNotifications.push(JSON.parse(data.body));
+        console.log("New notifications: ", newNotifications);
+        setNotifications(newNotifications);
+      }
+      );
+    });
+  }
+    , [notifications]);
 
 
   const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;

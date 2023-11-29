@@ -54,6 +54,10 @@ public class RabbitmqHandler {
                     Notification notification = new Notification("moisture", "/public/assets/images/notifications/water.png", isUnRead, vine);
                     // set description to  'Levels of the soil humidity are low.'
                     notification.setDescription("Levels of the soil humidity are low.");
+                    // send through websocket
+                    JSONObject notificationJson = new JSONObject(notification);
+                    this.template.convertAndSend("/topic/notification", notificationJson.toString());
+
                     notificationService.saveNotification(notification);
                 }
 
