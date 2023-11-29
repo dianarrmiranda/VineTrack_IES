@@ -10,6 +10,8 @@ import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 import { fetchData } from "src/utils";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import SockJS from "sockjs-client";
+import Stomp from "stompjs";
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
@@ -49,9 +51,33 @@ export default function VineDetailsView() {
       }
     });
   }
-  , []);
+  , [id]);
 
-  console.log("Moist: ", moistureData);
+
+
+  // websocket
+  const [latestValue, setLatestValue] = useState(null);
+  useEffect(() => {
+    const ws = new SockJS("http://localhost:8080/vt_ws");
+    const client = Stomp.over(ws);
+    client.connect({}, function () {
+      client.subscribe('/topic/update', function (data) {
+        if (JSON.parse(data.body).id == id) {
+          setLatestValue(JSON.parse(data.body).value);
+          const newMoistureData = [...moistureData];
+          newMoistureData.shift();
+          newMoistureData.push(JSON.parse(data.body).value);
+          console.log("New moisture data: ", newMoistureData);
+          setMoistureData(newMoistureData);
+        }
+      });
+    });
+  }
+  , [id, moistureData]);
+
+  console.log("Moisture", moistureData);
+  console.log("Latest value: ", latestValue);
+  
 
 
   return (
