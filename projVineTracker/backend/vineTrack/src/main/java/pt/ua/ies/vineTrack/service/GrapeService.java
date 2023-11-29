@@ -34,7 +34,6 @@ public class GrapeService {
     public Grape updateGrape(Grape grape){
         Grape existing = grapeRepo.findById(grape.getId()).orElse(null);
         existing.setName(grape.getName());
-        existing.setColor(grape.getColor());
         existing.setType(grape.getType());
     
         return grapeRepo.save(existing);
