@@ -32,6 +32,12 @@ export default function NotificationsPopover() {
   const [readNotifications, setReadNotifications] = useState([]);
   const [totalUnRead, setTotalUnRead] = useState(0);
   const [notifications, setNotifications] = useState([]);
+  const [showAllNotifications, setShowAllNotifications] = useState(false);
+
+  const handleToggleNotifications = () => {
+    setShowAllNotifications(!showAllNotifications);
+  };
+  
 
   const user = JSON.parse(localStorage.getItem('user'));
   console.log(user.id);
@@ -189,34 +195,27 @@ export default function NotificationsPopover() {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Scrollbar sx={{ height: { xs: 340, sm: 'auto' } }}>
-          <List disablePadding>
-            <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
-              New
-            </ListSubheader>
-            {unreadNotifications.map((notification) => (
-              <NotificationItem
-                key={notification.id}
-                notification={notification}
-                markAsRead={handleMarkAsRead}
-              />
-            ))}
-          </List>
-
-          <List disablePadding>
-            <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
-              Read
-            </ListSubheader>
-            {readNotifications.map((notification) => (
-              <NotificationItem key={notification.id} notification={notification} />
-            ))}
-          </List>
+        {(showAllNotifications ? [unreadNotifications, readNotifications] : [unreadNotifications]).map((notificationList, index) => (
+            <List disablePadding key={index}>
+              <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
+                {index === 0 ? 'New' : 'Read'}
+              </ListSubheader>
+              {notificationList.map((notification) => (
+                <NotificationItem
+                  key={notification.id}
+                  notification={notification}
+                  markAsRead={handleMarkAsRead}
+                />
+              ))}
+            </List>
+          ))}
         </Scrollbar>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Box sx={{ p: 1 }}>
-          <Button fullWidth disableRipple>
-            View All
+          <Button fullWidth disableRipple onClick={handleToggleNotifications}>
+            {showAllNotifications ? 'Show Less' : 'View All'}
           </Button>
         </Box>
       </Popover>

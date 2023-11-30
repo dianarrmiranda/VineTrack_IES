@@ -3,6 +3,8 @@ package pt.ua.ies.vineTrack.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pt.ua.ies.vineTrack.entity.Vine;
+import pt.ua.ies.vineTrack.repository.VineRepo;
+import pt.ua.ies.vineTrack.service.VineService;
 import pt.ua.ies.vineTrack.repository.NotificationRepo;
 import pt.ua.ies.vineTrack.entity.Notification;
 
@@ -13,6 +15,9 @@ import java.util.List;
 public class NotificationService {
     @Autowired
     private NotificationRepo notificationRepo;
+
+    @Autowired
+    private VineService vineService;
 
     public List<Notification> getAllNotifications(){
         return notificationRepo.findAll();
@@ -33,6 +38,20 @@ public class NotificationService {
 
     public Notification getNotificationById(Integer id){
         return notificationRepo.findById(id).orElseThrow();
+    }
+
+    public int getNumberOfNotificationsByVine(Vine vine){
+        return notificationRepo.getNotificationsByVine(vine).size();
+    }
+
+    public void removeOldestNotificationsForVine(Integer vineId, Integer numberOfNotificationsToKeep){
+        List<Notification> notifications = notificationRepo.getNotificationsByVine(vineService.getVineById(vineId));
+        int numberOfNotifications = notifications.size();
+        if(numberOfNotifications > numberOfNotificationsToKeep){
+            for(int i = 0; i < numberOfNotifications - numberOfNotificationsToKeep; i++){
+                notificationRepo.deleteById(notifications.get(i).getId());
+            }
+        }
     }
 
 }
