@@ -20,6 +20,7 @@ export default function VineDetailsView() {
   const [vine, setVine] = useState({});
   
   const [moistureData, setMoistureData] = useState(null);
+  const [tempData, setTempData] = useState(null);
 
   useEffect(() => {
     const initialize = async () => {
@@ -53,6 +54,25 @@ export default function VineDetailsView() {
   }
   , [id]);
 
+  useEffect(() => {
+    const res = fetchData(`vines/temperature/${id}`);
+    res.then((response) => {
+      if (response) {
+        console.log("Temperature data fetched");
+        
+        // moisture is a list of doubles
+        const temp = response;
+        const tempData = temp.map((value, index) => {
+          return value;
+        });
+        setTempData(tempData);
+      } else {
+        console.log("Temperature data failed");
+      }
+    });
+  }
+  , [id]);
+
 
 
   // websocket
@@ -64,18 +84,29 @@ export default function VineDetailsView() {
       client.subscribe('/topic/update', function (data) {
         if (JSON.parse(data.body).id == id) {
           setLatestValue(JSON.parse(data.body).value);
-          const newMoistureData = [...moistureData];
-          newMoistureData.shift();
-          newMoistureData.push(JSON.parse(data.body).value);
-          console.log("New moisture data: ", newMoistureData);
-          setMoistureData(newMoistureData);
+          if (JSON.parse(data.body).sensor == "temperature") {
+            const newTempData = [...tempData];
+            newTempData.shift();
+            newTempData.push(JSON.parse(data.body).value);
+            console.log("New temperature data: ", newTempData);
+            setTempData(newTempData);
+          }
+          if (JSON.parse(data.body).sensor == "moisture") {
+            const newMoistureData = [...moistureData];
+            newMoistureData.shift();
+            newMoistureData.push(JSON.parse(data.body).value);
+            console.log("New moisture data: ", newMoistureData);
+            setMoistureData(newMoistureData);
+          }
+          
         }
       });
     });
   }
-  , [id, moistureData]);
+  , [id, moistureData], [id, tempData]);
 
   console.log("Moisture", moistureData);
+  console.log("Temperature", tempData);
   console.log("Latest value: ", latestValue);
   
 
@@ -140,17 +171,30 @@ export default function VineDetailsView() {
             subheader=" in Celsius (°C)"
             chart={{
               labels: [
-                "01/01/2023",
-                "02/01/2023",
-                "03/01/2023",
-                "04/01/2023",
-                "05/01/2023",
-                "06/01/2023",
-                "07/01/2023",
-                "08/01/2023",
-                "09/01/2023",
-                "10/01/2023",
-                "11/01/2023",
+                "00:00",
+                "01:00",
+                "02:00",
+                "03:00",
+                "04:00",
+                "05:00",
+                "06:00",
+                "07:00",
+                "08:00",
+                "09:00",
+                "10:00",
+                "11:00",
+                "12:00",
+                "13:00",
+                "14:00",
+                "15:00",
+                "16:00",
+                "17:00",
+                "18:00",
+                "19:00",
+                "20:00",
+                "21:00",
+                "22:00",
+                "23:00",
               ],
               series: [
                 {
@@ -158,7 +202,7 @@ export default function VineDetailsView() {
                   type: "line",
                   color: "#FF0000",
                   fill: "solid",
-                  data: [18, 19, 20, 22, 24, 28, 30, 31, 28, 24, 22],
+                  data: tempData,
                 },
               ],
             }}

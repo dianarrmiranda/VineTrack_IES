@@ -176,4 +176,4 @@ class Generator:
             }
 
             self.sender.send(message)
-            await asyncio.sleep(60/self.numberOfVines)
+            await asyncio.sleep(3600/self.numberOfVines)

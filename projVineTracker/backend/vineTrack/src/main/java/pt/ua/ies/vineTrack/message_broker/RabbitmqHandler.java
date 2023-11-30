@@ -70,10 +70,9 @@ public class RabbitmqHandler {
                 Vine vine2 = vineService.getVineById(vineId2);
                 LocalDateTime date2 = LocalDateTime.now();
                 Track track2 = new Track(type, date2, value2, vine2);
-
-                vine2.setTemperature(value2);
-
                 trackService.saveTrack(track2);
+                vine2.setTemperature(value2);
+                vineService.save(vine2);
 
                 break;
             default:

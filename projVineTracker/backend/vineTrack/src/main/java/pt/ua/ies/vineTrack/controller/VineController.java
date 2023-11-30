@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import java.io.IOException;
@@ -63,10 +64,11 @@ public class VineController {
     public List<Double> getMoistureByVineId(@PathVariable int vineId){
         System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
-        // we need to get only the moisture values
-        for (Track track : tracks) {
+        Iterator<Track> iterator = tracks.iterator();
+        while (iterator.hasNext()) {
+            Track track = iterator.next();
             if (!track.getType().equals("moisture")) {
-                tracks.remove(track);
+                iterator.remove();
             }
         }
         // now we need to order the tracks by date from the oldest to the newest
@@ -82,6 +84,33 @@ public class VineController {
         }
         System.out.println(moistureValues);
         return moistureValues;
+    }
+
+    @GetMapping(path = "/temperature/{vineId}")
+    public List<Double> getTemperatureByVineId(@PathVariable int vineId){
+        System.out.println("Vine id: " + vineId);
+        List<Track> tracks = vineService.getTracksByVineId(vineId);
+        Iterator<Track> iterator = tracks.iterator();
+        while (iterator.hasNext()) {
+            Track track = iterator.next();
+            if (!track.getType().equals("temperature")) {
+                iterator.remove();
+            }
+        }
+
+        // now we need to order the tracks by date from the oldest to the newest
+        tracks.sort(Comparator.comparing(Track::getDate));
+
+        // finally we need to get only the moisture values
+        List<Double> tempValues = new ArrayList<>(tracks.stream().map(Track::getValue).toList());
+        while (tempValues.size() < 24) {
+            tempValues.add(0, 0.0);
+        }
+        if (tempValues.size() > 24) {
+            tempValues = tempValues.subList(tempValues.size() - 24, tempValues.size());
+        }
+        System.out.println("temp: " + tempValues);
+        return tempValues;
     }
 
     @GetMapping()
@@ -141,7 +170,7 @@ public class VineController {
             if (!img.isEmpty()){
                 try {
                     byte[] bytes = img.getBytes();
-                    Path path = Paths.get("src/main/resources/static/vines/" + vine.getId() + "_" + vine.getName() + ".jpeg");
+                    Path path = Paths.get("src/main/resources/static/vines/" + vine.getId() + "_" + vine.getName().replaceAll("\s", "") + ".jpeg");
                     Files.write(path, bytes);
                     vine.setImage(path.toString());
                 } catch (IOException e) {
