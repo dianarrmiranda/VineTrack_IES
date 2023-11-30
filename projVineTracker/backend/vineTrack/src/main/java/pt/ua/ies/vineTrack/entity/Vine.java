@@ -37,7 +37,7 @@ public class Vine {
     private String image;
 
     String phase = "bud";
-    int temperature = 15;
+    private Double temperature = 0.0;
 
     @ManyToMany()
     @JoinTable(name = "vine_grape",
@@ -122,11 +122,11 @@ public class Vine {
         this.phase = phase;
     }
 
-    public int getTemperature() {
+    public Double getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(int temperature) {
+    public void setTemperature(Double temperature) {
         this.temperature = temperature;
     }
 

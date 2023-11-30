@@ -71,6 +71,8 @@ public class RabbitmqHandler {
                 LocalDateTime date2 = LocalDateTime.now();
                 Track track2 = new Track(type, date2, value2, vine2);
 
+                vine2.setTemperature(value2);
+
                 trackService.saveTrack(track2);
 
                 break;
