@@ -15,7 +15,7 @@ import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 
-import { fetchData } from 'src/utils';
+import { fetchData, postData, updateData } from 'src/utils';
 import { fToNow } from 'src/utils/format-time';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -25,57 +25,6 @@ import SockJS from "sockjs-client";
 import Stomp from "stompjs";
 
 // ----------------------------------------------------------------------
-
-/*
-const NOTIFICATIONS = [
-  {
-    id: faker.string.uuid(),
-    title: 'Quinta do Vale Encantado',
-    description: 'Levels of the soil humidity are low.',
-    avatar: '/assets/images/notifications/water.png',
-    type: '',
-    createdAt: set(new Date(), { hours: 14, minutes: 30 }),
-    isUnRead: true,
-  },
-  {
-    id: faker.string.uuid(),
-    title: 'Château du Rêve',
-    description: 'Rain is expected in the next few hours.',
-    avatar: '/assets/images/notifications/rain.png',
-    type: '',
-    createdAt: sub(new Date(), { hours: 3, minutes: 30 }),
-    isUnRead: true,
-  },
-  {
-    id: faker.string.uuid(),
-    title: 'Domaine BelleVigne',
-    description: 'All nutrients are at the right levels.',
-    avatar: '/assets/images/notifications/nutrients.png',
-    type: '',
-    createdAt: sub(new Date(), { days: 1, hours: 3, minutes: 30 }),
-    isUnRead: false,
-  },
-  {
-    id: faker.string.uuid(),
-    title: 'Quinta do Vale Encantado',
-    description: 'Potassium levels are low.',
-    avatar: '/assets/images/notifications/nutrients.png',
-    type: '',
-    createdAt: sub(new Date(), { days: 1, hours: 2, minutes: 30 }),
-    isUnRead: false,
-  },
-  {
-    id: faker.string.uuid(),
-    title: 'Bodega El Dorado',
-    description: 'Vines on sector 3 are ready for harvest.',
-    avatar: '/assets/images/notifications/harvest.png',
-    type: '',
-    createdAt: sub(new Date(), { days: 1, hours: 1, minutes: 30 }),
-    isUnRead: false,
-  },
-];
-
- */
 
 
 export default function NotificationsPopover() {
@@ -179,28 +128,23 @@ export default function NotificationsPopover() {
   };
 
   const markNotificationAsRead = (notificationId) => {
-    fetchData(`users/markAsRead/${notificationId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((updatedNotification) => {
-        setNotifications((prevNotifications) => {
-          const updatedIndex = prevNotifications.findIndex(
-            (notification) => notification && notification.id === updatedNotification.id
-          );
-          if (updatedIndex !== -1) {
-            const updatedArray = [...prevNotifications];
-            updatedArray[updatedIndex] = updatedNotification;
-            return updatedArray;
-          }
-          return prevNotifications;
-        });
-      })
-      .catch((error) => {
-        console.error('Error marking notification as read:', error);
-      });
+    updateData(`users/markAsRead/${notificationId}`, null);
+
+    setTotalUnRead((prevTotal) => prevTotal - 1);
+
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((notification) =>
+        notification.id === notificationId ? { ...notification, isUnRead: false } : notification
+      )
+    );
+
+    setReadNotifications((prevRead) => [
+      ...prevRead,
+      unreadNotifications.find((notification) => notification.id === notificationId),
+    ]);
+
+    setUnreadNotifications((prevUnread) => prevUnread.filter((notification) => notification.id !== notificationId));
+
   };
 
   return (
@@ -290,7 +234,7 @@ NotificationItem.propTypes = {
     type: PropTypes.string,
     avatar: PropTypes.any,
   }),
-  markAsRead: PropTypes.func.isRequired,
+  markAsRead: PropTypes.func,
 };
 
 function NotificationItem({ notification, markAsRead }) {

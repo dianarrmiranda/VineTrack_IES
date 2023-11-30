@@ -34,4 +34,5 @@ public class NotificationService {
     public Notification getNotificationById(Integer id){
         return notificationRepo.findById(id).orElseThrow();
     }
+
 }
