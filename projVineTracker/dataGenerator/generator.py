@@ -1,4 +1,7 @@
 import asyncio
+import datetime
+
+import requests
 import mysql.connector
 import random
 from sender import *
@@ -131,3 +134,46 @@ class Generator:
             self.sender.send(message)
 
             await asyncio.sleep(60/self.numberOfVines) # envia dados a cada minuto para cada vinha
+
+    async def temperature(self):
+        #Call IPMA API to get temperature
+        print('Getting temperature from IPMA API')
+
+        locales = requests.get('http://api.ipma.pt/public-data/forecast/locations.json')
+        locales = locales.json()
+
+        locales = {locale['local']: locale['globalIdLocal'] for locale in locales}
+
+        while True:
+            self.connection = mysql.connector.connect(
+                host='database',
+                user='root',
+                password='root',
+                database='VTdb'
+            )
+
+            self.cursor = self.connection.cursor()
+            self.cursor.execute('SELECT location FROM vine WHERE id = %s', (self.id,))
+            location = self.cursor.fetchone()[0]
+
+            print(f'Vine {self.id} - Temperature')
+
+            temp = requests.get(f'http://api.ipma.pt/public-data/forecast/aggregate/{locales[location]}.json')
+            temp = temp.json()
+
+            temp = {hour['dataPrev']: hour['tMed'] for hour in temp if 'tMed' in hour }
+
+            today = datetime.date.today().strftime('%Y-%m-%d')
+            time = datetime.datetime.now().strftime('%H')
+
+            time = f'{time}:00:00'
+            temperture = float(temp[f'{today}T{time}'])
+
+            message = {
+                'id': self.id,
+                'sensor': 'temperature',
+                'value': temperture
+            }
+
+            self.sender.send(message)
+            await asyncio.sleep(60/self.numberOfVines)

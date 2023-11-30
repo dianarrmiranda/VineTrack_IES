@@ -62,6 +62,18 @@ public class RabbitmqHandler {
                 }
 
                 break;
+            case "temperature":
+                int vineId2 = params.getInt("id");
+                double value2 = params.getDouble("value");
+
+                // store the track in the database
+                Vine vine2 = vineService.getVineById(vineId2);
+                LocalDateTime date2 = LocalDateTime.now();
+                Track track2 = new Track(type, date2, value2, vine2);
+
+                trackService.saveTrack(track2);
+
+                break;
             default:
                 break;
         }
