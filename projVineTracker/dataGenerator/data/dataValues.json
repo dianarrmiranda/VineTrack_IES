@@ -33,5 +33,34 @@
                 }
             }
         }
+    },
+    {
+        "sensor": "nutrients",
+        "range": {
+            "min": 0,
+            "max": 100
+        },
+        "phase": {
+            "bud": {
+            },
+            "flower": {
+                "Nitrogen": [1.6,2.7],
+                "Phosphorus": [0.14, 0.55], 
+                "Potassium": [0.65, 1.3],
+                "Calcium": [1.2, 2.2], 
+                "Magnesium": [0.16, 0.55],
+                "Chloride": [0.5]
+            },
+            "fruit": {
+                "Nitrogen": [1.5,2.4],
+                "Phosphorus": [0.12, 0.45], 
+                "Potassium": [0.55, 1.05],
+                "Calcium": [1.5, 2.4], 
+                "Magnesium": [0.2, 0.6],
+                "Chloride": [0.5]
+            },
+            "ripen": {
+            }
+        }
     }
 ]
