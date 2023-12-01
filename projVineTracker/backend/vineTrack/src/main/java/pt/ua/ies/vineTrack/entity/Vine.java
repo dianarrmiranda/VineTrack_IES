@@ -34,6 +34,8 @@ public class Vine {
     private Date date;
     @Column(nullable = false)
     private String location;
+    @Column(nullable = false)
+    private String city;
     private String image;
 
     String phase = "bud";
@@ -82,6 +84,10 @@ public class Vine {
         return users;
     }
 
+    public String getCity() {
+        return city;
+    }
+
     public void setId(Integer id){
         this.id = id;
     }
@@ -128,6 +134,10 @@ public class Vine {
 
     public void setTemperature(Double temperature) {
         this.temperature = temperature;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
 

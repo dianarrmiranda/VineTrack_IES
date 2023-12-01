@@ -28,8 +28,9 @@ class Generator:
         self.cursor = self.connection.cursor()
         self.cursor.execute('SELECT id FROM vine ORDER BY id ASC')
         self.allIds = self.cursor.fetchall()
-        self.idIndex = 0
-        self.id = self.allIds[self.idIndex][0]
+        if len(self.allIds) != 0:
+            self.idIndex = 0
+            self.id = self.allIds[self.idIndex][0]
 
 
     def decrease_moisture(self, min, max, previousValue):
@@ -51,7 +52,6 @@ class Generator:
                 phases = sensor['decrease']['phase']
 
         while True:
-
             # values were added, we need to connect again
             self.connection = mysql.connector.connect(
                 host='database',
@@ -67,77 +67,79 @@ class Generator:
             self.cursor.execute('SELECT id FROM vine ORDER BY id ASC')
             self.allIds = self.cursor.fetchall()
 
-            if self.idIndex < len(self.allIds) - 1:
-                self.idIndex += 1
-            else:
-                self.idIndex = 0
+            if len(self.allIds) != 0:
+                if self.idIndex < len(self.allIds) - 1:
+                    self.idIndex += 1
+                else:
+                    self.idIndex = 0
 
-            self.id = self.allIds[self.idIndex][0]
+                self.id = self.allIds[self.idIndex][0]
 
-            print(f'Vine {self.id} - Moisture')
+                print(f'Vine {self.id} - Moisture')
 
-            # vine = self.vines[self.id]
-            self.cursor = self.connection.cursor()
-            self.cursor.execute('SELECT * FROM vine WHERE id = %s', (self.id,))
-            info = self.cursor.fetchall()
-            if len(info) == 0:
-                continue
-            info = info[0]
-            phase = info[5]
-            temperature = info[7]
-            if temperature < 12:
-                decreaseValue = phases[phase]['cool']
-            elif temperature < 18:
-                decreaseValue = phases[phase]['moderate']
-            elif temperature < 24:
-                decreaseValue = phases[phase]['warm']
-            else:
-                decreaseValue = phases[phase]['hot']
-            # obter a fase da vinha
-            # usar as descidas do ficheiro de dados para simular a descida da humidade (random)
-            # caso regue?
-            self.cursor = self.connection.cursor()
-            self.cursor.execute(f'SELECT * FROM track where vine_id = {self.id} ORDER BY date DESC LIMIT 2')
-            values = self.cursor.fetchall()
-            values = values[::-1]
+                # vine = self.vines[self.id]
+                self.cursor = self.connection.cursor()
+                self.cursor.execute('SELECT * FROM vine WHERE id = %s', (self.id,))
+                info = self.cursor.fetchall()
+                if len(info) == 0:
+                    continue
+                info = info[0]
+                phase = info[6]
+                temperature = info[8]
+                if temperature < 12:
+                    decreaseValue = phases[phase]['cool']
+                elif temperature < 18:
+                    decreaseValue = phases[phase]['moderate']
+                elif temperature < 24:
+                    decreaseValue = phases[phase]['warm']
+                else:
+                    decreaseValue = phases[phase]['hot']
+                # obter a fase da vinha
+                # usar as descidas do ficheiro de dados para simular a descida da humidade (random)
+                # caso regue?
+                self.cursor = self.connection.cursor()
+                self.cursor.execute(f'SELECT * FROM track where vine_id = {self.id} ORDER BY date DESC LIMIT 2')
+                values = self.cursor.fetchall()
+                values = values[::-1]
 
-            if values[1][-2] < 35:
-                # vai haver uma probabilidade de 50% de regar
-                if random.randint(0, 1) == 1:
-                    newValue = values[1][-2] + random.uniform(15, 25)
+                if values[1][-2] < 35:
+                    # vai haver uma probabilidade de 50% de regar
+                    if random.randint(0, 1) == 1:
+                        newValue = values[1][-2] + random.uniform(15, 25)
+
+                    else:
+                        newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-2])
+
+                elif values[1][-2] - values[0][-2] > 0:
+                    # vai aumentar até cheagar ao valor de humidade ideal
+                    ideal = {'bud': [70, 80], 'flower': [80, 90], 'fruit': [80, 90], 'maturity': [60, 70]}
+
+                    idealValues = ideal[phase]
+
+                    # já está no valor ideal
+                    if idealValues[0] < values[1][-2] < idealValues[1]:
+                        newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-2])
+
+                    else:
+                        newValue = random.uniform(idealValues[0], idealValues[1])
 
                 else:
                     newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-2])
 
-            elif values[1][-2] - values[0][-2] > 0:
-                # vai aumentar até cheagar ao valor de humidade ideal
-                ideal = {'bud': [70, 80], 'flower': [80, 90], 'fruit': [80, 90], 'maturity': [60, 70]}
+                newValue = round(newValue, 2)
+                message = {
+                    'id': self.id,
+                    'sensor': 'moisture',
+                    'value': newValue
+                }
+                self.sender.send(message)
 
-                idealValues = ideal[phase]
-
-                # já está no valor ideal
-                if idealValues[0] < values[1][-2] < idealValues[1]:
-                    newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-2])
-
-                else:
-                    newValue = random.uniform(idealValues[0], idealValues[1])
-
+            if self.numberOfVines != 0:
+                await asyncio.sleep(60/self.numberOfVines)
             else:
-                newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-2])
-
-            newValue = round(newValue, 2)
-            message = {
-                'id': self.id,
-                'sensor': 'moisture',
-                'value': newValue
-            }
-            self.sender.send(message)
-
-            await asyncio.sleep(60/self.numberOfVines) # envia dados a cada minuto para cada vinha
+                await asyncio.sleep(60/1)
 
     async def temperature(self):
-        #Call IPMA API to get temperature
-        print('Getting temperature from IPMA API')
 
         locales = requests.get('http://api.ipma.pt/public-data/forecast/locations.json')
         locales = locales.json()
@@ -153,12 +155,12 @@ class Generator:
             )
 
             self.cursor = self.connection.cursor()
-            self.cursor.execute('SELECT location FROM vine WHERE id = %s', (self.id,))
-            location = self.cursor.fetchone()[0]
+            self.cursor.execute('SELECT city FROM vine WHERE id = %s', (self.id,))
+            city = self.cursor.fetchone()[0]
 
             print(f'Vine {self.id} - Temperature')
 
-            temp = requests.get(f'http://api.ipma.pt/public-data/forecast/aggregate/{locales[location]}.json')
+            temp = requests.get(f'http://api.ipma.pt/public-data/forecast/aggregate/{locales[city]}.json')
             temp = temp.json()
 
             temp = {hour['dataPrev']: hour['tMed'] for hour in temp if 'tMed' in hour }
@@ -176,4 +178,8 @@ class Generator:
             }
 
             self.sender.send(message)
-            await asyncio.sleep(3600/self.numberOfVines)
+
+            if self.numberOfVines != 0:
+                await asyncio.sleep(3600/self.numberOfVines)
+            else:
+                await asyncio.sleep(3600/1)

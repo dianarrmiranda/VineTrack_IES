@@ -109,7 +109,7 @@ public class VineController {
         if (tempValues.size() > 24) {
             tempValues = tempValues.subList(tempValues.size() - 24, tempValues.size());
         }
-        System.out.println("temp: " + tempValues);
+        System.out.println("Temperature: " + tempValues);
         return tempValues;
     }
 
@@ -124,12 +124,13 @@ public class VineController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Vine> addVine(@RequestParam String name, @RequestParam String location, @RequestParam Double size, @RequestParam java.util.Date date, @RequestParam(required = false) MultipartFile img, @RequestParam List<Integer> users, @RequestParam List<Integer> typeGrap){
+    public ResponseEntity<Vine> addVine(@RequestParam String name, @RequestParam String location, @RequestParam String city, @RequestParam Double size, @RequestParam java.util.Date date, @RequestParam(required = false) MultipartFile img, @RequestParam List<Integer> users, @RequestParam List<Integer> typeGrap){
 
         try {
             Vine vine = new Vine();
             vine.setName(name);
             vine.setLocation(location);
+            vine.setCity(city);
             vine.setSize(size);
             vine.setImage("");
             vine.setDate(new Date(date.getTime()));
