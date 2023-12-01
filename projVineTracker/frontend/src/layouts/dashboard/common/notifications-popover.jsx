@@ -1,8 +1,5 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { set, sub } from 'date-fns';
-import { faker } from '@faker-js/faker';
-
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import Badge from '@mui/material/Badge';
@@ -18,11 +15,8 @@ import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 
-import { fetchData } from "src/utils";
-
-
+import { fetchData, postData, updateData } from 'src/utils';
 import { fToNow } from 'src/utils/format-time';
-
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 
@@ -32,60 +26,18 @@ import Stomp from "stompjs";
 
 // ----------------------------------------------------------------------
 
-/*
-const NOTIFICATIONS = [
-  {
-    id: faker.string.uuid(),
-    title: 'Quinta do Vale Encantado',
-    description: 'Levels of the soil humidity are low.',
-    avatar: '/assets/images/notifications/water.png',
-    type: '',
-    createdAt: set(new Date(), { hours: 14, minutes: 30 }),
-    isUnRead: true,
-  },
-  {
-    id: faker.string.uuid(),
-    title: 'Château du Rêve',
-    description: 'Rain is expected in the next few hours.',
-    avatar: '/assets/images/notifications/rain.png',
-    type: '',
-    createdAt: sub(new Date(), { hours: 3, minutes: 30 }),
-    isUnRead: true,
-  },
-  {
-    id: faker.string.uuid(),
-    title: 'Domaine BelleVigne',
-    description: 'All nutrients are at the right levels.',
-    avatar: '/assets/images/notifications/nutrients.png',
-    type: '',
-    createdAt: sub(new Date(), { days: 1, hours: 3, minutes: 30 }),
-    isUnRead: false,
-  },
-  {
-    id: faker.string.uuid(),
-    title: 'Quinta do Vale Encantado',
-    description: 'Potassium levels are low.',
-    avatar: '/assets/images/notifications/nutrients.png',
-    type: '',
-    createdAt: sub(new Date(), { days: 1, hours: 2, minutes: 30 }),
-    isUnRead: false,
-  },
-  {
-    id: faker.string.uuid(),
-    title: 'Bodega El Dorado',
-    description: 'Vines on sector 3 are ready for harvest.',
-    avatar: '/assets/images/notifications/harvest.png',
-    type: '',
-    createdAt: sub(new Date(), { days: 1, hours: 1, minutes: 30 }),
-    isUnRead: false,
-  },
-];
-
- */
-
 
 export default function NotificationsPopover() {
+  const [unreadNotifications, setUnreadNotifications] = useState([]);
+  const [readNotifications, setReadNotifications] = useState([]);
+  const [totalUnRead, setTotalUnRead] = useState(0);
   const [notifications, setNotifications] = useState([]);
+  const [showAllNotifications, setShowAllNotifications] = useState(false);
+
+  const handleToggleNotifications = () => {
+    setShowAllNotifications(!showAllNotifications);
+  };
+  
 
   const user = JSON.parse(localStorage.getItem('user'));
   console.log(user.id);
@@ -98,7 +50,7 @@ export default function NotificationsPopover() {
         console.log(response);
         const notifications = response;
         const notificationsData = notifications.map((value) => {
-          var temp = {
+          return {
             id: value.id,
             title: value.vine.name,
             description: value.description,
@@ -106,14 +58,19 @@ export default function NotificationsPopover() {
             type: '',
             createdAt: value.date,
             isUnRead: value.isUnRead,
-          }
-          console.log(temp);
-          return temp;
-        })
-        console.log(notificationsData);
+          };
+        });
+
+        const unread = notificationsData.filter((item) => item.isUnRead);
+        const read = notificationsData.filter((item) => !item.isUnRead);
+
+        setTotalUnRead(unread.length);
+
+        setUnreadNotifications(unread);
+        setReadNotifications(read);
         setNotifications(notificationsData);
       } else {
-        console.log("Notifications failed");
+        console.error('Failed to fetch notifications');
       }
     });
   }, []);
@@ -139,7 +96,7 @@ export default function NotificationsPopover() {
     , [notifications]);
 
 
-  const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
+
 
   const [open, setOpen] = useState(null);
 
@@ -152,14 +109,49 @@ export default function NotificationsPopover() {
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications(
-      notifications.map((notification) => ({
+    setUnreadNotifications([]);
+    setReadNotifications((prevRead) => [
+      ...prevRead,
+      ...unreadNotifications.map((notification) => ({
         ...notification,
         isUnRead: false,
-      }))
-    );
+      })),
+    ]);
+
+    unreadNotifications.forEach((notification) => {
+      markNotificationAsRead(notification.id);
+    });
   };
 
+  const handleMarkAsRead = (notificationId) => {
+    setUnreadNotifications((prevUnread) =>
+      prevUnread.map((notification) =>
+        notification.id === notificationId ? { ...notification, isUnRead: false } : notification
+      )
+    );
+
+    markNotificationAsRead(notificationId);
+  };
+
+  const markNotificationAsRead = (notificationId) => {
+    updateData(`users/markAsRead/${notificationId}`, null);
+
+    setTotalUnRead((prevTotal) => prevTotal - 1);
+
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((notification) =>
+        notification.id === notificationId ? { ...notification, isUnRead: false } : notification
+      )
+    );
+
+    setReadNotifications((prevRead) => [
+      ...prevRead,
+      unreadNotifications.find((notification) => notification.id === notificationId),
+    ]);
+
+    setUnreadNotifications((prevUnread) => prevUnread.filter((notification) => notification.id !== notificationId));
+
+  };
 
   return (
     <>
@@ -203,34 +195,33 @@ export default function NotificationsPopover() {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Scrollbar sx={{ height: { xs: 340, sm: 'auto' } }}>
-          <List
-            disablePadding
-            subheader={
+        {(showAllNotifications ? [unreadNotifications, readNotifications] : [unreadNotifications]).map((notificationList, index) => (
+            <List disablePadding key={index}>
               <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
-                New
+                {index === 0 ? 'New' : 'Read'}
               </ListSubheader>
-            }
-          >
-            {notifications.map((notification) => (
-              <NotificationItem key={notification.id} notification={notification} />
-            ))}
-          </List>
-
+              {notificationList.map((notification) => (
+                <NotificationItem
+                  key={notification.id}
+                  notification={notification}
+                  markAsRead={handleMarkAsRead}
+                />
+              ))}
+            </List>
+          ))}
         </Scrollbar>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Box sx={{ p: 1 }}>
-          <Button fullWidth disableRipple>
-            View All
+          <Button fullWidth disableRipple onClick={handleToggleNotifications}>
+            {showAllNotifications ? 'Show Less' : 'View All'}
           </Button>
         </Box>
       </Popover>
     </>
   );
 }
-
-// ----------------------------------------------------------------------
 
 NotificationItem.propTypes = {
   notification: PropTypes.shape({
@@ -242,13 +233,19 @@ NotificationItem.propTypes = {
     type: PropTypes.string,
     avatar: PropTypes.any,
   }),
+  markAsRead: PropTypes.func,
 };
 
-function NotificationItem({ notification }) {
+function NotificationItem({ notification, markAsRead }) {
   const { avatar, title } = renderContent(notification);
+
+  const handleClick = () => {
+    markAsRead(notification.id);
+  };
 
   return (
     <ListItemButton
+      onClick={handleClick}
       sx={{
         py: 1.5,
         px: 2.5,
@@ -274,7 +271,7 @@ function NotificationItem({ notification }) {
             }}
           >
             <Iconify icon="eva:clock-outline" sx={{ mr: 0.5, width: 16, height: 16 }} />
-            {fToNow(notification.createdAt)}
+            {fToNow(new Date(notification.createdAt))}
           </Typography>
         }
       />
