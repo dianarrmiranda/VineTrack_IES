@@ -47,6 +47,8 @@ public class RabbitmqHandler {
                 Track track = new Track(type, date, value, vine);
 
                 trackService.saveTrack(track);
+                // only have 10 tracks per vine, remove the oldest
+                trackService.removeOldTracks();
 
                 // receive message, if the value is bellow expected save notification to the database
                 // for now we will consider that the expected value is 40
