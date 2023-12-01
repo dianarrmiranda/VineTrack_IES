@@ -95,4 +95,8 @@ public class Notification {
         this.description=description;
     }
 
+    public Boolean isRead() {
+        return !this.isUnRead;
+    }
+
 }

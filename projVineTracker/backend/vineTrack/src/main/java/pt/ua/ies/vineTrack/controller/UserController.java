@@ -88,11 +88,33 @@ public class UserController {
         }
         System.out.println(notifications);
         // invert the list
+        int count = 1;
         List<Notification> invertedNotifications = new ArrayList<>();
         for (int i = notifications.size() - 1; i >= 0; i--) {
+            count++;
             invertedNotifications.add(notifications.get(i));
+            if (count == 11) {
+                break;
+            }
         }
         return invertedNotifications;
+    }
+
+    @PutMapping("/markAsRead/{notificationId}")
+    public ResponseEntity<Notification> markNotificationAsRead(@PathVariable int notificationId) {
+        try {
+            Notification notification = notificationService.getNotificationById(notificationId);
+
+            if (notification != null && !notification.isRead()) {
+                notification.setIsUnRead(false);  // Update isUnRead to false
+                notificationService.saveNotification(notification);
+                return ResponseEntity.ok(notification);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 

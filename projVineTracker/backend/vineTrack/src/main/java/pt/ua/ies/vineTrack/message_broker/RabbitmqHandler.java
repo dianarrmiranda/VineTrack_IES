@@ -28,6 +28,7 @@ public class RabbitmqHandler {
     @Autowired
     private TrackService trackService;
 
+    private static final int MAX_NOTIFICATIONS = 10;
     @RabbitListener(queues = Config.QUEUE_NAME)
     public void receiveMessage(String message) {
         System.out.println("Received <" + message + ">");
@@ -46,6 +47,8 @@ public class RabbitmqHandler {
                 Track track = new Track(type, date, value, vine);
 
                 trackService.saveTrack(track);
+                // only have 10 tracks per vine, remove the oldest
+                trackService.removeOldTracks();
 
                 // receive message, if the value is bellow expected save notification to the database
                 // for now we will consider that the expected value is 40
@@ -54,6 +57,15 @@ public class RabbitmqHandler {
                     Notification notification = new Notification("moisture", "/public/assets/images/notifications/water.png", isUnRead, vine);
                     // set description to  'Levels of the soil humidity are low.'
                     notification.setDescription("Levels of the soil humidity are low.");
+
+                    int totalNotifications = notificationService.getNumberOfNotificationsByVine(vine);
+
+                    // If the total exceeds the maximum limit, remove older notifications
+                    if (totalNotifications > MAX_NOTIFICATIONS) {
+                        notificationService.removeOldestNotificationsForVine(vine.getId(), MAX_NOTIFICATIONS);
+                    }
+
+
                     // send through websocket
                     JSONObject notificationJson = new JSONObject(notification);
                     this.template.convertAndSend("/topic/notification", notificationJson.toString());

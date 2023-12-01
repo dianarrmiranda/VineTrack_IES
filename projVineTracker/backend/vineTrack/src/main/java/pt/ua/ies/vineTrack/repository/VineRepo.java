@@ -5,9 +5,10 @@ import org.springframework.stereotype.Repository;
 
 import pt.ua.ies.vineTrack.entity.Vine;
 
+import java.util.List;
+
 @Repository
 public interface VineRepo extends JpaRepository<Vine, Integer>{
     Vine findByName(String name);
     Vine findByLocation(String location);
-    
-} 
+}
