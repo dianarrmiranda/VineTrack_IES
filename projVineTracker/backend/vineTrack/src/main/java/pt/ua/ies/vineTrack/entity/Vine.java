@@ -34,10 +34,12 @@ public class Vine {
     private Date date;
     @Column(nullable = false)
     private String location;
+    @Column(nullable = false)
+    private String city;
     private String image;
 
     String phase = "bud";
-    int temperature = 15;
+    private Double temperature = 0.0;
 
     @ManyToMany()
     @JoinTable(name = "vine_grape",
@@ -82,6 +84,10 @@ public class Vine {
         return users;
     }
 
+    public String getCity() {
+        return city;
+    }
+
     public void setId(Integer id){
         this.id = id;
     }
@@ -122,12 +128,16 @@ public class Vine {
         this.phase = phase;
     }
 
-    public int getTemperature() {
+    public Double getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(int temperature) {
+    public void setTemperature(Double temperature) {
         this.temperature = temperature;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
 

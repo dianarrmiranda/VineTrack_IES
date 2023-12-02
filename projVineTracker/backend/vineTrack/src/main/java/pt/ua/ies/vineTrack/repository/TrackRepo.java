@@ -20,4 +20,6 @@ public interface TrackRepo extends JpaRepository<Track, Integer> {
     // get last moisture track date for a vine
     @Query("SELECT t FROM Track t WHERE t.vine.id = ?1 AND t.type = 'moisture' ORDER BY t.date DESC")
     List<Track> getLastMoistureTrackByVineId(Integer vineId);
+
+    List<Track> findAllByTypeOrderByDateAsc(String type);
 }

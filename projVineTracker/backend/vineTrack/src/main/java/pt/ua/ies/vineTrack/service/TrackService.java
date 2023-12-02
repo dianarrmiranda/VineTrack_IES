@@ -2,11 +2,9 @@ package pt.ua.ies.vineTrack.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pt.ua.ies.vineTrack.entity.Vine;
 import pt.ua.ies.vineTrack.repository.TrackRepo;
 import pt.ua.ies.vineTrack.entity.Track;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,13 +29,11 @@ public class TrackService {
         return trackRepo.findAll().size();
     }
 
-    public void removeOldTracks() {
-        List<Integer> vinesIds = trackRepo.getVinesIds();
-        for (Integer vineId : vinesIds) {
-            List<Track> tracks = trackRepo.getTracksByVineId(vineId);
-            if (tracks.size() > 10) {
-                trackRepo.deleteAll(tracks.subList(0, tracks.size() - 10));
-            }
+    public void removeOldTracks(String type) {
+        List<Track> tracks = trackRepo.findAllByTypeOrderByDateAsc(type);
+        while (tracks.size() > 10) {
+            trackRepo.delete(tracks.get(0));
+            tracks.remove(0);
         }
     }
 

@@ -12,6 +12,7 @@ import VineSort from "../vine-sort";
 import VineFilters from "../vine-filters";
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Checkbox,
@@ -87,6 +88,7 @@ export default function VinesView() {
   const [plantingDate, setPlantingDate] = useState("");
   const [fileName, setFileName] = useState("");
   const [file, setFile] = useState(null);
+  const [city, setCity] = useState("");
 
   const [ grapeNewName, setGrapeNewName] = useState("");
   const [ grapeNewType, setGrapeNewType ] = useState("");
@@ -96,6 +98,7 @@ export default function VinesView() {
   const [alertSize, setAlertSize] = useState(false);
   const [alertImage, setAlertImage] = useState(false);
   const [alertImageSize, setAlertImageSize] = useState(false);
+  const [alertCity, setAlertCity] = useState(false);
 
   const [alertNewNameGrape, setAlertNewNameGrape] = useState(false);
   const [alertNewTypeGrape, setAlertNewTypeGrape] = useState(false);
@@ -174,11 +177,18 @@ export default function VinesView() {
     } else {
       setAlertImage(false);
     }
-    //max tamanho imagem 1MB
+    
     if (file !== null && file.size > 1000024) {
       setAlertImageSize(true);
     } else {
       setAlertImageSize(false);
+    }
+
+    if (city === ""){
+      setAlertCity(true);
+    }
+    else {
+      setAlertCity(false);
     }
 
     if (
@@ -187,13 +197,15 @@ export default function VinesView() {
       size >= 0 &&
       file !== null &&
       regex.exec(fileName) &&
-      file.size <= 1000000
+      file.size <= 1000000 &&
+      city !== ""
     ) {
       const user = JSON.parse(localStorage.getItem("user"));
-
+      
       const formData = new FormData();
       formData.append("name", name);
       formData.append("location", location);
+      formData.append("city", city);
       formData.append("size", size);
       formData.append("date", plantingDate);
       formData.append("img", file);
@@ -211,6 +223,7 @@ export default function VinesView() {
           console.log("Register successful");
           setName("");
           setLocation("");
+          setCity("");
           setSize("");
           setPlantingDate("");
           setFileName("");
@@ -263,6 +276,15 @@ export default function VinesView() {
       });
     }
   };
+
+  const [cities, setCities] = useState([]);
+
+  useEffect(() => {
+    fetch('http://api.ipma.pt/public-data/forecast/locations.json')
+      .then(response => response.json())
+      .then(data => setCities(data.map(city => city.local)))
+      .catch(err => console.error(err));
+  }, []);
 
 
   return (
@@ -346,6 +368,22 @@ export default function VinesView() {
             <Alert severity="error" sx={{ mb: 2 }}>
               {" "}
               Location must be at least 3 characters long{" "}
+            </Alert>
+          )}
+          <Autocomplete
+            disablePortal
+            required
+            id="combo-box-demo"
+            label="City"
+            options={cities}
+            sx={{ mb: 2 }}
+            renderInput={(params) => <TextField {...params} label="City" />}
+            onChange={(event, newValue) => setCity(newValue)}
+          />
+          {alertCity && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {" "}
+              Please select a city{" "}
             </Alert>
           )}
           <TextField

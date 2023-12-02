@@ -10,8 +10,10 @@ if __name__ == '__main__':
 
     generator = Generator(data)
     loop = asyncio.get_event_loop()
+    
 
     moisture = loop.create_task(generator.moisture())
+    temperature = loop.create_task(generator.temperature())
 
-    loop.run_until_complete(asyncio.gather(moisture))
+    loop.run_until_complete(asyncio.gather(moisture, temperature))
     loop.close()
