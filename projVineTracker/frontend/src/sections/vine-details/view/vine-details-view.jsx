@@ -78,7 +78,8 @@ export default function VineDetailsView() {
   console.log("Moisture", moistureData);
   console.log("Latest value: ", latestValue);
   
-
+  // console.log("Nutrients", NutrientData);
+  // console.log("Latest value: ", latestNutrientValue);
 
   return (
     <Container maxWidth="xl">

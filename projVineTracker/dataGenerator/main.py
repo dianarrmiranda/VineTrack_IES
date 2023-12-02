@@ -16,4 +16,6 @@ if __name__ == '__main__':
 
     #loop.run_until_complete(asyncio.gather(moisture))
     loop.run_until_complete(asyncio.gather(nutrient))
+    #loop.run_until_complete(asyncio.gather(moisture, nutrient))
+
     loop.close()
