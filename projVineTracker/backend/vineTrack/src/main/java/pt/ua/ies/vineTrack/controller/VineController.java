@@ -213,8 +213,9 @@ public class VineController {
             vineService.save(vine);
 
             // add 2 tracks to the vine
-            Track track1 = new Track("moisture", LocalDateTime.now(), 0.0, vine);
-            Track track2 = new Track("moisture", LocalDateTime.now(), 0.0, vine);
+            LocalDateTime now = LocalDateTime.now();
+            Track track2 = new Track("moisture", now, 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
+            Track track1 = new Track("moisture", LocalDateTime.now(), 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
             trackService.saveTrack(track1);
             trackService.saveTrack(track2);
 
