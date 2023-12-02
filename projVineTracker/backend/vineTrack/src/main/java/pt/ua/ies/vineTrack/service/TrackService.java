@@ -29,11 +29,30 @@ public class TrackService {
         return trackRepo.findAll().size();
     }
 
-    public void removeOldTracks(String type) {
+    public void removeOldTracks(String type, Integer id) {
         List<Track> tracks = trackRepo.findAllByTypeOrderByDateAsc(type);
-        while (tracks.size() > 10) {
-            trackRepo.delete(tracks.get(0));
-            tracks.remove(0);
+        
+        tracks.removeIf(track -> track.getVine().getId() != id);
+
+        System.out.println("tracks size: " + tracks.size());
+        System.out.println("type: " + type);
+        if (type.equals("moisture")) {
+            while (tracks.size() > 10) {
+                trackRepo.delete(tracks.get(0));
+                tracks.remove(0);
+            }
+        }else if (type.equals("temperature")) {
+            while (tracks.size() > 24) {
+                trackRepo.delete(tracks.get(0));
+                tracks.remove(0);
+            }
+        }else if (type.equals("weatherAlerts")) {
+            while (tracks.size() > 1) {
+                trackRepo.delete(tracks.get(0));
+                tracks.remove(0);
+            }
         }
+
+        System.out.println("tracks size 2: " + tracks.size());
     }
 }

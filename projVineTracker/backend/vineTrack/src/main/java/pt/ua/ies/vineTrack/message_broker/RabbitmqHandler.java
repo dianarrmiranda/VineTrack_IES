@@ -48,7 +48,7 @@ public class RabbitmqHandler {
 
                 trackService.saveTrack(track);
                 // only have 10 tracks per vine, remove the oldest
-                trackService.removeOldTracks("moisture");
+                trackService.removeOldTracks("moisture", vineId);
 
                 // receive message, if the value is bellow expected save notification to the database
                 // for now we will consider that the expected value is 40
@@ -86,14 +86,28 @@ public class RabbitmqHandler {
                 Track track2 = new Track(type, date2, value2, vine2, time, day);
 
                 trackService.saveTrack(track2);
-                trackService.removeOldTracks("temperature");
+                trackService.removeOldTracks("temperature", vineId2);
                 
                 vine2.setTemperature(value2);
                 vineService.save(vine2);
 
                 break;
+            case "weatherAlerts":
+                int vineId3 = params.getInt("id");
+                String value3 = params.getString("value");
+
+                Vine vine3 = vineService.getVineById(vineId3);
+                LocalDateTime date3 = LocalDateTime.now();
+
+                Track track3 = new Track(type, date3, value3, vine3);
+                trackService.saveTrack(track3);
+                trackService.removeOldTracks("weatherAlerts",vineId3);
+
+                break;
             default:
                 break;
+
+        
         }
     }
 }
