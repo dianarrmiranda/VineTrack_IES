@@ -28,8 +28,9 @@ class Generator:
         self.cursor = self.connection.cursor()
         self.cursor.execute('SELECT id FROM vine ORDER BY id ASC')
         self.allIds = self.cursor.fetchall()
+        self.id = None
+        self.idIndex = 0
         if len(self.allIds) != 0:
-            self.idIndex = 0
             self.id = self.allIds[self.idIndex][0]
 
 
@@ -59,6 +60,7 @@ class Generator:
                 password='root',
                 database='VTdb'
             )
+
             self.cursor = self.connection.cursor()
             self.numberOfVines = self.cursor.execute('SELECT COUNT(*) FROM vine')
             self.numberOfVines = self.cursor.fetchone()[0]
@@ -146,6 +148,10 @@ class Generator:
 
         locales = {locale['local']: locale['globalIdLocal'] for locale in locales}
 
+        last_hour = 0
+        last_day = datetime.date.today().strftime('%Y-%m-%d')
+        change_day = False
+
         while True:
             self.connection = mysql.connector.connect(
                 host='database',
@@ -154,32 +160,57 @@ class Generator:
                 database='VTdb'
             )
 
-            self.cursor = self.connection.cursor()
-            self.cursor.execute('SELECT city FROM vine WHERE id = %s', (self.id,))
-            city = self.cursor.fetchone()[0]
+            if self.id:
+                self.cursor = self.connection.cursor()
+                self.cursor.execute('SELECT city FROM vine WHERE id = %s', (self.id,))
+                city = self.cursor.fetchone()[0]
 
-            print(f'Vine {self.id} - Temperature')
+                print(f'Vine {self.id} - Temperature')
 
-            temp = requests.get(f'http://api.ipma.pt/public-data/forecast/aggregate/{locales[city]}.json')
-            temp = temp.json()
+                temp = requests.get(f'http://api.ipma.pt/public-data/forecast/aggregate/{locales[city]}.json')
+                temp = temp.json()
 
-            temp = {hour['dataPrev']: hour['tMed'] for hour in temp if 'tMed' in hour }
+                temp = {hour['dataPrev']: hour['tMed'] for hour in temp if 'tMed' in hour }
 
-            today = datetime.date.today().strftime('%Y-%m-%d')
-            time = datetime.datetime.now().strftime('%H')
+                today = datetime.date.today().strftime('%Y-%m-%d')
+                time = datetime.datetime.now().strftime('%H')
 
-            time = f'{time}:00:00'
-            temperture = float(temp[f'{today}T{time}'])
+                if last_hour == 0:
+                    last_hour = int(time)
+                elif last_hour + 1 == 24:
+                    change_day = True
+                    last_hour = 0
+                    time = '00'
+                else:
+                    last_hour = last_hour + 1
+                    time = str(last_hour)
 
-            message = {
-                'id': self.id,
-                'sensor': 'temperature',
-                'value': temperture
-            }
+                if last_day != today:
+                    change_day = False
+                    last_day = today
 
-            self.sender.send(message)
+                if change_day == False and today == last_day:
+                    last_day = today
+                    
+                    
+                    print("last_hour: ", last_hour)
+                    time = f'{time}:00:00'
+                    temperture = float(temp[f'{today}T{time}'])
+
+                    message = {
+                        'id': self.id,
+                        'sensor': 'temperature',
+                        'value': temperture,
+                        'day': today,
+                        'date': time
+                    }
+
+                    self.sender.send(message)
+
+                
+            
 
             if self.numberOfVines != 0:
-                await asyncio.sleep(3600/self.numberOfVines)
+                await asyncio.sleep(60/self.numberOfVines)
             else:
-                await asyncio.sleep(3600/1)
+                await asyncio.sleep(60/1)
