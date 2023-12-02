@@ -90,6 +90,50 @@ export default function AppView() {
         </Grid>
       </Grid>
 
+      {/* Consumo de agua */}
+
+      <Typography variant="h5" sx={{ mb: 5 }}>
+        Water Consumption
+      </Typography>
+
+      <Grid container spacing={3} sx={{ mb: 5 }}>
+        <Grid xs={12} md={6} lg={8}>
+          <AppHumidityChart
+            title="Water Consumption Daily"
+            subheader=" in Liters (L)"
+            chart={{
+              labels: [
+                "09/30/2019",
+                "09/30/2020",
+                "09/30/2021",
+                "09/30/2022",
+                "09/30/2023",
+              ],
+              series: [
+                {
+                  name: "vine1",
+                  type: "line",
+                  fill: "solid",
+                  data: [70, 78, 68, 50, 45],
+                },
+                {
+                  name: "vine2",
+                  type: "line",
+                  fill: "solid",
+                  data: [20, 59, 30, 14, 70],
+                },
+                {
+                  name: "vine3",
+                  type: "line",
+                  fill: "solid",
+                  data: [54, 80, 70, 90, 73],
+                },
+              ],
+            }}
+          />
+        </Grid>
+      </Grid>
+
       <Typography variant="h5" sx={{ mb: 5 }}>
         Environmental Impact
       </Typography>
