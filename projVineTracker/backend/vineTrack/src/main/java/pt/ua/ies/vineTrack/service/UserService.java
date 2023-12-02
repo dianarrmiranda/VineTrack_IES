@@ -7,7 +7,6 @@ import pt.ua.ies.vineTrack.repository.UserRepo;
 import pt.ua.ies.vineTrack.entity.User;
 
 import pt.ua.ies.vineTrack.entity.Vine;
-import pt.ua.ies.vineTrack.service.VineService;
 
 import java.util.ArrayList;
 import java.util.List;
