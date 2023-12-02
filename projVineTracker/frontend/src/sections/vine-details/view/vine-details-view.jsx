@@ -22,6 +22,8 @@ export default function VineDetailsView() {
   const [moistureData, setMoistureData] = useState(null);
   const [tempData, setTempData] = useState([]);
 
+  const [currentDay, setCurrentDay] = useState(new Date().getDate());
+
   useEffect(() => {
     const initialize = async () => {
       const res = fetchData(`vines/${id}`);
@@ -65,7 +67,7 @@ export default function VineDetailsView() {
 
           setTempData(labels.map((value, index) => {
             return {[value]: values[index]};
-          }));
+          }).sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
 
           
         } else {
@@ -74,9 +76,22 @@ export default function VineDetailsView() {
       });
   }, [id]);
 
+  useEffect(() => {
+    const today = new Date().getDate();
+    if (today !== currentDay) {
+      setTempData([]);
+      setCurrentDay(today);
+    }
+  }, [currentDay]);
+
   // websocket
   const [latestValue, setLatestValue] = useState(null);
   useEffect(() => {
+    const today = new Date().getDate();
+    if (today !== currentDay) {
+      setTempData([]);
+      setCurrentDay(today);
+    }
     const ws = new SockJS("http://localhost:8080/vt_ws");
     const client = Stomp.over(ws);
     client.connect({}, function () {
@@ -87,7 +102,7 @@ export default function VineDetailsView() {
             const newTempData = [...tempData];
             newTempData.push({[JSON.parse(data.body).date]: JSON.parse(data.body).value});
             console.log("New temperature data: ", newTempData);
-            setTempData(newTempData);
+            setTempData(newTempData.sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
           }
           if (JSON.parse(data.body).sensor == "moisture") {
             const newMoistureData = [...moistureData];
@@ -167,14 +182,14 @@ export default function VineDetailsView() {
             title="Temperature"
             subheader=" in Celsius (°C)"
             chart={{
-              labels: tempData.map((value, index) => { return Object.keys(value)[0] }),
+              labels: tempData.map((value, index) => {return Object.keys(value)[0]}),
               series: [
                 {
                   name: "Temperature",
                   type: "line",
                   color: "#FF0000",
                   fill: "solid",
-                  data: tempData.map((value, index) => { return Object.values(value)[0] })
+                  data: tempData.map((value, index) => { return Object.values(value)[0]})
                 },
               ],
             }}
