@@ -31,7 +31,7 @@ export default function AppTemperatureChart({ title, subheader, chart, ...other 
             y: {
                 formatter: (value) => {
                     if (typeof value !== 'undefined') {
-                        return `${value.toFixed(0)} ºC`;
+                        return `${value} ºC`;
                     }
                     return value;
                 },

@@ -20,7 +20,7 @@ export default function VineDetailsView() {
   const [vine, setVine] = useState({});
   
   const [moistureData, setMoistureData] = useState(null);
-  const [tempData, setTempData] = useState(null);
+  const [tempData, setTempData] = useState([]);
 
   useEffect(() => {
     const initialize = async () => {
@@ -55,25 +55,24 @@ export default function VineDetailsView() {
   , [id]);
 
   useEffect(() => {
-    const res = fetchData(`vines/temperature/${id}`);
-    res.then((response) => {
-      if (response) {
-        console.log("Temperature data fetched");
-        
-        // moisture is a list of doubles
-        const temp = response;
-        const tempData = temp.map((value, index) => {
-          return value;
-        });
-        setTempData(tempData);
-      } else {
-        console.log("Temperature data failed");
-      }
-    });
-  }
-  , [id]);
+    fetchData(`vines/temperature/${id}`)
+      .then(response => {
+        if (response) {
+          console.log("Temperature data fetched");
+          
+          const labels = Object.keys(response);
+          const values = Object.values(response);
 
+          setTempData(labels.map((value, index) => {
+            return {[value]: values[index]};
+          }));
 
+          
+        } else {
+          console.log("Temperature data failed");
+        }
+      });
+  }, [id]);
 
   // websocket
   const [latestValue, setLatestValue] = useState(null);
@@ -86,8 +85,7 @@ export default function VineDetailsView() {
           setLatestValue(JSON.parse(data.body).value);
           if (JSON.parse(data.body).sensor == "temperature") {
             const newTempData = [...tempData];
-            newTempData.shift();
-            newTempData.push(JSON.parse(data.body).value);
+            newTempData.push({[JSON.parse(data.body).date]: JSON.parse(data.body).value});
             console.log("New temperature data: ", newTempData);
             setTempData(newTempData);
           }
@@ -109,7 +107,6 @@ export default function VineDetailsView() {
   console.log("Temperature", tempData);
   console.log("Latest value: ", latestValue);
   
-
 
   return (
     <Container maxWidth="xl">
@@ -170,39 +167,14 @@ export default function VineDetailsView() {
             title="Temperature"
             subheader=" in Celsius (°C)"
             chart={{
-              labels: [
-                "00:00",
-                "01:00",
-                "02:00",
-                "03:00",
-                "04:00",
-                "05:00",
-                "06:00",
-                "07:00",
-                "08:00",
-                "09:00",
-                "10:00",
-                "11:00",
-                "12:00",
-                "13:00",
-                "14:00",
-                "15:00",
-                "16:00",
-                "17:00",
-                "18:00",
-                "19:00",
-                "20:00",
-                "21:00",
-                "22:00",
-                "23:00",
-              ],
+              labels: tempData.map((value, index) => { return Object.keys(value)[0] }),
               series: [
                 {
                   name: "Temperature",
                   type: "line",
                   color: "#FF0000",
                   fill: "solid",
-                  data: tempData,
+                  data: tempData.map((value, index) => { return Object.values(value)[0] })
                 },
               ],
             }}
