@@ -1,6 +1,7 @@
 package pt.ua.ies.vineTrack.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.web.bind.annotation.*;
 
 import pt.ua.ies.vineTrack.entity.Grape;
@@ -26,11 +27,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
+import java.util.Map;
+import java.util.TreeMap;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -87,7 +91,7 @@ public class VineController {
     }
 
     @GetMapping(path = "/temperature/{vineId}")
-    public List<Double> getTemperatureByVineId(@PathVariable int vineId){
+    public Map<String, Double> getTemperatureByVineId(@PathVariable int vineId){
         System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         Iterator<Track> iterator = tracks.iterator();
@@ -102,15 +106,24 @@ public class VineController {
         tracks.sort(Comparator.comparing(Track::getDate));
 
         // finally we need to get only the moisture values
-        List<Double> tempValues = new ArrayList<>(tracks.stream().map(Track::getValue).toList());
-        while (tempValues.size() < 24) {
-            tempValues.add(0, 0.0);
+
+        List<Double> tempValues = new ArrayList<>();
+        List<String> tempTimes = new ArrayList<>();
+
+        for (Track track : tracks) {
+            if (track.getDay().equals(LocalDate.now().toString())) {
+                tempValues.add(track.getValue());
+                tempTimes.add(track.getTime());
+            }
         }
-        if (tempValues.size() > 24) {
-            tempValues = tempValues.subList(tempValues.size() - 24, tempValues.size());
+
+        Map<String, Double> tempMap = new TreeMap<>();
+        for (int i = 0; i < tempValues.size(); i++) {
+            tempMap.put(tempTimes.get(i), tempValues.get(i));
         }
-        System.out.println("Temperature: " + tempValues);
-        return tempValues;
+
+        System.out.println("Temperature: " + tempMap);
+        return tempMap;
     }
 
     @GetMapping()
