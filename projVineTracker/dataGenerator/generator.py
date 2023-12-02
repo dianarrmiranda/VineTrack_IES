@@ -84,14 +84,7 @@ class Generator:
 
                 self.cursor = self.connection.cursor()
                 self.cursor.execute('SELECT id FROM vine ORDER BY id ASC')
-                allIds = self.cursor.fetchall()
-
-                newIds = [id for id in allIds if id not in self.allIds]
-                self.allIds = allIds
-
-                if len(newIds) != 0:
-                    for id in newIds:
-                        self.weatherAlerts()
+                self.allIds = self.cursor.fetchall()
 
                 if len(self.allIds) != 0:
                     if self.idIndex < len(self.allIds) - 1:
