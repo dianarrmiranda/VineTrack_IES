@@ -77,6 +77,27 @@ export default function VineDetailsView() {
   }, [id]);
 
   useEffect(() => {
+    fetchData(`vines/weatherAlerts/${id}`)
+      .then(response => {
+        if (response) {
+          console.log("Weather Alerts data fetched");
+          
+          const labels = Object.keys(response);
+          const values = Object.values(response);
+
+          console.log(labels.map((value, index) => {
+            return {[value]: values[index]};
+          }).sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
+
+          
+        } else {
+          console.log("Temperature data failed");
+        }
+      });
+  }, [id]);
+
+
+  useEffect(() => {
     const today = new Date().getDate();
     if (today !== currentDay) {
       setTempData([]);
@@ -110,6 +131,9 @@ export default function VineDetailsView() {
             newMoistureData.push(JSON.parse(data.body).value);
             console.log("New moisture data: ", newMoistureData);
             setMoistureData(newMoistureData);
+          }
+          if (JSON.parse(data.body).sensor == "weatherAlerts") {
+            console.log("New weather alert: ", JSON.parse(data.body).value);
           }
           
         }
