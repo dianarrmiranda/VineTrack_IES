@@ -40,19 +40,7 @@ public class TrackService {
     }
 
     // get last moisture track date for a vine
-    public List<Track> getLastMoistureTrackByVineId(Integer vineId){
+public List<Track> getLastMoistureTrackByVineId(Integer vineId){
         return trackRepo.getLastMoistureTrackByVineId(vineId);
-    }
-
-    // remove the waterConsumption tracks older than 7 days ago
-    public void removeOldWaterConsumptionTracks() {
-        // get last track's day
-        List<Track> tracks = trackRepo.findAllByTypeOrderByDateAsc("waterConsumption");
-        Track lastTrack = tracks.get(tracks.size() - 1);
-        String lastTrackDay = lastTrack.getDay();
-
-        // get the waterConsumption tracks older than 7 days ago using column day
-        List<Track> oldWaterConsumptionTracks = trackRepo.getOldWaterConsumptionTracks(lastTrack.getDate().toLocalDate().minusDays(7));
-        trackRepo.deleteAll(oldWaterConsumptionTracks);
     }
 }
