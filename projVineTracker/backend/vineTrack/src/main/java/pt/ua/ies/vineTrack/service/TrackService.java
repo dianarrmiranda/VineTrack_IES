@@ -40,7 +40,7 @@ public class TrackService {
     }
 
     // get last moisture track date for a vine
-public List<Track> getLastMoistureTrackByVineId(Integer vineId){
+    public List<Track> getLastMoistureTrackByVineId(Integer vineId){
         return trackRepo.getLastMoistureTrackByVineId(vineId);
     }
 }

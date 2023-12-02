@@ -16,6 +16,7 @@ import pt.ua.ies.vineTrack.service.NotificationService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Component
@@ -49,15 +50,30 @@ public class RabbitmqHandler {
                 List<Track> tracks = trackService.getLastMoistureTrackByVineId(vineId);
                 Track lastMoistureTrack = !tracks.isEmpty() ? tracks.get(0) : null;
                 LocalDateTime lastMoistureTrackDate = lastMoistureTrack != null ? lastMoistureTrack.getDate() : null;
+                pastValue = lastMoistureTrack != null ? lastMoistureTrack.getValue() : 0;
                 LocalDateTime date;
                 if (lastMoistureTrackDate != null) {
                     date = lastMoistureTrackDate.plusHours(1);
                 } else {
                     date = LocalDateTime.now();
                 }
-                Track track = new Track(type, date, value, vine);
+
+                LocalDate d = date.toLocalDate();
+                LocalTime t = date.toLocalTime();
+
+                Track track = new Track(type, date, value, vine, t.toString(), d.toString());
 
                 trackService.saveTrack(track);
+
+                // water consumption
+                if (value - pastValue > 0) { //watered
+                    double waterPercentage = (value - pastValue);
+                    // Per m^2: 100% = 4L
+                    double waterConsumption = waterPercentage * 4 / 100 * vine.getSize();
+
+                    trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
+                    System.out.println("Water consumption: " + waterConsumption);
+                }
 
                 // water consumption
                 if (value - pastValue > 0) { //watered
