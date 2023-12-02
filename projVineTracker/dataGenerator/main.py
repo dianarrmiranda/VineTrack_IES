@@ -21,7 +21,7 @@ if __name__ == '__main__':
     for id in allIds:
         generator.id = id
         tasks.append(loop.create_task(generator.moisture()))
-    #nutrient = loop.create_task(generator.nutrients())
+        #nutrient = loop.create_task(generator.nutrients())
         tasks.append(loop.create_task(generator.temperature()))
         tasks.append(loop.create_task(generator.weatherAlerts()))
 
