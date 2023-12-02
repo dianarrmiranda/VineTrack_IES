@@ -55,4 +55,9 @@ public class TrackService {
 
         System.out.println("tracks size 2: " + tracks.size());
     }
+
+    // get last moisture track date for a vine
+public List<Track> getLastMoistureTrackByVineId(Integer vineId){
+        return trackRepo.getLastMoistureTrackByVineId(vineId);
+    }
 }

@@ -3,6 +3,7 @@ package pt.ua.ies.vineTrack.message_broker;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import pt.ua.ies.vineTrack.entity.Track;
@@ -14,6 +15,7 @@ import pt.ua.ies.vineTrack.service.NotificationService;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class RabbitmqHandler {
@@ -43,7 +45,15 @@ public class RabbitmqHandler {
 
                 // store the track in the database
                 Vine vine = vineService.getVineById(vineId);
-                LocalDateTime date = LocalDateTime.now();
+                List<Track> tracks = trackService.getLastMoistureTrackByVineId(vineId);
+                Track lastMoistureTrack = !tracks.isEmpty() ? tracks.get(0) : null;
+                LocalDateTime lastMoistureTrackDate = lastMoistureTrack != null ? lastMoistureTrack.getDate() : null;
+                LocalDateTime date;
+                if (lastMoistureTrackDate != null) {
+                    date = lastMoistureTrackDate.plusHours(1);
+                } else {
+                    date = LocalDateTime.now();
+                }
                 Track track = new Track(type, date, value, vine);
 
                 trackService.saveTrack(track);
