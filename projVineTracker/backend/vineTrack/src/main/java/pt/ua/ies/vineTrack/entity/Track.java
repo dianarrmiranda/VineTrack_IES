@@ -14,8 +14,10 @@ public class Track {
 
     private String type;
     private LocalDateTime date;
+    private String time = "00:00:00";
+    private String day = "00/00/0000";
     private double value;
-
+    
     @ManyToOne
     @JoinColumn(name = "vine_id", referencedColumnName = "id")
     private Vine vine;
@@ -28,6 +30,15 @@ public class Track {
         this.date = date;
         this.value = value;
         this.vine = vine;
+    }
+
+    public Track(String type, LocalDateTime date, double value, Vine vine, String time, String day) {
+        this.type = type;
+        this.date = date;
+        this.time = time;
+        this.day = day;
+        this.value = value;
+        this.vine = vine;   
     }
 
     public Integer getId() {
@@ -50,6 +61,14 @@ public class Track {
         return vine;
     }
 
+    public String getTime() {
+        return time;
+    }
+
+    public String getDay() {
+        return day;
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }
@@ -68,5 +87,13 @@ public class Track {
 
     public void setVine(Vine vine) {
         this.vine = vine;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public void setDay(String day) {
+        this.day = day;
     }
 }

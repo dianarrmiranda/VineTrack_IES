@@ -15,4 +15,6 @@ public interface TrackRepo extends JpaRepository<Track, Integer> {
     // get all tracks for a vine
     @Query("SELECT t FROM Track t WHERE t.vine.id = ?1")
     List<Track> getTracksByVineId(Integer vineId);
+
+    List<Track> findAllByTypeOrderByDateAsc(String type);
 }

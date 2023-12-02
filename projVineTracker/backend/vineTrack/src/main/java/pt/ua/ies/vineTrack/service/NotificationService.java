@@ -3,8 +3,6 @@ package pt.ua.ies.vineTrack.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pt.ua.ies.vineTrack.entity.Vine;
-import pt.ua.ies.vineTrack.repository.VineRepo;
-import pt.ua.ies.vineTrack.service.VineService;
 import pt.ua.ies.vineTrack.repository.NotificationRepo;
 import pt.ua.ies.vineTrack.entity.Notification;
 

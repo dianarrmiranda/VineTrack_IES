@@ -20,6 +20,9 @@ export default function VineDetailsView() {
   const [vine, setVine] = useState({});
   
   const [moistureData, setMoistureData] = useState(null);
+  const [tempData, setTempData] = useState([]);
+
+  const [currentDay, setCurrentDay] = useState(new Date().getDate());
 
   useEffect(() => {
     const initialize = async () => {
@@ -53,32 +56,72 @@ export default function VineDetailsView() {
   }
   , [id]);
 
+  useEffect(() => {
+    fetchData(`vines/temperature/${id}`)
+      .then(response => {
+        if (response) {
+          console.log("Temperature data fetched");
+          
+          const labels = Object.keys(response);
+          const values = Object.values(response);
 
+          setTempData(labels.map((value, index) => {
+            return {[value]: values[index]};
+          }).sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
+
+          
+        } else {
+          console.log("Temperature data failed");
+        }
+      });
+  }, [id]);
+
+  useEffect(() => {
+    const today = new Date().getDate();
+    if (today !== currentDay) {
+      setTempData([]);
+      setCurrentDay(today);
+    }
+  }, [currentDay]);
 
   // websocket
   const [latestValue, setLatestValue] = useState(null);
   useEffect(() => {
+    const today = new Date().getDate();
+    if (today !== currentDay) {
+      setTempData([]);
+      setCurrentDay(today);
+    }
     const ws = new SockJS("http://localhost:8080/vt_ws");
     const client = Stomp.over(ws);
     client.connect({}, function () {
       client.subscribe('/topic/update', function (data) {
         if (JSON.parse(data.body).id == id) {
           setLatestValue(JSON.parse(data.body).value);
-          const newMoistureData = [...moistureData];
-          newMoistureData.shift();
-          newMoistureData.push(JSON.parse(data.body).value);
-          console.log("New moisture data: ", newMoistureData);
-          setMoistureData(newMoistureData);
+          if (JSON.parse(data.body).sensor == "temperature") {
+            const newTempData = [...tempData];
+            newTempData.push({[JSON.parse(data.body).date]: JSON.parse(data.body).value});
+            console.log("New temperature data: ", newTempData);
+            setTempData(newTempData.sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
+          }
+          if (JSON.parse(data.body).sensor == "moisture") {
+            const newMoistureData = [...moistureData];
+            newMoistureData.shift();
+            newMoistureData.push(JSON.parse(data.body).value);
+            console.log("New moisture data: ", newMoistureData);
+            setMoistureData(newMoistureData);
+          }
+          
         }
       });
     });
   }
-  , [id, moistureData]);
+  , [id, moistureData], [id, tempData]);
 
   console.log("Moisture", moistureData);
+  console.log("Temperature", tempData);
   console.log("Latest value: ", latestValue);
   
-
 
   return (
     <Container maxWidth="xl">
@@ -139,26 +182,14 @@ export default function VineDetailsView() {
             title="Temperature"
             subheader=" in Celsius (°C)"
             chart={{
-              labels: [
-                "01/01/2023",
-                "02/01/2023",
-                "03/01/2023",
-                "04/01/2023",
-                "05/01/2023",
-                "06/01/2023",
-                "07/01/2023",
-                "08/01/2023",
-                "09/01/2023",
-                "10/01/2023",
-                "11/01/2023",
-              ],
+              labels: tempData.map((value, index) => {return Object.keys(value)[0]}),
               series: [
                 {
                   name: "Temperature",
                   type: "line",
                   color: "#FF0000",
                   fill: "solid",
-                  data: [18, 19, 20, 22, 24, 28, 30, 31, 28, 24, 22],
+                  data: tempData.map((value, index) => { return Object.values(value)[0]})
                 },
               ],
             }}

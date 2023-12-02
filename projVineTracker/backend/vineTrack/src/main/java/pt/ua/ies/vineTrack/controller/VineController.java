@@ -1,7 +1,6 @@
 package pt.ua.ies.vineTrack.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 
 import pt.ua.ies.vineTrack.entity.Grape;
 import pt.ua.ies.vineTrack.entity.Notification;
@@ -26,10 +25,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
-
+import java.util.Map;
+import java.util.TreeMap;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,10 +65,11 @@ public class VineController {
     public List<Double> getMoistureByVineId(@PathVariable int vineId){
         System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
-        // we need to get only the moisture values
-        for (Track track : tracks) {
+        Iterator<Track> iterator = tracks.iterator();
+        while (iterator.hasNext()) {
+            Track track = iterator.next();
             if (!track.getType().equals("moisture")) {
-                tracks.remove(track);
+                iterator.remove();
             }
         }
         // now we need to order the tracks by date from the oldest to the newest
@@ -84,6 +87,42 @@ public class VineController {
         return moistureValues;
     }
 
+    @GetMapping(path = "/temperature/{vineId}")
+    public Map<String, Double> getTemperatureByVineId(@PathVariable int vineId){
+        System.out.println("Vine id: " + vineId);
+        List<Track> tracks = vineService.getTracksByVineId(vineId);
+        Iterator<Track> iterator = tracks.iterator();
+        while (iterator.hasNext()) {
+            Track track = iterator.next();
+            if (!track.getType().equals("temperature")) {
+                iterator.remove();
+            }
+        }
+
+        // now we need to order the tracks by date from the oldest to the newest
+        tracks.sort(Comparator.comparing(Track::getDate));
+
+        // finally we need to get only the moisture values
+
+        List<Double> tempValues = new ArrayList<>();
+        List<String> tempTimes = new ArrayList<>();
+
+        for (Track track : tracks) {
+            if (track.getDay().equals(LocalDate.now().toString())) {
+                tempValues.add(track.getValue());
+                tempTimes.add(track.getTime());
+            }
+        }
+
+        Map<String, Double> tempMap = new TreeMap<>();
+        for (int i = 0; i < tempValues.size(); i++) {
+            tempMap.put(tempTimes.get(i), tempValues.get(i));
+        }
+
+        System.out.println("Temperature: " + tempMap);
+        return tempMap;
+    }
+
     @GetMapping()
     public ResponseEntity<List<Vine>> getAllVines(){
         try {
@@ -95,12 +134,13 @@ public class VineController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Vine> addVine(@RequestParam String name, @RequestParam String location, @RequestParam Double size, @RequestParam java.util.Date date, @RequestParam(required = false) MultipartFile img, @RequestParam List<Integer> users, @RequestParam List<Integer> typeGrap){
+    public ResponseEntity<Vine> addVine(@RequestParam String name, @RequestParam String location, @RequestParam String city, @RequestParam Double size, @RequestParam java.util.Date date, @RequestParam(required = false) MultipartFile img, @RequestParam List<Integer> users, @RequestParam List<Integer> typeGrap){
 
         try {
             Vine vine = new Vine();
             vine.setName(name);
             vine.setLocation(location);
+            vine.setCity(city);
             vine.setSize(size);
             vine.setImage("");
             vine.setDate(new Date(date.getTime()));
@@ -141,7 +181,7 @@ public class VineController {
             if (!img.isEmpty()){
                 try {
                     byte[] bytes = img.getBytes();
-                    Path path = Paths.get("src/main/resources/static/vines/" + vine.getId() + "_" + vine.getName() + ".jpeg");
+                    Path path = Paths.get("src/main/resources/static/vines/" + vine.getId() + "_" + vine.getName().replaceAll("\s", "") + ".jpeg");
                     Files.write(path, bytes);
                     vine.setImage(path.toString());
                 } catch (IOException e) {
