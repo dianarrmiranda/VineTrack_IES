@@ -80,6 +80,16 @@ public class RabbitmqHandler {
                     trackService.removeOldWaterConsumptionTracks();
                 }
 
+                // water consumption
+                if (value - pastValue > 0) { //watered
+                    double waterPercentage = (value - pastValue);
+                    // Per m^2: 100% = 4L
+                    double waterConsumption = waterPercentage * 4 / 100 * vine.getSize();
+
+                    trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
+                    System.out.println("Water consumption: " + waterConsumption);
+                }
+
                 // receive message, if the value is bellow expected save notification to the database
                 // for now we will consider that the expected value is 40
                 if (value < 40) {
