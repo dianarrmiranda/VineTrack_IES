@@ -1,8 +1,6 @@
 package pt.ua.ies.vineTrack.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
-import org.springframework.web.bind.annotation.*;
 
 import pt.ua.ies.vineTrack.entity.Grape;
 import pt.ua.ies.vineTrack.entity.Notification;
@@ -30,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
