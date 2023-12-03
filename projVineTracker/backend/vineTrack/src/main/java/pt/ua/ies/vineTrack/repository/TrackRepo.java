@@ -22,4 +22,8 @@ public interface TrackRepo extends JpaRepository<Track, Integer> {
     List<Track> getLastMoistureTrackByVineId(Integer vineId);
 
     List<Track> findAllByTypeOrderByDateAsc(String type);
+
+    // get the waterConsumption tracks older than 7 days ago
+    @Query("SELECT t FROM Track t WHERE t.type = 'waterConsumption' AND t.day < DATE_SUB((SELECT MAX(t2.day) FROM Track t2 WHERE t2.type = 'waterConsumption'), INTERVAL 5 DAY)")
+    List<Track> getOldWaterConsumptionTracks();
 }
