@@ -28,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -159,7 +158,7 @@ public class VineController {
     }
 
     @GetMapping(path = "/waterConsumption/{vineId}")
-    public List<Double> getWaterConsumptionByVineId(@PathVariable int vineId){
+    public Map<String, Double> getWaterConsumptionByVineId(@PathVariable int vineId){
         System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
 
@@ -179,26 +178,7 @@ public class VineController {
         }
 
         System.out.println("Water consumption: " + waterConsumptionMap);
-
-        List<Double> waterConsumptionValues = new ArrayList<>(waterConsumptionMap.values());
-        while (waterConsumptionValues.size() < 8) {
-            waterConsumptionValues.add(0, 0.0);
-        }
-
-        if (waterConsumptionValues.size() > 8) {
-            waterConsumptionValues = waterConsumptionValues.subList(waterConsumptionValues.size() - 8, waterConsumptionValues.size());
-        }
-
-        return waterConsumptionValues;
-    }
-
-    @GetMapping(path = "/name/{vineId}")
-    public String getVineNameById(@PathVariable Integer vineId){
-        try {
-            return vineService.getVineById(vineId).getName();
-        } catch (Exception e) {
-            return "Vine not found";
-        }
+        return waterConsumptionMap;
     }
 
 
