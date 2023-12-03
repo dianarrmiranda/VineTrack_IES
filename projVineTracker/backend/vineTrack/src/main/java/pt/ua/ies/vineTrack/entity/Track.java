@@ -16,6 +16,7 @@ public class Track {
     private LocalDateTime date;
     private String time = "00:00:00";
     private String day = "00/00/0000";
+    @Column(columnDefinition = "VARCHAR(1000)")
     private String valString = ""; 
     private double value;
     

@@ -275,16 +275,12 @@ class Generator:
 
                     alerts = [alert for alert in alerts if alert['idAreaAviso'] == idAreaAviso]
                     value = {}
+
                     for alert in alerts:
-                        if alert['idAreaAviso'] == idAreaAviso:
-                            value['awarenessTypeName'] = alert['awarenessTypeName']
-                            value['startTime'] = alert['startTime']
-                            value['endTime'] = alert['endTime']
-                            value['awarenessLevelID'] = alert['awarenessLevelID']
-                            break
+                        if str(alert['awarenessTypeName']) == 'Vento' or str(alert['awarenessTypeName']) == 'Precipitação' or str(alert['awarenessTypeName']) == 'Trovoada' or str(alert['awarenessTypeName']) == 'Neve' or str(alert['awarenessTypeName']) == 'Nevoeiro': 
+                            value[str(alert['awarenessTypeName'])] = [str(alert['startTime']), str(alert['endTime']), str(alert['awarenessLevelID'])]
 
-
-                    
+                    print(value)
                     message = {
                         'id': self.id,
                         'sensor': 'weatherAlerts',
@@ -293,13 +289,11 @@ class Generator:
 
                     self.sender.send(message)
 
-                    
-                
-
                 if self.numberOfVines != 0:
-                    await asyncio.sleep(43200/self.numberOfVines)
+                    await asyncio.sleep(60/self.numberOfVines)
                 else:
-                    await asyncio.sleep(43200/1)
+                    await asyncio.sleep(60/1)
+                    
             except mysql.connector.Error as err:
                 print(f"Error: {err}")
                 if self.numberOfVines != 0:

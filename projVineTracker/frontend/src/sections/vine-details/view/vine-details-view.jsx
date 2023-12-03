@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
+import { Box, Card, CardHeader } from "@mui/material";
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
@@ -21,6 +22,7 @@ export default function VineDetailsView() {
   
   const [moistureData, setMoistureData] = useState(null);
   const [tempData, setTempData] = useState([]);
+  const [weatherAlertsData, setWeatherAlertsData] = useState(null);
 
   const [currentDay, setCurrentDay] = useState(new Date().getDate());
 
@@ -84,10 +86,12 @@ export default function VineDetailsView() {
           
           const labels = Object.keys(response);
           const values = Object.values(response);
-
-          console.log(labels.map((value, index) => {
+           
+          setWeatherAlertsData(labels.map((value, index) => {
             return {[value]: values[index]};
-          }).sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
+          }));
+
+
 
           
         } else {
@@ -121,6 +125,7 @@ export default function VineDetailsView() {
           setLatestValue(JSON.parse(data.body).value);
           if (JSON.parse(data.body).sensor == "temperature") {
             const newTempData = [...tempData];
+            newTempData.shift();
             newTempData.push({[JSON.parse(data.body).date]: JSON.parse(data.body).value});
             console.log("New temperature data: ", newTempData);
             setTempData(newTempData.sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
@@ -134,6 +139,9 @@ export default function VineDetailsView() {
           }
           if (JSON.parse(data.body).sensor == "weatherAlerts") {
             console.log("New weather alert: ", JSON.parse(data.body).value);
+            const newWeatherAlertsData = [{[JSON.parse(data.body).date]: JSON.parse(data.body).value}];
+            console.log("New weather alert data: ", newWeatherAlertsData);
+            setWeatherAlertsData(newWeatherAlertsData);
           }
           
         }
@@ -218,6 +226,16 @@ export default function VineDetailsView() {
               ],
             }}
           />
+        </Grid>
+        <Grid xs={12} md={6} lg={4}>
+          <Card>
+              <CardHeader title='Weather Alerts'  />
+              <Box sx={{ p: 3, pb: 1 }}>
+                  <Typography variant="h6" sx={{ mb: 5 }}>
+                    No alerts
+                  </Typography>
+              </Box>
+          </Card>
         </Grid>
       </Grid>
       <br></br>
