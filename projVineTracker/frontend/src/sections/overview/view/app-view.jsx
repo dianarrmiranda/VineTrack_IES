@@ -159,32 +159,7 @@ export default function AppView() {
                 "yesterday",
                 "today",
               ],
-              series: [
-                {
-                  name: "vine1",
-                  type: "line",
-                  fill: "solid",
-                  data: [70, 78, 68, 50, 45, 50, 60, 70],
-                },
-                {
-                  name: "vine2",
-                  type: "line",
-                  fill: "solid",
-                  data: [20, 59, 30, 14, 70, 50, 60, 70],
-                },
-                {
-                  name: "vine3",
-                  type: "line",
-                  fill: "solid",
-                  data: [54, 80, 70, 90, 73, 50, 60, 70],
-                },
-                {
-                  name: "vine4",
-                  type: "line",
-                  fill: "solid",
-                  data: [20, 59, 30, 14, 70, 60, 70, 80],
-                },
-              ],
+              series: waterConsumptionData,
             }}
           />
         </Grid>

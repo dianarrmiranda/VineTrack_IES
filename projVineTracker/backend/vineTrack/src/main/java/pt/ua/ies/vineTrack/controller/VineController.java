@@ -192,6 +192,15 @@ public class VineController {
         return waterConsumptionValues;
     }
 
+    @GetMapping(path = "/name/{vineId}")
+    public String getVineNameById(@PathVariable Integer vineId){
+        try {
+            return vineService.getVineById(vineId).getName();
+        } catch (Exception e) {
+            return "Vine not found";
+        }
+    }
+
 
     @GetMapping()
     public ResponseEntity<List<Vine>> getAllVines(){
