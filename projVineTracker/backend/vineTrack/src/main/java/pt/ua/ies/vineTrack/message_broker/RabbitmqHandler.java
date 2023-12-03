@@ -3,6 +3,7 @@ package pt.ua.ies.vineTrack.message_broker;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import pt.ua.ies.vineTrack.entity.Track;
@@ -13,7 +14,10 @@ import pt.ua.ies.vineTrack.service.VineService;
 import pt.ua.ies.vineTrack.service.NotificationService;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 @Component
 public class RabbitmqHandler {
@@ -40,15 +44,41 @@ public class RabbitmqHandler {
             case "moisture":
                 int vineId = params.getInt("id");
                 double value = params.getDouble("value");
-
+                double pastValue;
                 // store the track in the database
                 Vine vine = vineService.getVineById(vineId);
-                LocalDateTime date = LocalDateTime.now();
-                Track track = new Track(type, date, value, vine);
+                List<Track> tracks = trackService.getLastMoistureTrackByVineId(vineId);
+                Track lastMoistureTrack = !tracks.isEmpty() ? tracks.get(0) : null;
+                LocalDateTime lastMoistureTrackDate = lastMoistureTrack != null ? lastMoistureTrack.getDate() : null;
+                pastValue = lastMoistureTrack != null ? lastMoistureTrack.getValue() : 0;
+                LocalDateTime date;
+                if (lastMoistureTrackDate != null) {
+                    date = lastMoistureTrackDate.plusHours(1);
+                } else {
+                    date = LocalDateTime.now();
+                }
+
+                LocalDate d = date.toLocalDate();
+                LocalTime t = date.toLocalTime();
+
+                Track track = new Track(type, date, value, vine, t.toString(), d.toString());
 
                 trackService.saveTrack(track);
                 // only have 10 tracks per vine, remove the oldest
                 trackService.removeOldTracks("moisture", vineId);
+
+                // water consumption
+                if (value - pastValue > 0) { //watered
+                    double waterPercentage = (value - pastValue);
+                    // Per m^2: 100% = 4L
+                    double waterConsumption = waterPercentage * 4 / 100 * vine.getSize();
+
+                    trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
+                    System.out.println("Water consumption: " + waterConsumption);
+
+                    // only keep water consumption tracks that are less than 8 days old
+                    trackService.removeOldWaterConsumptionTracks();
+                }
 
                 // receive message, if the value is bellow expected save notification to the database
                 // for now we will consider that the expected value is 40

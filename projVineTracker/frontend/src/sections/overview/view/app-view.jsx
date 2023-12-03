@@ -7,6 +7,7 @@ import AppHumidityChart from "../app-production-chart";
 import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 import { useEffect, useState } from "react";
 import { fetchData } from "src/utils";
+import { size } from "lodash";
 // ----------------------------------------------------------------------
 
 
@@ -25,6 +26,51 @@ export default function AppView() {
     };
     initialize();
   }, []);
+
+  // get user's vine ids
+  const [vineIds, setVineIds] = useState([]);
+  useEffect(() => {
+    const initialize = async () => {
+      const vineIds = await fetchData(`users/vines/${userInfo.id}`);
+      setVineIds(vineIds);
+    };
+    initialize();
+  }, [userInfo]);
+
+  // get water consumption data for each vine
+  const [waterConsumption, setWaterConsumption] = useState([]);
+  // also need to get the vine name
+  useEffect(() => {
+    const initialize = async () => {
+      // waterConsumption is a map of vinName: waterConsumptionValue
+      const waterConsumption = {};
+      for (const vineId of vineIds) {
+        const vineName = await fetchData(`vines/name/${vineId}`);
+        const vineWaterConsumption = await fetchData(`vines/waterConsumption/${vineId}`);
+        waterConsumption[vineName] = vineWaterConsumption;
+      }
+      setWaterConsumption(waterConsumption);
+    };
+    initialize();
+  }, [vineIds]);
+
+  // finnaly, create the yaxis data for the water consumption chart
+  const [waterConsumptionData, setWaterConsumptionData] = useState([]);
+  useEffect(() => {
+    const initialize = async () => {
+      const waterConsumptionData = [];
+      for (const vineName in waterConsumption) {
+        waterConsumptionData.push({
+          name: vineName,
+          type: "line",
+          fill: "solid",
+          data: waterConsumption[vineName],
+        });
+      }
+      setWaterConsumptionData(waterConsumptionData);
+    };
+    initialize();
+  }, [waterConsumption]);
 
   return (
     <Container maxWidth="xl">
@@ -85,6 +131,34 @@ export default function AppView() {
                 { label: "Pinot Noir", value: 24.5 },
                 { label: "Shiraz/Syrah", value: 19.5 },
               ],
+            }}
+          />
+        </Grid>
+      </Grid>
+
+      {/* Consumo de agua */}
+
+      <Typography variant="h5" sx={{ mb: 5 }}>
+        Water Consumption <span style={{ color: "grey", fontSize: "0.7em" }}>in the past 7 days</span>
+      </Typography>
+
+      <Grid container spacing={3} sx={{ mb: 5 }}>
+        <Grid xs={12} md={6} lg={8}>
+          <AppHumidityChart
+            title="Water Consumption Daily"
+            subheader=" in Liters (L)"
+            chart={{
+              labels: [
+                "7 days ago",
+                "6 days ago",
+                "5 days ago",
+                "4 days ago",
+                "3 days ago",
+                "2 days ago",
+                "yesterday",
+                "today",
+              ],
+              series: waterConsumptionData,
             }}
           />
         </Grid>

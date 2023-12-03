@@ -164,15 +164,15 @@ export default function VineDetailsView() {
             subheader=" in Percentage (%)"
             chart={{
               labels: [
-                "1h 30min ago",
-                "1h 20min ago",
-                "1h 10min ago",
+                "9h ago",
+                "8h ago",
+                "7h ago",
+                "6h ago",
+                "5h ago",
+                "4h ago",
+                "3h ago",
+                "2h ago",
                 "1h ago",
-                "50min ago",
-                "40min ago",
-                "30min ago",
-                "20min ago",
-                "10min ago",
                 "NOW",
               ],
               series: [
