@@ -16,6 +16,7 @@ public class Track {
     private LocalDateTime date;
     private String time = "00:00:00";
     private String day = "00/00/0000";
+    private String valString = ""; 
     private double value;
     
     @ManyToOne
@@ -29,6 +30,14 @@ public class Track {
         this.type = type;
         this.date = date;
         this.value = value;
+        this.vine = vine;
+    }
+
+    public Track(String type, LocalDateTime date,  String value, Vine vine) {
+        this.type = type;
+        this.date = date;
+        this.valString = value;
+        this.value = 0.0;
         this.vine = vine;
     }
 
@@ -69,6 +78,10 @@ public class Track {
         return day;
     }
 
+    public String getValString() {
+        return valString;
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }
@@ -95,5 +108,9 @@ public class Track {
 
     public void setDay(String day) {
         this.day = day;
+    }
+
+    public void setValString(String valString) {
+        this.valString = valString;
     }
 }

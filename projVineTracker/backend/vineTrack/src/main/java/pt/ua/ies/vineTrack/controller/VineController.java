@@ -83,7 +83,7 @@ public class VineController {
         if (moistureValues.size() > 10) {
             moistureValues = moistureValues.subList(moistureValues.size() - 10, moistureValues.size());
         }
-        System.out.println(moistureValues);
+        System.out.println("Moisture: " + moistureValues);
         return moistureValues;
     }
 
@@ -122,6 +122,46 @@ public class VineController {
         System.out.println("Temperature: " + tempMap);
         return tempMap;
     }
+
+    @GetMapping(path = "/weatherAlerts/{vineId}")
+    public Map<String, String> getWeatherAlertsByVineId(@PathVariable int vineId){
+        System.out.println("Vine id: " + vineId);
+        List<Track> tracks = vineService.getTracksByVineId(vineId);
+        Iterator<Track> iterator = tracks.iterator();
+        while (iterator.hasNext()) {
+            Track track = iterator.next();
+            if (!track.getType().equals("weatherAlerts")) {
+                iterator.remove();
+            }
+        }
+
+        // now we need to order the tracks by date from the oldest to the newest
+        tracks.sort(Comparator.comparing(Track::getDate));
+
+        // finally we need to get only the moisture values
+
+        List<String> weatherLabels = new ArrayList<>();
+        List<String> weatherValues = new ArrayList<>();
+
+        for (Track track : tracks) {
+            String weatherAlerts = track.getValString();
+            String[] weatherAlertsArray = weatherAlerts.split(",");
+            for (String weatherAlert : weatherAlertsArray) {
+                String[] weatherAlertArray = weatherAlert.split(":");
+                weatherLabels.add(weatherAlertArray[0]);
+                weatherValues.add(weatherAlertArray[1]);
+            }
+        }
+
+        Map<String, String> weatherMap = new TreeMap<>();
+        for (int i = 0; i < weatherValues.size(); i++) {
+            weatherMap.put(weatherLabels.get(i), weatherValues.get(i));
+        }
+
+        System.out.println("Weather: " + weatherMap);
+        return weatherMap;
+    }
+
 
     @GetMapping()
     public ResponseEntity<List<Vine>> getAllVines(){
