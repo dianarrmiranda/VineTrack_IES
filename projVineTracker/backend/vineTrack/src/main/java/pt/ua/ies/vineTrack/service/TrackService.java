@@ -44,4 +44,9 @@ public class TrackService {
         return trackRepo.getLastMoistureTrackByVineId(vineId);
     }
 
+    // remove the waterConsumption tracks older than 7 days ago
+    public void removeOldWaterConsumptionTracks() {
+        List<Track> tracks = trackRepo.getOldWaterConsumptionTracks();
+        trackRepo.deleteAll(tracks);
+    }
 }
