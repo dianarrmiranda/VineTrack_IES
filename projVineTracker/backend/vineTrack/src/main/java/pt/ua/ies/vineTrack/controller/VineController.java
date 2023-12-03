@@ -159,7 +159,7 @@ public class VineController {
     }
 
     @GetMapping(path = "/waterConsumption/{vineId}")
-    public Map<String, Double> getWaterConsumptionByVineId(@PathVariable int vineId){
+    public List<Double> getWaterConsumptionByVineId(@PathVariable int vineId){
         System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
 
@@ -179,7 +179,17 @@ public class VineController {
         }
 
         System.out.println("Water consumption: " + waterConsumptionMap);
-        return waterConsumptionMap;
+
+        List<Double> waterConsumptionValues = new ArrayList<>(waterConsumptionMap.values());
+        while (waterConsumptionValues.size() < 8) {
+            waterConsumptionValues.add(0, 0.0);
+        }
+
+        if (waterConsumptionValues.size() > 8) {
+            waterConsumptionValues = waterConsumptionValues.subList(waterConsumptionValues.size() - 8, waterConsumptionValues.size());
+        }
+
+        return waterConsumptionValues;
     }
 
 
