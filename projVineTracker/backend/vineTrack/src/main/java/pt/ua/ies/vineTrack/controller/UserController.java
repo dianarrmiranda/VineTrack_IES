@@ -77,6 +77,15 @@ public class UserController {
         }
     }
 
+    @GetMapping(path = "/vines/{userId}")
+    public ResponseEntity<List<Integer>> getVinesByUserId(@PathVariable Integer userId){
+        try {
+            return ResponseEntity.ok(userService.getVinesIds(userId));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping(path = "/notifications/{userId}")
     // get all notifications from a vine
     public List<Notification> getNotificationsByUserId(@PathVariable Integer userId){
