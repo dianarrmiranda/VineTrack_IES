@@ -27,6 +27,51 @@ export default function AppView() {
     initialize();
   }, []);
 
+  // get user's vine ids
+  const [vineIds, setVineIds] = useState([]);
+  useEffect(() => {
+    const initialize = async () => {
+      const vineIds = await fetchData(`users/vines/${userInfo.id}`);
+      setVineIds(vineIds);
+    };
+    initialize();
+  }, [userInfo]);
+
+  // get water consumption data for each vine
+  const [waterConsumption, setWaterConsumption] = useState([]);
+  // also need to get the vine name
+  useEffect(() => {
+    const initialize = async () => {
+      // waterConsumption is a map of vinName: waterConsumptionValue
+      const waterConsumption = {};
+      for (const vineId of vineIds) {
+        const vineName = await fetchData(`vines/name/${vineId}`);
+        const vineWaterConsumption = await fetchData(`vines/waterConsumption/${vineId}`);
+        waterConsumption[vineName] = vineWaterConsumption;
+      }
+      setWaterConsumption(waterConsumption);
+    };
+    initialize();
+  }, [vineIds]);
+
+  // finnaly, create the yaxis data for the water consumption chart
+  const [waterConsumptionData, setWaterConsumptionData] = useState([]);
+  useEffect(() => {
+    const initialize = async () => {
+      const waterConsumptionData = [];
+      for (const vineName in waterConsumption) {
+        waterConsumptionData.push({
+          name: vineName,
+          type: "line",
+          fill: "solid",
+          data: waterConsumption[vineName],
+        });
+      }
+      setWaterConsumptionData(waterConsumptionData);
+    };
+    initialize();
+  }, [waterConsumption]);
+
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>
@@ -113,32 +158,7 @@ export default function AppView() {
                 "yesterday",
                 "today",
               ],
-              series: [
-                {
-                  name: "vine1",
-                  type: "line",
-                  fill: "solid",
-                  data: [70, 78, 68, 50, 45, 50, 60, 70],
-                },
-                {
-                  name: "vine2",
-                  type: "line",
-                  fill: "solid",
-                  data: [20, 59, 30, 14, 70, 50, 60, 70],
-                },
-                {
-                  name: "vine3",
-                  type: "line",
-                  fill: "solid",
-                  data: [54, 80, 70, 90, 73, 50, 60, 70],
-                },
-                {
-                  name: "vine4",
-                  type: "line",
-                  fill: "solid",
-                  data: [20, 59, 30, 14, 70, 60, 70, 80],
-                },
-              ],
+              series: waterConsumptionData,
             }}
           />
         </Grid>

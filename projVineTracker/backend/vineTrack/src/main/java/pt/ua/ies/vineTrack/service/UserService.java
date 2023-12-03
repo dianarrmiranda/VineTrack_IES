@@ -10,6 +10,7 @@ import pt.ua.ies.vineTrack.entity.Vine;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -79,6 +80,21 @@ public class UserService {
         }
 
         return userVines;
+    }
+
+    // return the vines Ids of a user
+    public List<Integer> getVinesIds(Integer userId){
+        List<Vine> vines = vineService.getAllVines();
+        List<Integer> vinesIds = new ArrayList<>();
+        for (Vine vine : vines) {
+            List<User> users = vine.getUsers();
+            for (User user : users) {
+                if (Objects.equals(user.getId(), userId)) {
+                    vinesIds.add(vine.getId());
+                }
+            }
+        }
+        return vinesIds;
     }
     
 }
