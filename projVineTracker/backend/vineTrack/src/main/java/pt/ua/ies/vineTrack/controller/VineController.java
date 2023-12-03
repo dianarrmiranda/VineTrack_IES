@@ -27,17 +27,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
-import java.util.ArrayList;
 
 @CrossOrigin("*")
 @RestController
@@ -162,6 +157,30 @@ public class VineController {
         return weatherMap;
     }
 
+    @GetMapping(path = "/waterConsumption/{vineId}")
+    public Map<String, Double> getWaterConsumptionByVineId(@PathVariable int vineId){
+        System.out.println("Vine id: " + vineId);
+        List<Track> tracks = vineService.getTracksByVineId(vineId);
+
+        tracks.removeIf(track -> !track.getType().equals("waterConsumption"));
+
+        // map to store day: waterConsumption for that day
+        Map<String, Double> waterConsumptionMap = new TreeMap<>();
+
+        for (Track track : tracks) {
+            String day = track.getDay();
+            double waterConsumption = track.getValue();
+            if (waterConsumptionMap.containsKey(day)) {
+                waterConsumptionMap.put(day, waterConsumptionMap.get(day) + waterConsumption);
+            } else {
+                waterConsumptionMap.put(day, waterConsumption);
+            }
+        }
+
+        System.out.println("Water consumption: " + waterConsumptionMap);
+        return waterConsumptionMap;
+    }
+
 
     @GetMapping()
     public ResponseEntity<List<Vine>> getAllVines(){
@@ -277,6 +296,4 @@ public class VineController {
             return ResponseEntity.notFound().build();
         }
     }
-
-
 }
