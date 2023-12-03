@@ -132,6 +132,12 @@ export default function AppView() {
                   fill: "solid",
                   data: [54, 80, 70, 90, 73, 50, 60, 70],
                 },
+                {
+                  name: "vine4",
+                  type: "line",
+                  fill: "solid",
+                  data: [20, 59, 30, 14, 70, 60, 70, 80],
+                },
               ],
             }}
           />
