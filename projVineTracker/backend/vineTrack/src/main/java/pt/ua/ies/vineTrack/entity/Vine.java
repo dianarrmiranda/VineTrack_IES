@@ -2,6 +2,7 @@ package pt.ua.ies.vineTrack.entity;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.ArrayList;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -37,9 +38,19 @@ public class Vine {
     @Column(nullable = false)
     private String city;
     private String image;
+    // private List<List<Object>> NutrientsList;
 
     String phase = "bud";
     private Double temperature = 0.0;
+    // {
+    //     NutrientsList = new ArrayList<>();
+    //     NutrientsList.add(List.of("Nitrogen", 0.5));
+    //     NutrientsList.add(List.of("Phosphorus", 0.5));
+    //     NutrientsList.add(List.of("Potassium", 0.5));
+    //     NutrientsList.add(List.of("Calcium", 0.5));
+    //     NutrientsList.add(List.of("Magnesium", 0.5));
+    //     NutrientsList.add(List.of("Chloride", 0.5));
+    // }
 
     @ManyToMany()
     @JoinTable(name = "vine_grape",
@@ -140,7 +151,13 @@ public class Vine {
         this.city = city;
     }
 
+    // public List<List<Object>> getNutrientsList() {
+    //     return NutrientsList;
+    // }
 
+    // public void setNutrientsList(List<List<Object>> nutrientsList) {
+    //     this.NutrientsList = nutrientsList;
+    // }
     @Override
     public String toString() {
         return name;

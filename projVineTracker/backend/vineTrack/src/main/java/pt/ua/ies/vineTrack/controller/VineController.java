@@ -87,6 +87,32 @@ public class VineController {
         return moistureValues;
     }
 
+    @GetMapping(path = "/nutrients/{vineId}")
+    public List<Double> getNutrientsByVineId(@PathVariable int vineId){
+        System.out.println("Vine id: " + vineId);
+        List<Track> tracks = vineService.getTracksByVineId(vineId);
+        Iterator<Track> iterator = tracks.iterator();
+        while (iterator.hasNext()) {
+            Track track = iterator.next();
+            if (!track.getType().equals("nutrients")) {
+                iterator.remove();
+            }
+        }
+        // now we need to order the tracks by date from the oldest to the newest
+        tracks.sort(Comparator.comparing(Track::getDate));
+
+        // finally we need to get only the moisture values
+        List<Double> NutrientsValues = new ArrayList<>(tracks.stream().map(Track::getValue).toList());
+        // while (moistureValues.size() < 10) {
+        //     moistureValues.add(0, 0.0);
+        // }
+        // if (moistureValues.size() > 10) {
+        //     moistureValues = moistureValues.subList(moistureValues.size() - 10, moistureValues.size());
+        // }
+        System.out.println("Nutrients: " + NutrientsValues);
+        return NutrientsValues;
+    }
+
     @GetMapping(path = "/temperature/{vineId}")
     public Map<String, Double> getTemperatureByVineId(@PathVariable int vineId){
         System.out.println("Vine id: " + vineId);
