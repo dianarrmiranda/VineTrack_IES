@@ -63,7 +63,13 @@ public class TrackService {
 
     // remove the waterConsumption tracks older than 7 days ago
     public void removeOldWaterConsumptionTracks() {
-        List<Track> tracks = trackRepo.getOldWaterConsumptionTracks();
-        trackRepo.deleteAll(tracks);
+        // get last track's day
+        List<Track> tracks = trackRepo.findAllByTypeOrderByDateAsc("waterConsumption");
+        Track lastTrack = tracks.get(tracks.size() - 1);
+        String lastTrackDay = lastTrack.getDay();
+
+        // get the waterConsumption tracks older than 7 days ago using column day
+        List<Track> oldWaterConsumptionTracks = trackRepo.getOldWaterConsumptionTracks(lastTrack.getDate().toLocalDate().minusDays(6));
+        trackRepo.deleteAll(oldWaterConsumptionTracks);
     }
 }

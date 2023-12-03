@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import pt.ua.ies.vineTrack.entity.Track;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
