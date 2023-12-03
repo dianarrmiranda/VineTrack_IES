@@ -27,17 +27,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
-import java.util.ArrayList;
 
 @CrossOrigin("*")
 @RestController
@@ -188,6 +183,49 @@ public class VineController {
         return weatherMap;
     }
 
+    @GetMapping(path = "/waterConsumption/{vineId}")
+    public List<Double> getWaterConsumptionByVineId(@PathVariable int vineId){
+        System.out.println("Vine id: " + vineId);
+        List<Track> tracks = vineService.getTracksByVineId(vineId);
+
+        tracks.removeIf(track -> !track.getType().equals("waterConsumption"));
+
+        // map to store day: waterConsumption for that day
+        Map<String, Double> waterConsumptionMap = new TreeMap<>();
+
+        for (Track track : tracks) {
+            String day = track.getDay();
+            double waterConsumption = track.getValue();
+            if (waterConsumptionMap.containsKey(day)) {
+                waterConsumptionMap.put(day, waterConsumptionMap.get(day) + waterConsumption);
+            } else {
+                waterConsumptionMap.put(day, waterConsumption);
+            }
+        }
+
+        System.out.println("Water consumption: " + waterConsumptionMap);
+
+        List<Double> waterConsumptionValues = new ArrayList<>(waterConsumptionMap.values());
+        while (waterConsumptionValues.size() < 8) {
+            waterConsumptionValues.add(0, 0.0);
+        }
+
+        if (waterConsumptionValues.size() > 8) {
+            waterConsumptionValues = waterConsumptionValues.subList(waterConsumptionValues.size() - 8, waterConsumptionValues.size());
+        }
+
+        return waterConsumptionValues;
+    }
+
+    @GetMapping(path = "/name/{vineId}")
+    public String getVineNameById(@PathVariable Integer vineId){
+        try {
+            return vineService.getVineById(vineId).getName();
+        } catch (Exception e) {
+            return "Vine not found";
+        }
+    }
+
 
     @GetMapping()
     public ResponseEntity<List<Vine>> getAllVines(){
@@ -239,8 +277,9 @@ public class VineController {
             vineService.save(vine);
 
             // add 2 tracks to the vine
-            Track track1 = new Track("moisture", LocalDateTime.now(), 0.0, vine);
-            Track track2 = new Track("moisture", LocalDateTime.now(), 0.0, vine);
+            LocalDateTime now = LocalDateTime.now();
+            Track track2 = new Track("moisture", now, 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
+            Track track1 = new Track("moisture", LocalDateTime.now(), 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
             trackService.saveTrack(track1);
             trackService.saveTrack(track2);
 
@@ -302,6 +341,4 @@ public class VineController {
             return ResponseEntity.notFound().build();
         }
     }
-
-
 }
