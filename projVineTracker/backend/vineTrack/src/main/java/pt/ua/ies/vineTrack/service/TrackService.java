@@ -29,31 +29,28 @@ public class TrackService {
         return trackRepo.findAll().size();
     }
 
-    public void removeOldTracks() {
-        List<Integer> vinesIds = trackRepo.getVinesIds();
-        for (Integer vineId : vinesIds) {
-            List<Track> tracks = trackRepo.getTracksByVineId(vineId);
-            if (tracks.size() > 10) {
-                trackRepo.deleteAll(tracks.subList(0, tracks.size() - 10));
+    public void removeOldTracks(String type, Integer id) {
+        List<Track> tracks = trackRepo.findAllByTypeOrderByDateAsc(type);
+        
+        tracks.removeIf(track -> track.getVine().getId() != id);
+
+        if (type.equals("moisture")) {
+            while (tracks.size() > 10) {
+                trackRepo.delete(tracks.get(0));
+                tracks.remove(0);
+            }
+        }else if (type.equals("temperature")) {
+            while (tracks.size() > 24) {
+                trackRepo.delete(tracks.get(0));
+                tracks.remove(0);
+            }
+        }else if (type.equals("weatherAlerts")) {
+            while (tracks.size() > 1) {
+                trackRepo.delete(tracks.get(0));
+                tracks.remove(0);
             }
         }
-    }
 
-    // get last moisture track date for a vine
-    public List<Track> getLastMoistureTrackByVineId(Integer vineId){
-        return trackRepo.getLastMoistureTrackByVineId(vineId);
-    }
-
-    // remove the waterConsumption tracks older than 7 days ago
-    public void removeOldWaterConsumptionTracks() {
-        // get last track's day
-        List<Track> tracks = trackRepo.findAllByTypeOrderByDateAsc("waterConsumption");
-        Track lastTrack = tracks.get(tracks.size() - 1);
-        String lastTrackDay = lastTrack.getDay();
-
-        // get the waterConsumption tracks older than 7 days ago using column day
-        List<Track> oldWaterConsumptionTracks = trackRepo.getOldWaterConsumptionTracks(lastTrack.getDate().toLocalDate().minusDays(7));
-        trackRepo.deleteAll(oldWaterConsumptionTracks);
     }
 
     // get last moisture track date for a vine

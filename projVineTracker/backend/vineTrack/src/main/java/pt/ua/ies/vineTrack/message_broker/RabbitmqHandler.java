@@ -151,6 +151,7 @@ public class RabbitmqHandler {
 
                 Track track3 = new Track(type, date3, value3, vine3);
                 trackService.saveTrack(track3);
+                trackService.removeOldTracks("weatherAlerts",vineId3);
 
                 break;
             default:
