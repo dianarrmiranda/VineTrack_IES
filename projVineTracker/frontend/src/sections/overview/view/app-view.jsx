@@ -139,7 +139,7 @@ export default function AppView() {
       {/* Consumo de agua */}
 
       <Typography variant="h5" sx={{ mb: 5 }}>
-        Water Consumption
+        Water Consumption <span style={{ color: "grey", fontSize: "0.7em" }}>in the past 7 days</span>
       </Typography>
 
       <Grid container spacing={3} sx={{ mb: 5 }}>
@@ -149,30 +149,33 @@ export default function AppView() {
             subheader=" in Liters (L)"
             chart={{
               labels: [
-                "09/30/2019",
-                "09/30/2020",
-                "09/30/2021",
-                "09/30/2022",
-                "09/30/2023",
+                "7 days ago",
+                "6 days ago",
+                "5 days ago",
+                "4 days ago",
+                "3 days ago",
+                "2 days ago",
+                "yesterday",
+                "today",
               ],
               series: [
                 {
                   name: "vine1",
                   type: "line",
                   fill: "solid",
-                  data: [70, 78, 68, 50, 45],
+                  data: [70, 78, 68, 50, 45, 50, 60, 70],
                 },
                 {
                   name: "vine2",
                   type: "line",
                   fill: "solid",
-                  data: [20, 59, 30, 14, 70],
+                  data: [20, 59, 30, 14, 70, 50, 60, 70],
                 },
                 {
                   name: "vine3",
                   type: "line",
                   fill: "solid",
-                  data: [54, 80, 70, 90, 73],
+                  data: [54, 80, 70, 90, 73, 50, 60, 70],
                 },
               ],
             }}
