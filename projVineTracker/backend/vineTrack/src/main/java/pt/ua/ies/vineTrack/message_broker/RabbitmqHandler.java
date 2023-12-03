@@ -88,6 +88,22 @@ public class RabbitmqHandler {
 
                     trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
                     System.out.println("Water consumption: " + waterConsumption);
+
+                    // only keep water consumption tracks that are less than 8 days old
+                    trackService.removeOldWaterConsumptionTracks();
+                }
+
+                // water consumption
+                if (value - pastValue > 0) { //watered
+                    double waterPercentage = (value - pastValue);
+                    // Per m^2: 100% = 4L
+                    double waterConsumption = waterPercentage * 4 / 100 * vine.getSize();
+
+                    trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
+                    System.out.println("Water consumption: " + waterConsumption);
+
+                    // only keep water consumption tracks that are less than 8 days old
+                    trackService.removeOldWaterConsumptionTracks();
                 }
 
                 // receive message, if the value is bellow expected save notification to the database

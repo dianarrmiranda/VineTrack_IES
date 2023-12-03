@@ -8,6 +8,7 @@ import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 import { useEffect, useState } from "react";
 import { fetchData } from "src/utils";
 import { size } from "lodash";
+import { size } from "lodash";
 // ----------------------------------------------------------------------
 
 
