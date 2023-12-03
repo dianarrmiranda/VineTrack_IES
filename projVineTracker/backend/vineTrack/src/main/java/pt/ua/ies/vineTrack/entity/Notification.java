@@ -19,21 +19,25 @@ public class Notification {
     private String description;
 
 
-    // one user can take many notifications (1:N)
+    // one vine can take many notifications (1:N)
     @ManyToOne
     @JoinColumn(name = "vine_id")
     private Vine vine;
+
+
+    @Column(name = "vine_id", insertable = false, updatable = false)
+    private Integer vineId;
 
 
     // constructors
     public Notification() {
     }
 
-    public Notification(String type, String avatar, Boolean isUnRead, Vine vine) {
+    public Notification(String type, String avatar, Boolean isUnRead, Integer vineId) {
         this.type = type;
         this.avatar = avatar;
         this.isUnRead = isUnRead;
-        this.vine = vine;
+        this.vineId = vineId;
         this.date = LocalDateTime.now();
         this.description = "Default";
     }
@@ -99,4 +103,11 @@ public class Notification {
         return !this.isUnRead;
     }
 
+    public Integer getVineId() {
+        return vineId;
+    }
+
+    public void setVineId(Integer vineId) {
+        this.vineId = vineId;
+    }
 }

@@ -47,6 +47,7 @@ public class RabbitmqHandler {
                 double pastValue;
                 // store the track in the database
                 Vine vine = vineService.getVineById(vineId);
+                System.out.println("Vine: " + vine.getName());
                 List<Track> tracks = trackService.getLastMoistureTrackByVineId(vineId);
                 Track lastMoistureTrack = !tracks.isEmpty() ? tracks.get(0) : null;
                 LocalDateTime lastMoistureTrackDate = lastMoistureTrack != null ? lastMoistureTrack.getDate() : null;
@@ -84,9 +85,19 @@ public class RabbitmqHandler {
                 // for now we will consider that the expected value is 40
                 if (value < 40) {
                     Boolean isUnRead = true;
-                    Notification notification = new Notification("moisture", "/public/assets/images/notifications/water.png", isUnRead, vine);
+                    Notification notification = new Notification();
                     // set description to  'Levels of the soil humidity are low.'
                     notification.setDescription("Levels of the soil humidity are low.");
+                    notification.setVine(vine); // Set the association
+                    notification.setType("moisture"); // Set the type
+                    notification.setAvatar("/public/assets/images/notifications/water.png"); // Set the avatar
+                    notification.setIsUnRead(isUnRead); // Set the isUnRead
+                    notification.setDate(LocalDateTime.now()); // Set the date
+                    notification.setVineId(vine.getId()); // Set the vineId directly
+
+                    System.out.println("VINE ID: " + vineId);
+                    System.out.println("Received Notification: type: " + notification.getType() + " avatar: " + notification.getAvatar() + " isUnRead: " + notification.getIsUnRead() + " vineId: " + notification.getVineId());
+
 
                     int totalNotifications = notificationService.getNumberOfNotificationsByVine(vine);
 

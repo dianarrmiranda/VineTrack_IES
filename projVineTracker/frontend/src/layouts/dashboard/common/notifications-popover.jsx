@@ -48,18 +48,26 @@ export default function NotificationsPopover() {
       if (response) {
         console.log("Notifications fetched");
         console.log(response);
+
         const notifications = response;
-        const notificationsData = notifications.map((value) => {
-          return {
-            id: value.id,
-            title: value.vine.name,
-            description: value.description,
-            avatar: value.avatar,
-            type: '',
-            createdAt: value.date,
-            isUnRead: value.isUnRead,
-          };
+        const notificationsData = notifications.map(async (value) => {
+          if (value.vine) {
+            console.log("Testing getting the vine name: " ,await fetchData(`vines/name/${value.vineId}`));
+            return {
+              id: value.id,
+              title: await fetchData(`vines/name/${value.vineId}`),
+              description: value.description,
+              avatar: value.avatar,
+              type: '',
+              createdAt: new Date(value.date),
+              isUnRead: value.isUnRead,
+            };
+          } else {
+            console.error("vineId is undefined for notification:", value);
+            return null; // or handle it in a way that makes sense for your application
+          }
         });
+        
 
         const unread = notificationsData.filter((item) => item.isUnRead);
         const read = notificationsData.filter((item) => !item.isUnRead);
@@ -77,23 +85,23 @@ export default function NotificationsPopover() {
 
 
   // websocket
-  const [latestNotification, setLatestNotification] = useState(null);
-  useEffect(() => {
-    const ws = new SockJS("http://localhost:8080/vt_ws");
-    const client = Stomp.over(ws);
-    client.connect({}, function () {
-      client.subscribe('/topic/notification', function (data) {
-        console.log("New notification: ", JSON.parse(data.body));
-        setLatestNotification(JSON.parse(data.body));
-        const newNotifications = [...notifications];
-        newNotifications.push(JSON.parse(data.body));
-        console.log("New notifications: ", newNotifications);
-        setNotifications(newNotifications);
-      }
-      );
-    });
-  }
-    , [notifications]);
+  // const [latestNotification, setLatestNotification] = useState(null);
+  // useEffect(() => {
+  //   const ws = new SockJS("http://localhost:8080/vt_ws");
+  //   const client = Stomp.over(ws);
+  //   client.connect({}, function () {
+  //     client.subscribe('/topic/notification', function (data) {
+  //       console.log("New notification: ", JSON.parse(data.body));
+  //       setLatestNotification(JSON.parse(data.body));
+  //       const newNotifications = [...notifications];
+  //       newNotifications.push(JSON.parse(data.body));
+  //       console.log("New notifications: ", newNotifications);
+  //       setNotifications(newNotifications);
+  //     }
+  //     );
+  //   });
+  // }
+  //   , [notifications]);
 
 
 
@@ -195,14 +203,14 @@ export default function NotificationsPopover() {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Scrollbar sx={{ height: { xs: 340, sm: 'auto' } }}>
-        {(showAllNotifications ? [unreadNotifications, readNotifications] : [unreadNotifications]).map((notificationList, index) => (
+        {(showAllNotifications ? [notifications] : [notifications.filter((item) => item.isUnRead)]).map((notificationList, index) => (
             <List disablePadding key={index}>
               <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
                 {index === 0 ? 'New' : 'Read'}
               </ListSubheader>
-              {notificationList.map((notification) => (
+              {notificationList.map((notification, index) => (
                 <NotificationItem
-                  key={notification.id}
+                  key={`${notification.id}-${index}`}  // Using a combination of id and index
                   notification={notification}
                   markAsRead={handleMarkAsRead}
                 />
