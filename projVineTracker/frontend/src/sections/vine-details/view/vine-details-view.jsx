@@ -22,7 +22,7 @@ export default function VineDetailsView() {
   
   const [moistureData, setMoistureData] = useState(null);
   const [tempData, setTempData] = useState([]);
-  const [weatherAlertsData, setWeatherAlertsData] = useState(null);
+  const [weatherAlertsData, setWeatherAlertsData] = useState([]);
 
   const [currentDay, setCurrentDay] = useState(new Date().getDate());
 
@@ -78,23 +78,16 @@ export default function VineDetailsView() {
       });
   }, [id]);
 
-  const [rows, setRows] = useState([]);
-
-
   useEffect(() => {
     fetchData(`vines/weatherAlerts/${id}`)
       .then(response => {
         if (response) {
           console.log("Weather Alerts data fetched");
-          
-          console.log("res ", response);
-          console.log("res2 ", Object.keys(response));
-          console.log("res3 ", Object.values(response));
-
+        
           const labels = Object.keys(response);
           const values = Object.values(response);
 
-          setRows(labels.map((value, index) => {
+          setWeatherAlertsData(labels.map((value, index) => {
             return {
               type: value,
               startTime: values[index][0],
@@ -148,15 +141,15 @@ export default function VineDetailsView() {
           }
           if (JSON.parse(data.body).sensor == "weatherAlerts") {
             console.log("New weather alert: ", JSON.parse(data.body).value);
+            
             const obj =  JSON.parse(data.body).value;
             const json = obj.replace(/'/g, '"');
-            // Converte a string JSON em um objeto JavaScript
             const obj2 = JSON.parse(json);
 
             const labels = Object.keys(obj2);
             const values = Object.values(obj2);
 
-            setRows(labels.map((value, index) => {
+            setWeatherAlertsData(labels.map((value, index) => {
               return {
                 type: value,
                 startTime: values[index][0],
@@ -175,7 +168,7 @@ export default function VineDetailsView() {
   console.log("Moisture", moistureData);
   console.log("Temperature", tempData);
   console.log("Latest value: ", latestValue);
-  console.log("Weather Alerts: ", rows);
+  console.log("Weather Alerts: ", weatherAlertsData);
   
 
   return (
@@ -254,7 +247,7 @@ export default function VineDetailsView() {
           <Card>
               <CardHeader title='Weather Alerts'  />
               <Box sx={{ p: 3, pb: 1 }}>
-                {rows && 
+                {weatherAlertsData && 
                   <TableContainer component={Paper}>
                   <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
@@ -266,7 +259,7 @@ export default function VineDetailsView() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {rows.map((row) => (
+                      {weatherAlertsData.map((row) => (
                         <TableRow
                           key={row.name}
                           sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -283,7 +276,7 @@ export default function VineDetailsView() {
                   </Table>
                 </TableContainer>
                 }
-                {!rows && <Typography variant="body2" sx={{ mb: 1 }}>No weather alerts</Typography>}
+                {!weatherAlertsData && <Typography variant="body2" sx={{ mb: 1 }}>No weather alerts</Typography>}
               </Box>
           </Card>
         </Grid>

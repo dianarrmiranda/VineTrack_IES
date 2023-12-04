@@ -36,6 +36,7 @@ class Generator:
 
                 while len(self.allIds) == 0:
                     print("No vine IDs found. Waiting for 60 seconds before trying again.")
+                    self.cursor.execute('SELECT id FROM vine ORDER BY id ASC')
                     self.allIds = self.cursor.fetchall()
                     time.sleep(60)
 
@@ -265,15 +266,18 @@ class Generator:
                     self.cursor.execute('SELECT city FROM vine WHERE id = %s', (self.id,))
                     city = self.cursor.fetchone()[0]
 
-                    print(f'Vine {self.id} - Temperature')
+                    print("city: ", city)
 
                     idAreaAviso = locales[city]
+                    print("idAreaAviso: ", idAreaAviso)
 
                     alerts = requests.get(f'https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json')
                     alerts = alerts.json()
 
                     alerts = [alert for alert in alerts if alert['idAreaAviso'] == idAreaAviso]
                     value = {}
+
+                    print("alerts: ", alerts)
 
                     for alert in alerts:
                         if str(alert['awarenessTypeName']) == 'Vento' or str(alert['awarenessTypeName']) == 'Precipitação' or str(alert['awarenessTypeName']) == 'Trovoada' or str(alert['awarenessTypeName']) == 'Neve' or str(alert['awarenessTypeName']) == 'Nevoeiro': 
