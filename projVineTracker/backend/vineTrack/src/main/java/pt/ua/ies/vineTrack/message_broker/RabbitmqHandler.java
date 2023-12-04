@@ -88,7 +88,7 @@ public class RabbitmqHandler {
                 // for now we will consider that the expected value is 40
                 if (value < 40) {
                     Boolean isUnRead = true;
-                    Notification notification = new Notification("moisture", "/public/assets/images/notifications/water.png", isUnRead, vine);
+                    Notification notification = new Notification("moisture", "/assets/images/notifications/water.png", isUnRead, vine);
                     // set description to  'Levels of the soil humidity are low.'
                     notification.setDescription("Levels of the soil humidity are low.");
 
@@ -136,8 +136,6 @@ public class RabbitmqHandler {
                 trackService.saveTrack(track3);
                 trackService.removeOldTracks("weatherAlerts",vineId3);
 
-                System.out.println("Values3: " + value3);
-
                 Map<String, List<String>> map = new HashMap<>();
                 String val = StringUtils.substringBetween(value3, "{", "}");
                 
@@ -153,12 +151,13 @@ public class RabbitmqHandler {
                 }
 
                 for (String key : map.keySet()) {
-                    System.out.println(key + " : " + map.get(key).get(2));
+
                     if (!map.get(key).get(2).equals("'green'")){
+
                         Boolean isUnRead = true;
-                        Notification notification = new Notification("weatherAlerts", "/public/assets/images/notifications/rain.png", isUnRead, vine3);
-                        // set description to  'Levels of the soil humidity are low.'
-                        notification.setDescription("Weather alert: " + key.replaceAll("'", "") + " - " + map.get(key).get(3).replaceAll("'", ""));
+                        Notification notification = new Notification("weatherAlerts", "/assets/images/notifications/rain.png", isUnRead, vine3);
+                        
+                        notification.setDescription(key.replaceAll("'", "") + ": " + map.get(key).get(3).replaceAll("'", ""));
 
                         int totalNotifications = notificationService.getNumberOfNotificationsByVine(vine3);
 
@@ -166,6 +165,12 @@ public class RabbitmqHandler {
                         if (totalNotifications > MAX_NOTIFICATIONS) {
                             notificationService.removeOldestNotificationsForVine(vine3.getId(), MAX_NOTIFICATIONS);
                         }
+                    
+                        // send through websocket
+                        JSONObject notificationJson = new JSONObject(notification);
+                        this.template.convertAndSend("/topic/notification", notificationJson.toString());
+
+                        notificationService.saveNotification(notification);
                     }
                 }
 
