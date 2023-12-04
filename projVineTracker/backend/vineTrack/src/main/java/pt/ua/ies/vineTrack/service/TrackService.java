@@ -34,8 +34,6 @@ public class TrackService {
         
         tracks.removeIf(track -> track.getVine().getId() != id);
 
-        System.out.println("tracks size: " + tracks.size());
-        System.out.println("type: " + type);
         if (type.equals("moisture")) {
             while (tracks.size() > 10) {
                 trackRepo.delete(tracks.get(0));
@@ -53,7 +51,6 @@ public class TrackService {
             }
         }
 
-        System.out.println("tracks size 2: " + tracks.size());
     }
 
     // get last moisture track date for a vine
