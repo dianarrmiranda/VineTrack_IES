@@ -64,7 +64,6 @@ public class VineController {
 
     @GetMapping(path = "/moisture/{vineId}")
     public List<Double> getMoistureByVineId(@PathVariable int vineId){
-        System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         Iterator<Track> iterator = tracks.iterator();
         while (iterator.hasNext()) {
@@ -84,13 +83,12 @@ public class VineController {
         if (moistureValues.size() > 10) {
             moistureValues = moistureValues.subList(moistureValues.size() - 10, moistureValues.size());
         }
-        System.out.println("Moisture: " + moistureValues);
+        System.out.println("Vine: " + vineId + " - " + "Moisture: " + moistureValues);
         return moistureValues;
     }
 
     @GetMapping(path = "/temperature/{vineId}")
     public Map<String, Double> getTemperatureByVineId(@PathVariable int vineId){
-        System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         Iterator<Track> iterator = tracks.iterator();
         while (iterator.hasNext()) {
@@ -120,13 +118,12 @@ public class VineController {
             tempMap.put(tempTimes.get(i), tempValues.get(i));
         }
 
-        System.out.println("Temperature: " + tempMap);
+        System.out.println("Vine: " + vineId + " - " + "Temperature: " + tempMap);
         return tempMap;
     }
 
     @GetMapping(path = "/weatherAlerts/{vineId}")
     public Map<String, List<String>> getWeatherAlertsByVineId(@PathVariable int vineId) throws JsonMappingException, JsonProcessingException{
-        System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         Iterator<Track> iterator = tracks.iterator();
         while (iterator.hasNext()) {
@@ -151,13 +148,12 @@ public class VineController {
             map = mapper.readValue(weatherAlerts, new TypeReference<Map<String, List<String>>>() {});
         }
 
-        System.out.println("Weather: " + map);
+        System.out.println("Vine: " + vineId + " - " + "Weather: " + map);
         return map;
     }
 
     @GetMapping(path = "/waterConsumption/{vineId}")
     public List<Double> getWaterConsumptionByVineId(@PathVariable int vineId){
-        System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
 
         tracks.removeIf(track -> !track.getType().equals("waterConsumption"));
@@ -175,7 +171,7 @@ public class VineController {
             }
         }
 
-        System.out.println("Water consumption: " + waterConsumptionMap);
+        System.out.println("Vine: " + vineId + " - " + "Water consumption: " + waterConsumptionMap);
 
         List<Double> waterConsumptionValues = new ArrayList<>(waterConsumptionMap.values());
         while (waterConsumptionValues.size() < 8) {

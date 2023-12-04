@@ -35,10 +35,19 @@ class Generator:
                 self.idIndex = 0
 
                 while len(self.allIds) == 0:
-                    print("No vine IDs found. Waiting for 60 seconds before trying again.")
+                    time.sleep(60)
+                    self.connection = mysql.connector.connect(
+                        host='database',
+                        user='root',
+                        password='root',
+                        database='VTdb'
+                    )
+                    self.cursor = self.connection.cursor()
                     self.cursor.execute('SELECT id FROM vine ORDER BY id ASC')
                     self.allIds = self.cursor.fetchall()
-                    time.sleep(60)
+                    print("self.allIds: ", self.allIds)
+                    print("No vine IDs found. Waiting for 60 seconds before trying again.")
+                    
 
                 self.id = self.allIds[self.idIndex][0]
 
@@ -266,10 +275,7 @@ class Generator:
                     self.cursor.execute('SELECT city FROM vine WHERE id = %s', (self.id,))
                     city = self.cursor.fetchone()[0]
 
-                    print("city: ", city)
-
                     idAreaAviso = locales[city]
-                    print("idAreaAviso: ", idAreaAviso)
 
                     alerts = requests.get(f'https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json')
                     alerts = alerts.json()
@@ -277,11 +283,9 @@ class Generator:
                     alerts = [alert for alert in alerts if alert['idAreaAviso'] == idAreaAviso]
                     value = {}
 
-                    print("alerts: ", alerts)
-
                     for alert in alerts:
                         if str(alert['awarenessTypeName']) == 'Vento' or str(alert['awarenessTypeName']) == 'Precipitação' or str(alert['awarenessTypeName']) == 'Trovoada' or str(alert['awarenessTypeName']) == 'Neve' or str(alert['awarenessTypeName']) == 'Nevoeiro': 
-                            value[str(alert['awarenessTypeName'])] = [str(alert['startTime']), str(alert['endTime']), str(alert['awarenessLevelID'])]
+                            value[str(alert['awarenessTypeName'])] = [str(alert['startTime']), str(alert['endTime']), str(alert['awarenessLevelID'], str(alert['text']))]
 
                     message = {
                         'id': self.id,

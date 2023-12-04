@@ -23,8 +23,8 @@ services:
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 20s
-      timeout: 5s
-      retries: 5
+      timeout: 10s
+      retries: 20
     depends_on:
       database : 
         condition: service_healthy	

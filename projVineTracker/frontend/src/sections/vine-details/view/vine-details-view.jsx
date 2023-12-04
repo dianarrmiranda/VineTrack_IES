@@ -23,6 +23,7 @@ export default function VineDetailsView() {
   const [moistureData, setMoistureData] = useState(null);
   const [tempData, setTempData] = useState([]);
   const [weatherAlertsData, setWeatherAlertsData] = useState([]);
+  const [weatherAlertsNotification, setWeatherAlertsNotification] = useState([]);
 
   const [currentDay, setCurrentDay] = useState(new Date().getDate());
 
@@ -90,11 +91,22 @@ export default function VineDetailsView() {
           setWeatherAlertsData(labels.map((value, index) => {
             return {
               type: value,
+              level: values[index][2],
               startTime: values[index][0],
-              endTime: values[index][1],
-              level: values[index][2]
+              endTime: values[index][1]
             };
           }));
+
+          setWeatherAlertsNotification(labels.map((value, index) => {
+            return {
+              type: value,
+              level: values[index][2],
+              startTime: values[index][0],
+              endTime: values[index][1],
+              text: values[index][3]
+
+            };
+          }).filter((value, index) => { return value.level != "green" ; }));
           
         } else {
           console.log("Temperature data failed");
@@ -130,6 +142,7 @@ export default function VineDetailsView() {
             newTempData.shift();
             newTempData.push({[JSON.parse(data.body).date]: JSON.parse(data.body).value});
             console.log("New temperature data: ", newTempData);
+            
             setTempData(newTempData.sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
           }
           if (JSON.parse(data.body).sensor == "moisture") {
@@ -152,11 +165,22 @@ export default function VineDetailsView() {
             setWeatherAlertsData(labels.map((value, index) => {
               return {
                 type: value,
+                level: values[index][2],
                 startTime: values[index][0],
-                endTime: values[index][1],
-                level: values[index][2]
+                endTime: values[index][1]
               };
             }));
+
+            setWeatherAlertsNotification(labels.map((value, index) => {
+              return {
+                type: value,
+                level: values[index][2],
+                startTime: values[index][0],
+                endTime: values[index][1],
+                text: values[index][3]
+  
+              };
+            }).filter((value, index) => { return value.level != "green" ; }));
           }
           
         }
@@ -169,6 +193,7 @@ export default function VineDetailsView() {
   console.log("Temperature", tempData);
   console.log("Latest value: ", latestValue);
   console.log("Weather Alerts: ", weatherAlertsData);
+  console.log("Weather Alerts Notification: ", weatherAlertsNotification);
   
 
   return (
@@ -253,9 +278,9 @@ export default function VineDetailsView() {
                     <TableHead>
                       <TableRow>
                         <TableCell>Alert Type</TableCell>
+                        <TableCell align="right">Level</TableCell>
                         <TableCell align="right">Start Time</TableCell>
                         <TableCell align="right">End Time</TableCell>
-                        <TableCell align="right">Awareness Level</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -267,9 +292,9 @@ export default function VineDetailsView() {
                           <TableCell component="th" scope="row">
                             {row.type}
                           </TableCell>
+                          <TableCell align="right">{row.level}</TableCell>
                           <TableCell align="right">{row.startTime}</TableCell>
                           <TableCell align="right">{row.endTime}</TableCell>
-                          <TableCell align="right">{row.level}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
