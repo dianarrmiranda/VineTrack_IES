@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+
 import pt.ua.ies.vineTrack.entity.Track;
 import pt.ua.ies.vineTrack.entity.Vine;
 import pt.ua.ies.vineTrack.entity.Notification;
@@ -13,11 +14,14 @@ import pt.ua.ies.vineTrack.service.TrackService;
 import pt.ua.ies.vineTrack.service.VineService;
 import pt.ua.ies.vineTrack.service.NotificationService;
 
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class RabbitmqHandler {
@@ -65,28 +69,6 @@ public class RabbitmqHandler {
 
                 trackService.saveTrack(track);
 
-                // water consumption
-                if (value - pastValue > 0) { //watered
-                    double waterPercentage = (value - pastValue);
-                    // Per m^2: 100% = 4L
-                    double waterConsumption = waterPercentage * 4 / 100 * vine.getSize();
-
-                    trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
-                    System.out.println("Water consumption: " + waterConsumption);
-                }
-
-                // water consumption
-                if (value - pastValue > 0) { //watered
-                    double waterPercentage = (value - pastValue);
-                    // Per m^2: 100% = 4L
-                    double waterConsumption = waterPercentage * 4 / 100 * vine.getSize();
-
-                    trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
-                    System.out.println("Water consumption: " + waterConsumption);
-
-                    // only keep water consumption tracks that are less than 8 days old
-                    trackService.removeOldWaterConsumptionTracks();
-                }
 
                 // water consumption
                 if (value - pastValue > 0) { //watered
@@ -153,9 +135,8 @@ public class RabbitmqHandler {
                 trackService.saveTrack(track3);
                 trackService.removeOldTracks("weatherAlerts",vineId3);
 
-                System.out.println("Values3: " + value3);
 
-                String[] weatherAlerts = value3.split(",");
+
 
                 break;
             default:
