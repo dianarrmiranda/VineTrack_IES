@@ -153,6 +153,10 @@ public class RabbitmqHandler {
                 trackService.saveTrack(track3);
                 trackService.removeOldTracks("weatherAlerts",vineId3);
 
+                System.out.println("Values3: " + value3);
+
+                String[] weatherAlerts = value3.split(",");
+
                 break;
             default:
                 break;
