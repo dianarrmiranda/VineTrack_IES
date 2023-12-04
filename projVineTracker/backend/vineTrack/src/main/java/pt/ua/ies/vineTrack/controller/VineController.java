@@ -33,6 +33,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
+import org.javatuples.Pair;
+
 
 @CrossOrigin("*")
 @RestController
@@ -84,26 +86,30 @@ public class VineController {
 
     @GetMapping(path = "/nutrients/{vineId}")
     public List<Double> getNutrientsByVineId(@PathVariable int vineId){
-        System.out.println("Vine id: " + vineId);
+        System.out.println("Inside /nutrients: Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
-        Iterator<Track> iterator = tracks.iterator();
-        while (iterator.hasNext()) {
-            Track track = iterator.next();
-            if (!track.getType().equals("nutrients")) {
-                iterator.remove();
-            }
-        }
+        // Iterator<Track> iterator = tracks.iterator();
+        // while (iterator.hasNext()) {
+        //     Track track = iterator.next();
+        //     if (!track.getType().equals("nutrients")) {
+        //         iterator.remove();
+        //     }
+        // }
         // now we need to order the tracks by date from the oldest to the newest
         tracks.sort(Comparator.comparing(Track::getDate));
 
+        for (Track track : tracks) {
+            double Nutrientval = track.getValue();
+        }
+
         // finally we need to get only the moisture values
-        List<Double> NutrientsValues = new ArrayList<>(tracks.stream().map(Track::getValue).toList());
-        // while (moistureValues.size() < 10) {
-        //     moistureValues.add(0, 0.0);
-        // }
-        // if (moistureValues.size() > 10) {
-        //     moistureValues = moistureValues.subList(moistureValues.size() - 10, moistureValues.size());
-        // }
+        List<Pair<String,Double>> NutrientsValues = new ArrayList<>();
+        while (NutrientsValues.size() < 10) {
+            nutrientsList.add(new Pair<>("Nitrogen", Nutrientval));
+        }
+        if (NutrientsValues.size() > 10) {
+            NutrientsValues = NutrientsValues.subList(NutrientsValues.size() - 10, NutrientsValues.size());
+        }
         System.out.println("Nutrients: " + NutrientsValues);
         return NutrientsValues;
     }
