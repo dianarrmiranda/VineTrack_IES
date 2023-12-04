@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
+import { Box, Card, CardHeader, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
@@ -21,6 +22,8 @@ export default function VineDetailsView() {
   
   const [moistureData, setMoistureData] = useState(null);
   const [tempData, setTempData] = useState([]);
+  const [weatherAlertsData, setWeatherAlertsData] = useState([]);
+  const [weatherAlertsNotification, setWeatherAlertsNotification] = useState([]);
 
   const [currentDay, setCurrentDay] = useState(new Date().getDate());
 
@@ -67,7 +70,7 @@ export default function VineDetailsView() {
 
           setTempData(labels.map((value, index) => {
             return {[value]: values[index]};
-          }).sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
+          }).sort((a, b) => Object.keys(b)[0] - Object.keys(a)[0]));
 
           
         } else {
@@ -81,14 +84,29 @@ export default function VineDetailsView() {
       .then(response => {
         if (response) {
           console.log("Weather Alerts data fetched");
-          
+        
           const labels = Object.keys(response);
           const values = Object.values(response);
 
-          console.log(labels.map((value, index) => {
-            return {[value]: values[index]};
-          }).sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
+          setWeatherAlertsData(labels.map((value, index) => {
+            return {
+              type: value,
+              level: values[index][2],
+              startTime: values[index][0],
+              endTime: values[index][1]
+            };
+          }));
 
+          setWeatherAlertsNotification(labels.map((value, index) => {
+            return {
+              type: value,
+              level: values[index][2],
+              startTime: values[index][0],
+              endTime: values[index][1],
+              text: values[index][3]
+
+            };
+          }).filter((value, index) => { return value.level != "green" ; }));
           
         } else {
           console.log("Temperature data failed");
@@ -120,10 +138,15 @@ export default function VineDetailsView() {
         if (JSON.parse(data.body).id == id) {
           setLatestValue(JSON.parse(data.body).value);
           if (JSON.parse(data.body).sensor == "temperature") {
-            const newTempData = [...tempData];
-            newTempData.push({[JSON.parse(data.body).date]: JSON.parse(data.body).value});
-            console.log("New temperature data: ", newTempData);
-            setTempData(newTempData.sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
+            const newtempData = [...tempData];
+
+            if (!newtempData.map((value, index) => {return Object.keys(value)[0]}).includes(JSON.parse(data.body).date)) {
+              newtempData.push({[JSON.parse(data.body).date]: JSON.parse(data.body).value});
+              setTempData(newtempData.sort((a, b) => Object.keys(b)[0] - Object.keys(a)[0]));
+            }
+
+            console.log("New temperature data: ", newtempData);
+            
           }
           if (JSON.parse(data.body).sensor == "moisture") {
             const newMoistureData = [...moistureData];
@@ -134,17 +157,46 @@ export default function VineDetailsView() {
           }
           if (JSON.parse(data.body).sensor == "weatherAlerts") {
             console.log("New weather alert: ", JSON.parse(data.body).value);
+            
+            const obj =  JSON.parse(data.body).value;
+            const json = obj.replace(/'/g, '"');
+            const obj2 = JSON.parse(json);
+
+            const labels = Object.keys(obj2);
+            const values = Object.values(obj2);
+
+            setWeatherAlertsData(labels.map((value, index) => {
+              return {
+                type: value,
+                level: values[index][2],
+                startTime: values[index][0],
+                endTime: values[index][1]
+              };
+            }));
+
+            setWeatherAlertsNotification(labels.map((value, index) => {
+              return {
+                type: value,
+                level: values[index][2],
+                startTime: values[index][0],
+                endTime: values[index][1],
+                text: values[index][3]
+  
+              };
+            }).filter((value, index) => { return value.level != "green" ; }));
           }
           
         }
       });
     });
   }
-  , [id, moistureData], [id, tempData]);
+  , [id, moistureData], [id, tempData], [id, weatherAlertsData]);
 
   console.log("Moisture", moistureData);
   console.log("Temperature", tempData);
   console.log("Latest value: ", latestValue);
+  console.log("Weather Alerts: ", weatherAlertsData);
+  console.log("Weather Alerts Notification: ", weatherAlertsNotification);
   
 
   return (
@@ -218,6 +270,43 @@ export default function VineDetailsView() {
               ],
             }}
           />
+        </Grid>
+        <Grid xs={12} md={6} lg={4}>
+          <Card>
+              <CardHeader title='Weather Alerts'  />
+              <Box sx={{ p: 3, pb: 1 }}>
+                {weatherAlertsData && 
+                  <TableContainer component={Paper}>
+                  <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Alert Type</TableCell>
+                        <TableCell align="right">Level</TableCell>
+                        <TableCell align="right">Start Time</TableCell>
+                        <TableCell align="right">End Time</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {weatherAlertsData.map((row) => (
+                        <TableRow
+                          key={row.name}
+                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        >
+                          <TableCell component="th" scope="row">
+                            {row.type}
+                          </TableCell>
+                          <TableCell align="right">{row.level}</TableCell>
+                          <TableCell align="right">{row.startTime}</TableCell>
+                          <TableCell align="right">{row.endTime}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                }
+                {!weatherAlertsData && <Typography variant="body2" sx={{ mb: 1 }}>No weather alerts</Typography>}
+              </Box>
+          </Card>
         </Grid>
       </Grid>
       <br></br>

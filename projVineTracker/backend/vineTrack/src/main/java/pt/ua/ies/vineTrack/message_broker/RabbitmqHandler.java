@@ -65,8 +65,29 @@ public class RabbitmqHandler {
                 Track track = new Track(type, date, value, vine, t.toString(), d.toString());
 
                 trackService.saveTrack(track);
-                // only have 10 tracks per vine, remove the oldest
-                trackService.removeOldTracks("moisture", vineId);
+
+                // water consumption
+                if (value - pastValue > 0) { //watered
+                    double waterPercentage = (value - pastValue);
+                    // Per m^2: 100% = 4L
+                    double waterConsumption = waterPercentage * 4 / 100 * vine.getSize();
+
+                    trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
+                    System.out.println("Water consumption: " + waterConsumption);
+                }
+
+                // water consumption
+                if (value - pastValue > 0) { //watered
+                    double waterPercentage = (value - pastValue);
+                    // Per m^2: 100% = 4L
+                    double waterConsumption = waterPercentage * 4 / 100 * vine.getSize();
+
+                    trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
+                    System.out.println("Water consumption: " + waterConsumption);
+
+                    // only keep water consumption tracks that are less than 8 days old
+                    trackService.removeOldWaterConsumptionTracks();
+                }
 
                 // water consumption
                 if (value - pastValue > 0) { //watered
@@ -127,7 +148,6 @@ public class RabbitmqHandler {
                 Track track2 = new Track(type, date2, value2, vine2, time, day);
 
                 trackService.saveTrack(track2);
-                trackService.removeOldTracks("temperature", vineId2);
                 
                 vine2.setTemperature(value2);
                 vineService.save(vine2);
