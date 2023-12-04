@@ -70,7 +70,7 @@ export default function VineDetailsView() {
 
           setTempData(labels.map((value, index) => {
             return {[value]: values[index]};
-          }).sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
+          }).sort((a, b) => Object.keys(b)[0] - Object.keys(a)[0]));
 
           
         } else {
@@ -138,12 +138,15 @@ export default function VineDetailsView() {
         if (JSON.parse(data.body).id == id) {
           setLatestValue(JSON.parse(data.body).value);
           if (JSON.parse(data.body).sensor == "temperature") {
-            const newTempData = [...tempData];
-            newTempData.shift();
-            newTempData.push({[JSON.parse(data.body).date]: JSON.parse(data.body).value});
-            console.log("New temperature data: ", newTempData);
+            const newtempData = [...tempData];
+
+            if (!newtempData.map((value, index) => {return Object.keys(value)[0]}).includes(JSON.parse(data.body).date)) {
+              newtempData.push({[JSON.parse(data.body).date]: JSON.parse(data.body).value});
+              setTempData(newtempData.sort((a, b) => Object.keys(b)[0] - Object.keys(a)[0]));
+            }
+
+            console.log("New temperature data: ", newtempData);
             
-            setTempData(newTempData.sort((a, b) => Object.values(b)[0] - Object.values(a)[0]));
           }
           if (JSON.parse(data.body).sensor == "moisture") {
             const newMoistureData = [...moistureData];
@@ -187,7 +190,7 @@ export default function VineDetailsView() {
       });
     });
   }
-  , [id, moistureData], [id, tempData]);
+  , [id, moistureData], [id, tempData], [id, weatherAlertsData]);
 
   console.log("Moisture", moistureData);
   console.log("Temperature", tempData);
