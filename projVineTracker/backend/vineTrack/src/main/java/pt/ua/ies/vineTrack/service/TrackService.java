@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import pt.ua.ies.vineTrack.repository.TrackRepo;
 import pt.ua.ies.vineTrack.entity.Track;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -64,9 +65,10 @@ public class TrackService {
         List<Track> tracks = trackRepo.findAllByTypeOrderByDateAsc("waterConsumption");
         Track lastTrack = tracks.get(tracks.size() - 1);
         String lastTrackDay = lastTrack.getDay();
+        LocalDate lastTrackDate = LocalDate.parse(lastTrackDay);
 
         // get the waterConsumption tracks older than 7 days ago using column day
-        List<Track> oldWaterConsumptionTracks = trackRepo.getOldWaterConsumptionTracks(lastTrack.getDate().toLocalDate().minusDays(7));
+        List<Track> oldWaterConsumptionTracks = trackRepo.getOldWaterConsumptionTracks(lastTrackDate.minusDays(7));
         trackRepo.deleteAll(oldWaterConsumptionTracks);
     }
 }

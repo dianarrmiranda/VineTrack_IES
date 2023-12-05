@@ -131,8 +131,8 @@ class Generator:
                     values = self.cursor.fetchall()
                     values = values[::-1]
                     if values[1][-2] < 35:
-                        # vai haver uma probabilidade de 70% de regar
-                        if random.randint(0, 100) < 70:
+                        # vai haver uma probabilidade de 80% de regar
+                        if random.randint(0, 100) < 80:
                             newValue = values[1][-2] + random.uniform(15, 25)
                         else:
                             newValue = self.decrease_moisture(decreaseValue[0], decreaseValue[1], values[1][-2])
