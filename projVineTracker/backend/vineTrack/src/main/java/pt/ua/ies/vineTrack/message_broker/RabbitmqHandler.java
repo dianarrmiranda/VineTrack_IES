@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,8 @@ public class RabbitmqHandler {
                     double waterPercentage = (value - pastValue);
                     // Per m^2: 100% = 4L
                     double waterConsumption = waterPercentage * 4 / 100 * vine.getSize();
+                    // 2 decimal places
+                    waterConsumption = Math.round(waterConsumption * 100.0) / 100.0;
 
                     trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
                     System.out.println("Water consumption: " + waterConsumption);
@@ -154,8 +157,43 @@ public class RabbitmqHandler {
                 trackService.saveTrack(track3);
                 trackService.removeOldTracks("weatherAlerts",vineId3);
 
+                Map<String, List<String>> map = new HashMap<>();
+                String val = StringUtils.substringBetween(value3, "{", "}");
+                
+                String[] keyValuePairs = val.split(",(?![^\\[]*\\])");
+                
 
+                for(String pair : keyValuePairs) {
+                    String[] keyValue = pair.split(": ");
+                    String listString = keyValue[1].substring(1, keyValue[1].length() - 1);
+                    String[] listItems = listString.split(", ");
+                    List<String> list = Arrays.asList(listItems);
+                    map.put(keyValue[0], list);
+                }
 
+                for (String key : map.keySet()) {
+
+                    if (!map.get(key).get(2).equals("'green'")){
+
+                        Boolean isUnRead = true;
+                        Notification notification = new Notification("weatherAlerts", "/assets/images/notifications/rain.png", isUnRead, vine3);
+                        
+                        notification.setDescription(key.replaceAll("'", "") + ": " + map.get(key).get(3).replaceAll("'", ""));
+
+                        int totalNotifications = notificationService.getNumberOfNotificationsByVine(vine3);
+
+                        // If the total exceeds the maximum limit, remove older notifications
+                        if (totalNotifications > MAX_NOTIFICATIONS) {
+                            notificationService.removeOldestNotificationsForVine(vine3.getId(), MAX_NOTIFICATIONS);
+                        }
+                    
+                        // send through websocket
+                        JSONObject notificationJson = new JSONObject(notification);
+                        this.template.convertAndSend("/topic/notification", notificationJson.toString());
+
+                        notificationService.saveNotification(notification);
+                    }
+                }
 
                 break;
             default:
