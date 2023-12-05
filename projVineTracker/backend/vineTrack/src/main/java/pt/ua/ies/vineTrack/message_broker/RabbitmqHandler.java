@@ -76,6 +76,8 @@ public class RabbitmqHandler {
                     double waterPercentage = (value - pastValue);
                     // Per m^2: 100% = 4L
                     double waterConsumption = waterPercentage * 4 / 100 * vine.getSize();
+                    // 2 decimal places
+                    waterConsumption = Math.round(waterConsumption * 100.0) / 100.0;
 
                     trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
                     System.out.println("Water consumption: " + waterConsumption);
