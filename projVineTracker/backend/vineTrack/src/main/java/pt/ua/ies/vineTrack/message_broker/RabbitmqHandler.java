@@ -134,6 +134,19 @@ public class RabbitmqHandler {
                 trackService.removeOldTracks("weatherAlerts",vineId3);
 
                 break;
+            case "nutrients":
+                int vineId4 = params.getInt("id");
+                double value4 = params.getDouble("value");
+                String nutrient = params.getString("nutrient");
+
+                Vine vine4 = vineService.getVineById(vineId4);
+                LocalDateTime date4 = LocalDateTime.now();
+
+                Track track4 = new Track(type, date4, value4, vine4);
+                trackService.saveTrack(track4);
+                trackService.removeOldTracks("nutrients", vineId4);
+
+                break;
             default:
                 break;
 

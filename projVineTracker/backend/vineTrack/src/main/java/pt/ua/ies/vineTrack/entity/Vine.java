@@ -38,19 +38,9 @@ public class Vine {
     @Column(nullable = false)
     private String city;
     private String image;
-    // private List<List<Object>> NutrientsList;
 
     String phase = "bud";
     private Double temperature = 0.0;
-    // {
-    //     NutrientsList = new ArrayList<>();
-    //     NutrientsList.add(List.of("Nitrogen", 0.5));
-    //     NutrientsList.add(List.of("Phosphorus", 0.5));
-    //     NutrientsList.add(List.of("Potassium", 0.5));
-    //     NutrientsList.add(List.of("Calcium", 0.5));
-    //     NutrientsList.add(List.of("Magnesium", 0.5));
-    //     NutrientsList.add(List.of("Chloride", 0.5));
-    // }
 
     @ManyToMany()
     @JoinTable(name = "vine_grape",
@@ -62,6 +52,9 @@ public class Vine {
     @ManyToMany(mappedBy = "vines")
     private List<User> users;
 
+    @Column(nullable = false)
+    @ManyToMany(mappedBy = "nutrients")
+    private List<Nutrient> Nutrients; //TODO: convém ver como os valores saem daqui
 
     public Integer getId(){
         return id;

@@ -87,31 +87,27 @@ public class VineController {
     @GetMapping(path = "/nutrients/{vineId}")
     public List<Double> getNutrientsByVineId(@PathVariable int vineId){
         System.out.println("Inside /nutrients: Vine id: " + vineId);
-        List<Track> tracks = vineService.getTracksByVineId(vineId);
-        // Iterator<Track> iterator = tracks.iterator();
-        // while (iterator.hasNext()) {
-        //     Track track = iterator.next();
-        //     if (!track.getType().equals("nutrients")) {
-        //         iterator.remove();
-        //     }
-        // }
-        // now we need to order the tracks by date from the oldest to the newest
-        tracks.sort(Comparator.comparing(Track::getDate));
-
-        for (Track track : tracks) {
-            double Nutrientval = track.getValue();
-        }
-
-        // finally we need to get only the moisture values
-        List<Pair<String,Double>> NutrientsValues = new ArrayList<>();
-        while (NutrientsValues.size() < 10) {
-            nutrientsList.add(new Pair<>("Nitrogen", Nutrientval));
-        }
-        if (NutrientsValues.size() > 10) {
-            NutrientsValues = NutrientsValues.subList(NutrientsValues.size() - 10, NutrientsValues.size());
-        }
-        System.out.println("Nutrients: " + NutrientsValues);
-        return NutrientsValues;
+         // return new ArrayList<>(); // TODO: pus só aqui esta lista para ele não se queixar de falta de return
+         List<Track> tracks = vineService.getTracksByVineId(vineId);
+         Iterator<Track> iterator = tracks.iterator();
+         while (iterator.hasNext()) {
+             Track track = iterator.next();
+             if (!track.getType().equals("nutrients")) {
+                 iterator.remove();
+             }
+         }
+         // now we need to order the tracks by date from the oldest to the newest
+         tracks.sort(Comparator.comparing(Track::getDate));
+         // finally we need to get only the moisture values
+         List<Double> nutrientsValues = new ArrayList<>(tracks.stream().map(Track::getValue).toList());
+         while (nutrientsValues.size() < 10) {
+             nutrientsValues.add(0, 0.0);
+         }
+         if (nutrientsValues.size() > 10) {
+             nutrientsValues = nutrientsValues.subList(nutrientsValues.size() - 10, nutrientsValues.size());
+         }
+         System.out.println("Nutrients: " + nutrientsValues);
+         return nutrientsValues;
     }
 
     @GetMapping(path = "/temperature/{vineId}")
@@ -288,6 +284,12 @@ public class VineController {
             Track track1 = new Track("moisture", LocalDateTime.now(), 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
             trackService.saveTrack(track1);
             trackService.saveTrack(track2);
+
+            Track track4 = new Track("nutrients", now, 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
+            Track track3 = new Track("nutrients", LocalDateTime.now(), 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
+            trackService.saveTrack(track3);
+            trackService.saveTrack(track4);
+
 
             if (!img.isEmpty()){
                 try {
