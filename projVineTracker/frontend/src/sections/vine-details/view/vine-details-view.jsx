@@ -12,7 +12,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
-import { Box, Card, CardHeader, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { Box, Card, CardHeader, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@mui/material";
+import Iconify from "src/components/iconify";
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
@@ -357,6 +358,56 @@ export default function VineDetailsView() {
               ],
             }}
           />
+        </Grid>
+
+        <Grid xs={12} md={6} lg={4}>
+          <Card>
+
+              <Grid container alignItems="center" justifyContent="space-between">
+                <Grid item>
+                  <CardHeader title='PH Values' />
+                </Grid>
+                <Grid item sx={{pt: 4, pr: 3}}>
+                  <Button
+                    variant="contained"
+                    color="inherit"
+                    startIcon={<Iconify icon="eva:plus-fill" />}
+                  >
+                    Add New Value
+                  </Button>
+                </Grid>
+              </Grid>
+
+              <Box sx={{ p: 3, pb: 1 }}>
+                {weatherAlertsData && 
+                  <TableContainer component={Paper}>
+                  <Table aria-label="simple table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Date</TableCell>
+                        <TableCell align="right">PH Value</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {weatherAlertsData.map((row) => (
+                        <TableRow
+                          key={row.name}
+                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        >
+                          <TableCell component="th" scope="row">
+                            {row.type}
+                          </TableCell>
+                          <TableCell align="right">{row.level}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                }
+                {!weatherAlertsData && <Typography variant="body2" sx={{ mb: 1 }}>No weather alerts</Typography>}
+              </Box>
+
+          </Card>
         </Grid>
       </Grid>
 
