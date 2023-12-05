@@ -2,6 +2,7 @@ package pt.ua.ies.vineTrack.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import pt.ua.ies.vineTrack.entity.Track;
 
@@ -25,6 +26,6 @@ public interface TrackRepo extends JpaRepository<Track, Integer> {
     List<Track> findAllByTypeOrderByDateAsc(String type);
 
     // get the waterConsumption tracks older than 7 days ago using column day
-    @Query("SELECT t FROM Track t WHERE t.type = 'waterConsumption' AND t.day < ?1")
-    List<Track> getOldWaterConsumptionTracks(LocalDate day);
+    @Query("SELECT t FROM Track t WHERE t.type = 'waterConsumption' AND STR_TO_DATE(t.day, '%Y-%m-%d') < :day")
+    List<Track> getOldWaterConsumptionTracks(@Param("day") LocalDate day);
 }

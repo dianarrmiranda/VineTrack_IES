@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import pt.ua.ies.vineTrack.repository.TrackRepo;
 import pt.ua.ies.vineTrack.entity.Track;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -34,8 +35,6 @@ public class TrackService {
         
         tracks.removeIf(track -> track.getVine().getId() != id);
 
-        System.out.println("tracks size: " + tracks.size());
-        System.out.println("type: " + type);
         if (type.equals("moisture")) {
             while (tracks.size() > 10) {
                 trackRepo.delete(tracks.get(0));
@@ -53,7 +52,6 @@ public class TrackService {
             }
         }
 
-        System.out.println("tracks size 2: " + tracks.size());
     }
 
     // get last moisture track date for a vine
@@ -67,9 +65,10 @@ public class TrackService {
         List<Track> tracks = trackRepo.findAllByTypeOrderByDateAsc("waterConsumption");
         Track lastTrack = tracks.get(tracks.size() - 1);
         String lastTrackDay = lastTrack.getDay();
+        LocalDate lastTrackDate = LocalDate.parse(lastTrackDay);
 
         // get the waterConsumption tracks older than 7 days ago using column day
-        List<Track> oldWaterConsumptionTracks = trackRepo.getOldWaterConsumptionTracks(lastTrack.getDate().toLocalDate().minusDays(7));
+        List<Track> oldWaterConsumptionTracks = trackRepo.getOldWaterConsumptionTracks(lastTrackDate.minusDays(7));
         trackRepo.deleteAll(oldWaterConsumptionTracks);
     }
 }

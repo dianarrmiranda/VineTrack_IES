@@ -25,6 +25,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -34,6 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
 import org.javatuples.Pair;
+
 
 
 @CrossOrigin("*")
@@ -60,7 +66,6 @@ public class VineController {
 
     @GetMapping(path = "/moisture/{vineId}")
     public List<Double> getMoistureByVineId(@PathVariable int vineId){
-        System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         Iterator<Track> iterator = tracks.iterator();
         while (iterator.hasNext()) {
@@ -80,7 +85,7 @@ public class VineController {
         if (moistureValues.size() > 10) {
             moistureValues = moistureValues.subList(moistureValues.size() - 10, moistureValues.size());
         }
-        System.out.println("Moisture: " + moistureValues);
+        System.out.println("Vine: " + vineId + " - " + "Moisture: " + moistureValues);
         return moistureValues;
     }
 
@@ -112,7 +117,6 @@ public class VineController {
 
     @GetMapping(path = "/temperature/{vineId}")
     public Map<String, Double> getTemperatureByVineId(@PathVariable int vineId){
-        System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         Iterator<Track> iterator = tracks.iterator();
         while (iterator.hasNext()) {
@@ -142,13 +146,12 @@ public class VineController {
             tempMap.put(tempTimes.get(i), tempValues.get(i));
         }
 
-        System.out.println("Temperature: " + tempMap);
+        System.out.println("Vine: " + vineId + " - " + "Temperature: " + tempMap);
         return tempMap;
     }
 
     @GetMapping(path = "/weatherAlerts/{vineId}")
-    public Map<String, String> getWeatherAlertsByVineId(@PathVariable int vineId){
-        System.out.println("Vine id: " + vineId);
+    public Map<String, List<String>> getWeatherAlertsByVineId(@PathVariable int vineId) throws JsonMappingException, JsonProcessingException{
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         Iterator<Track> iterator = tracks.iterator();
         while (iterator.hasNext()) {
@@ -163,31 +166,22 @@ public class VineController {
 
         // finally we need to get only the moisture values
 
-        List<String> weatherLabels = new ArrayList<>();
-        List<String> weatherValues = new ArrayList<>();
+        Map<String, List<String>> map = new TreeMap<>();
 
         for (Track track : tracks) {
             String weatherAlerts = track.getValString();
-            String[] weatherAlertsArray = weatherAlerts.split(",");
-            for (String weatherAlert : weatherAlertsArray) {
-                String[] weatherAlertArray = weatherAlert.split(":");
-                weatherLabels.add(weatherAlertArray[0]);
-                weatherValues.add(weatherAlertArray[1]);
-            }
+            weatherAlerts = weatherAlerts.replace("'", "\"");
+
+            ObjectMapper mapper = new ObjectMapper();
+            map = mapper.readValue(weatherAlerts, new TypeReference<Map<String, List<String>>>() {});
         }
 
-        Map<String, String> weatherMap = new TreeMap<>();
-        for (int i = 0; i < weatherValues.size(); i++) {
-            weatherMap.put(weatherLabels.get(i), weatherValues.get(i));
-        }
-
-        System.out.println("Weather: " + weatherMap);
-        return weatherMap;
+        System.out.println("Vine: " + vineId + " - " + "Weather: " + map);
+        return map;
     }
 
     @GetMapping(path = "/waterConsumption/{vineId}")
     public List<Double> getWaterConsumptionByVineId(@PathVariable int vineId){
-        System.out.println("Vine id: " + vineId);
         List<Track> tracks = vineService.getTracksByVineId(vineId);
 
         tracks.removeIf(track -> !track.getType().equals("waterConsumption"));
@@ -205,7 +199,7 @@ public class VineController {
             }
         }
 
-        System.out.println("Water consumption: " + waterConsumptionMap);
+        System.out.println("Vine: " + vineId + " - " + "Water consumption: " + waterConsumptionMap);
 
         List<Double> waterConsumptionValues = new ArrayList<>(waterConsumptionMap.values());
         while (waterConsumptionValues.size() < 8) {
