@@ -98,6 +98,7 @@ export default function NotificationsPopover() {
         };
 
         setLatestNotification(newFormattedNotification);
+        console.log("New Notification: ", newFormattedNotification);
 
         // Use a function to avoid duplicate notifications
         setUnreadNotifications((prevUnread) => {
@@ -105,8 +106,10 @@ export default function NotificationsPopover() {
           if (!prevUnread.some((notification) => notification.id === newFormattedNotification.id)) {
             return [...prevUnread, newFormattedNotification];
           }
+          console.log("Unread Notifications: ", prevUnread);
           return prevUnread;
         });
+
 
         setTotalUnRead((prevTotal) => prevTotal + 1);
       // }

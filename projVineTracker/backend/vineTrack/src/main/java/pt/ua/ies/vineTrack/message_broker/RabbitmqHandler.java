@@ -91,7 +91,7 @@ public class RabbitmqHandler {
                     Notification notification = new Notification();
                     // set description to  'Levels of the soil humidity are low.'
                     notification.setDescription("Levels of the soil humidity are low.");
-                    notification.setVine(vine); // Set the association
+                    notification.setVine(vine); // Set the vine
                     notification.setType("moisture"); // Set the type
                     notification.setAvatar("/public/assets/images/notifications/water.png"); // Set the avatar
                     notification.setIsUnRead(isUnRead); // Set the isUnRead
@@ -110,11 +110,19 @@ public class RabbitmqHandler {
                     }
 
 
-                    // send through websocket
-                    JSONObject notificationJson = new JSONObject(notification);
-                    this.template.convertAndSend("/topic/notification", notificationJson.toString());
 
                     notificationService.saveNotification(notification);
+
+                    // send through websocket
+                    JSONObject notificationJson = new JSONObject();
+                    notificationJson.put("id", notification.getId());
+                    notificationJson.put("type", notification.getType());
+                    notificationJson.put("avatar", notification.getAvatar());
+                    notificationJson.put("isUnRead", notification.getIsUnRead());
+                    notificationJson.put("vineId", notification.getVineId());
+                    notificationJson.put("description", notification.getDescription());
+                    notificationJson.put("date", notification.getDate());
+                    this.template.convertAndSend("/topic/notification", notificationJson.toString());
                 }
 
                 break;
