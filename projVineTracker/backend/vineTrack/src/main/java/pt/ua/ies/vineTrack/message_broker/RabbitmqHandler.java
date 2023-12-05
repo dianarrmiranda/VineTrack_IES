@@ -93,7 +93,45 @@ public class RabbitmqHandler {
 
                     // if water consumption is above the limit, send notification
                     if (waterConsumption > waterConsumptionLimit) {
-                        // wait for pull request to come
+                        Boolean isUnRead = true;
+                        Notification notification = new Notification();
+                        // set description to  'Levels of the soil humidity are low.'
+                        notification.setDescription("Water consumption is above the limit. Please check the vine " + vine.getName() + ".");
+                        notification.setVine(vine); // Set the vine
+                        notification.setType("waterConsumption"); // Set the type
+                        notification.setAvatar("/public/assets/images/notifications/waterConsumption.png"); // Set the avatar
+                        notification.setIsUnRead(isUnRead); // Set the isUnRead
+                        notification.setDate(LocalDateTime.now()); // Set the date
+                        // notification.setVineId(vine.getId()); // Set the vineId directly
+
+                        System.out.println("VINE ID: " + vineId);
+                        // System.out.println("Received Notification: type: " + notification.getType() + " avatar: " + notification.getAvatar() + " isUnRead: " + notification.getIsUnRead() + " vineId: " + notification.getVineId());
+
+
+                        int totalNotifications = notificationService.getNumberOfNotificationsByVine(vine);
+
+                        // If the total exceeds the maximum limit, remove older notifications
+                        if (totalNotifications > MAX_NOTIFICATIONS) {
+                            notificationService.removeOldestNotificationsForVine(vine.getId(), MAX_NOTIFICATIONS);
+                        }
+
+
+
+                        notificationService.saveNotification(notification);
+
+                        // send through websocket
+                        JSONObject notificationJson = new JSONObject();
+                        notificationJson.put("id", notification.getId());
+                        notificationJson.put("type", notification.getType());
+                        notificationJson.put("avatar", notification.getAvatar());
+                        notificationJson.put("isUnRead", notification.getIsUnRead());
+                        // notificationJson.put("vineId", notification.getVineId());
+                        notificationJson.put("description", notification.getDescription());
+                        notificationJson.put("date", notification.getDate());
+                        notificationJson.put("waterLimit", waterConsumptionLimit);
+                        this.template.convertAndSend("/topic/notification", notificationJson.toString());
+
+
                     }
 
 
