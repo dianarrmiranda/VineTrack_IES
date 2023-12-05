@@ -176,8 +176,16 @@ public class RabbitmqHandler {
                     if (!map.get(key).get(2).equals("'green'")){
 
                         Boolean isUnRead = true;
-                        Notification notification = new Notification("weatherAlerts", "/assets/images/notifications/rain.png", isUnRead, vine3);
-                        
+                        Notification notification = new Notification();
+                        // "weatherAlerts", "/assets/images/notifications/rain.png", isUnRead, vine3
+                        notification.setDescription("Levels of the soil humidity are low.");
+                        notification.setVine(vine3); // Set the vine
+                        notification.setType("weatherAlerts"); // Set the type
+                        notification.setAvatar("/public/assets/images/notifications/rain.png"); // Set the avatar
+                        notification.setIsUnRead(isUnRead); // Set the isUnRead
+                        notification.setVineId(vine3.getId()); // Set the vineId directly
+
+
                         notification.setDescription(key.replaceAll("'", "") + ": " + map.get(key).get(3).replaceAll("'", ""));
 
                         int totalNotifications = notificationService.getNumberOfNotificationsByVine(vine3);
@@ -186,12 +194,19 @@ public class RabbitmqHandler {
                         if (totalNotifications > MAX_NOTIFICATIONS) {
                             notificationService.removeOldestNotificationsForVine(vine3.getId(), MAX_NOTIFICATIONS);
                         }
-                    
-                        // send through websocket
-                        JSONObject notificationJson = new JSONObject(notification);
-                        this.template.convertAndSend("/topic/notification", notificationJson.toString());
 
                         notificationService.saveNotification(notification);
+
+                        // send through websocket
+                        JSONObject notificationJson = new JSONObject();
+                        notificationJson.put("id", notification.getId());
+                        notificationJson.put("type", notification.getType());
+                        notificationJson.put("avatar", notification.getAvatar());
+                        notificationJson.put("isUnRead", notification.getIsUnRead());
+                        notificationJson.put("vineId", notification.getVineId());
+                        notificationJson.put("description", notification.getDescription());
+                        notificationJson.put("date", notification.getDate());
+                        this.template.convertAndSend("/topic/notification", notificationJson.toString());
                     }
                 }
 
