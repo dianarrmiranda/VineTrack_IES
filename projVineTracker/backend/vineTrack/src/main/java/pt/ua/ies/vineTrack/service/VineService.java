@@ -53,6 +53,7 @@ public class VineService {
         existing.setLocation(vine.getLocation());
         existing.setTypeGrap(vine.getTypeGrap());
         existing.setUsers(vine.getUsers());
+        existing.setMaxWaterConsumption(vine.getMaxWaterConsumption());
     
         return vineRepo.save(existing);
     }

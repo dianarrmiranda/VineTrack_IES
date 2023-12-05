@@ -55,6 +55,8 @@ public class VineController {
     @Autowired
     private NotificationService notificationService;
 
+    private static final double MAX_WATER_CONSUMPTION = 0.95; // max of 0.95L per m^2 per day
+
     @GetMapping(path = "/test")
     public Track getAllVinesTest(){
         // Returns the last track
@@ -216,6 +218,7 @@ public class VineController {
             vine.setSize(size);
             vine.setImage("");
             vine.setDate(new Date(date.getTime()));
+            vine.setMaxWaterConsumption(MAX_WATER_CONSUMPTION*vine.getSize()); // default value defined
             for (Integer id : users) {
                 User user = userService.getUserById(id);
                 if (user.getVines() != null) {

@@ -38,6 +38,8 @@ public class RabbitmqHandler {
     private TrackService trackService;
 
     private static final int MAX_NOTIFICATIONS = 10;
+    private static final double MAX_WATER_CONSUMPTION = 0.95; // max of 0.95L per m^2 per day
+
     @RabbitListener(queues = Config.QUEUE_NAME)
     public void receiveMessage(String message) {
         System.out.println("Received <" + message + ">");
@@ -84,6 +86,17 @@ public class RabbitmqHandler {
 
                     // only keep water consumption tracks that are less than 8 days old
                     trackService.removeOldWaterConsumptionTracks();
+
+                    // check if water consumption is above the limit
+                    double vineSize = vine.getSize();
+                    double waterConsumptionLimit = vine.getMaxWaterConsumption();
+
+                    // if water consumption is above the limit, send notification
+                    if (waterConsumption > waterConsumptionLimit) {
+                        // wait for pull request to come
+                    }
+
+
                 }
 
                 // receive message, if the value is bellow expected save notification to the database

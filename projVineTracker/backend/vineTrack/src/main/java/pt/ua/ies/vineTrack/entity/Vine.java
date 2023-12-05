@@ -38,6 +38,8 @@ public class Vine {
     private String city;
     private String image;
 
+    private Double MaxWaterConsumption;
+
     String phase = "bud";
     private Double temperature = 0.0;
 
@@ -140,6 +142,13 @@ public class Vine {
         this.city = city;
     }
 
+    public Double getMaxWaterConsumption() {
+        return MaxWaterConsumption;
+    }
+
+    public void setMaxWaterConsumption(Double maxWaterConsumption) {
+        MaxWaterConsumption = maxWaterConsumption;
+    }
 
     @Override
     public String toString() {
