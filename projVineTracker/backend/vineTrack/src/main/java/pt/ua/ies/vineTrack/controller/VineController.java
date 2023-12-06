@@ -199,9 +199,23 @@ public class VineController {
         Vine v = vineService.getVineById(vineId);
 
         SortedMap<String, Double> avgTempsByDay = v.getAvgTempsByDay();
-
-        for (Track track : tracks) {
+        String lastDay = "";
+        Iterator<Track> iterator = tracks.iterator();
+        while (iterator.hasNext()) {
+            Track track = iterator.next();
             String day = track.getDay();
+
+            //Delete tracks dos dias que já terminaram
+            if (!day.equals(lastDay)){
+                for (Track tr : tracks){
+                    if (tr.getDay().equals(lastDay)){
+                        trackService.deleteTrackById(tr.getId());
+                    }
+                }
+            }
+
+            lastDay = day;
+
             double temperature = Double.parseDouble(df.format(track.getValue()));
             if (avgTempsByDay.containsKey(day)) {
                 avgTempsByDay.put(day,  Double.parseDouble(df.format((avgTempsByDay.get(day) + temperature) / 2)));
@@ -214,7 +228,6 @@ public class VineController {
 
         SortedMap<String, Double> avgTempByWeek = v.getAvgTempsByWeek();
 
-        String currentMonth = "";
         String currentWeek = "";
         double weekSum = 0;
         int dayCount = 0;
@@ -230,20 +243,8 @@ public class VineController {
 
             String dayF = (String) avgTempsByDay.keySet().toArray()[dayCount];
 
-            if (!month.equals(currentMonth)) {
-                if (currentMonth.isEmpty()) {
-                    weekSum = weekSum + avgTempsByDay.get(dayF);
-                    currentMonth = month;
-                    dayCount++;
-                } else {
-                    currentMonth = month;
-                    dayCount = 0;
-                }
-
-            } else {
-                weekSum = weekSum + avgTempsByDay.get(dayF);
-                dayCount++;
-            }
+            weekSum = weekSum + avgTempsByDay.get(dayF);
+            dayCount++;
 
             if (dayCount == 7) {
                 weekAverage = Double.parseDouble(df.format(weekSum / dayCount));
@@ -256,7 +257,7 @@ public class VineController {
 
                 weekSum = 0;
                 dayCount = 0;
-
+                
                 for (int x = i-6; x <= i; x++){
                     String d = (String) avgTempsByDay.keySet().toArray()[0];
                     avgTempsByDay.keySet().remove(d);

@@ -448,7 +448,7 @@ export default function VineDetailsView() {
         <Grid xs={12} md={6} lg={4}>
             <Card>
               <CardHeader title='Average Temperature'  />
-              <Box sx={{ p: 3, pb: 1 }}>
+              <Box sx={{ p: 2, pb: 1 }}>
                 {avgTempsByDay.length > 0 && 
                   <TableContainer component={Paper}>
                   <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -476,10 +476,10 @@ export default function VineDetailsView() {
                 }
                 {avgTempsByDay.length == 0 && avgTempsByWeek.length == 0 && <Typography variant="body2" sx={{ mb: 1 }}>No Temperatures</Typography>}
                 </Box>
-                <Box sx={{ p: 3, pb: 1 }}>
+                <Box sx={{ p: 2, pb: 1 }}>
                   {avgTempsByWeek.length > 0 && 
                     <TableContainer component={Paper}>
-                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                    <Table sx={{ minWidth: 500 }} aria-label="simple table">
                       <TableHead>
                         <TableRow>
                           <TableCell>Week</TableCell>
