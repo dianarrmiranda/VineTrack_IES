@@ -56,4 +56,9 @@ public class NotificationService {
         return notificationRepo.getNotificationsByVine(vineService.getVineById(vineId));
     }
 
+    public void deleteNotifications(List<Notification> notificationsToRemove) {
+        for(Notification notification : notificationsToRemove){
+            notificationRepo.deleteById(notification.getId());
+        }
+    }
 }
