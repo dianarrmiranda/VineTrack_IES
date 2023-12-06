@@ -3,6 +3,7 @@ package pt.ua.ies.vineTrack.controller;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import pt.ua.ies.vineTrack.entity.Grape;
 import pt.ua.ies.vineTrack.entity.Notification;
 import pt.ua.ies.vineTrack.entity.Track;
@@ -56,6 +57,8 @@ public class VineController {
     private TrackService trackService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private SimpMessagingTemplate template; // for sending messages to the client through websocket
 
     @GetMapping(path = "/test")
     public Track getAllVinesTest(){
@@ -375,6 +378,36 @@ public class VineController {
 
             return ResponseEntity.ok(list);
         } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping(path = "/harvest/{vineId}")
+    public ResponseEntity<String> harvestVine(@PathVariable Integer vineId) {
+        // we need to send a notification
+        try {
+            Notification notification = new Notification();
+            notification.setDescription("Ready to Harvest.");
+            notification.setType("harvest"); // Set the type
+            notification.setAvatar("/public/assets/images/notifications/harvest.png"); // Set the avatar
+            notification.setIsUnRead(true); // Set the isUnRead
+            notification.setDate(LocalDateTime.now()); // Set the date
+            notification.setVineId(vineId); // Set the vineId directly
+
+            notificationService.saveNotification(notification);
+
+            JSONObject notificationJson = new JSONObject();
+            notificationJson.put("id", notification.getId());
+            notificationJson.put("type", notification.getType());
+            notificationJson.put("avatar", notification.getAvatar());
+            notificationJson.put("isUnRead", notification.getIsUnRead());
+            notificationJson.put("vineId", notification.getVineId());
+            notificationJson.put("description", notification.getDescription());
+            notificationJson.put("date", notification.getDate());
+            this.template.convertAndSend("/topic/notification", notificationJson.toString());
+
+            return ResponseEntity.ok("sent");
+        } catch (Exception e){
             return ResponseEntity.notFound().build();
         }
     }
