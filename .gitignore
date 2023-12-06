@@ -114,5 +114,6 @@ fabric.properties
 
 *.idea
 
-
+### VS Code ###
+.vscode/
 
