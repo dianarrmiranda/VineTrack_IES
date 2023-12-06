@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -91,6 +92,8 @@ public class VineController {
     public Map<String, Double> getTemperatureByVineId(@PathVariable int vineId){
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         Iterator<Track> iterator = tracks.iterator();
+        DecimalFormat df = new DecimalFormat("#.##");
+
         while (iterator.hasNext()) {
             Track track = iterator.next();
             if (!track.getType().equals("temperature")) {
@@ -108,7 +111,7 @@ public class VineController {
 
         for (Track track : tracks) {
             if (track.getDay().equals(LocalDate.now().toString())) {
-                tempValues.add(track.getValue());
+                tempValues.add(Double.parseDouble(df.format(track.getValue())));
                 tempTimes.add(track.getTime());
             }
         }
@@ -184,55 +187,97 @@ public class VineController {
         return waterConsumptionValues;
     }
 
-    @GetMapping(path = "/avgTemperature/{vineId}")
-    public Map<String, Double>  getAvgTemperatureByVineId(@PathVariable int vineId){
+    @GetMapping(path = "/avgTemperatureByDay/{vineId}")
+    public Map<String, Double>  getAvgTemperatureByDayByVineId(@PathVariable int vineId){
+        DecimalFormat df = new DecimalFormat("#.##");
+
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         tracks.removeIf(track -> !track.getType().equals("temperature"));
 
         Vine v = vineService.getVineById(vineId);
 
-        Map<String, Double> avgTempsByDay = v.getAvgTempsByDay();
+        SortedMap<String, Double> avgTempsByDay = v.getAvgTempsByDay();
 
         for (Track track : tracks) {
             String day = track.getDay();
-            double temperature = track.getValue();
+            double temperature = Double.parseDouble(df.format(track.getValue()));
             if (avgTempsByDay.containsKey(day)) {
-                avgTempsByDay.put(day, (avgTempsByDay.get(day) + temperature) / 2);
+                avgTempsByDay.put(day,  Double.parseDouble(df.format((avgTempsByDay.get(day) + temperature) / 2)));
             } else {
                 avgTempsByDay.put(day, temperature);
             }
         }
+
         v.setAvgTempsByDay(avgTempsByDay);
-/*
-        for (int i = 0; i <= avgTempsByDay.size(); i++ ){
-            String[] fullDay = ((String) avgTempsByDay.keySet().toArray()[i]).split("-");
+
+        SortedMap<String, Double> avgTempByWeek = v.getAvgTempsByWeek();
+
+        String currentMonth = "";
+        String currentWeek = "";
+        double weekSum = 0;
+        int dayCount = 0;
+        double weekAverage;
+
+        int size = avgTempsByDay.size();
+
+        for (int i = 0; i < size; i++) {
+            String[] fullDay = ((String) avgTempsByDay.keySet().toArray()[dayCount]).split("-");
             String day = fullDay[2];
             String month = fullDay[1];
             String year = fullDay[0];
 
-            if (i != 0){
-                String[] fullDayLast = ((String) avgTempsByDay.keySet().toArray()[i-1]).split("-");
-                String dayLast  = fullDay[2];
-                String monthLast  = fullDay[1];
-                String yearLast  = fullDay[0];
+            String dayF = (String) avgTempsByDay.keySet().toArray()[dayCount];
 
-                if (!month.equals(monthLast)){
-                    System.out.println("another month");
+            if (!month.equals(currentMonth)) {
+                if (currentMonth.isEmpty()) {
+                    weekSum = weekSum + avgTempsByDay.get(dayF);
+                    currentMonth = month;
+                    dayCount++;
+                } else {
+                    currentMonth = month;
+                    dayCount = 0;
+                }
+
+            } else {
+                weekSum = weekSum + avgTempsByDay.get(dayF);
+                dayCount++;
+            }
+
+            if (dayCount == 7) {
+                weekAverage = Double.parseDouble(df.format(weekSum / dayCount));
+                String[] fullDay1 = ((String) avgTempsByDay.keySet().toArray()[dayCount-7]).split("-");
+                String day1 = fullDay1[2];
+                String month1 = fullDay1[1];
+
+                currentWeek = day1 + "/" + month1 + " - " + day + "/" + month + " (" + year + ")";
+                avgTempByWeek.put(currentWeek, weekAverage);
+
+                weekSum = 0;
+                dayCount = 0;
+
+                for (int x = i-6; x <= i; x++){
+                    String d = (String) avgTempsByDay.keySet().toArray()[0];
+                    avgTempsByDay.keySet().remove(d);
                 }
             }
-
-            if (i < 7 ){
-
-            }
-
-
         }
 
- */
+        v.setAvgTempsByWeek(avgTempByWeek);
+        vineService.save(v);
 
-        System.out.println("Vine: " + vineId + " - " + "Avg temperature: " + avgTempsByDay);
-
+        System.out.println("Vine: " + vineId + " - " + "Avg temperature by day: " + avgTempsByDay);
         return avgTempsByDay;
+
+    }
+
+    @GetMapping(path = "/avgTemperatureByWeek/{vineId}")
+    public Map<String, Double> getAvgTemperatureByWeekByVineId(@PathVariable int vineId){
+        Vine v = vineService.getVineById(vineId);
+        SortedMap<String, Double> avgTempByWeek = v.getAvgTempsByWeek();
+
+        System.out.println("Vine: " + vineId + " - " + "Avg temperature by week: " + avgTempByWeek);
+
+        return avgTempByWeek;
     }
 
     @GetMapping(path = "/name/{vineId}")

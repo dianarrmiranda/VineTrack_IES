@@ -3,6 +3,7 @@ package pt.ua.ies.vineTrack.entity;
 import java.sql.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -46,7 +47,10 @@ public class Vine {
     private List<User> users;
 
     @ElementCollection
-    private Map<String, Double> avgTempsByDay = new TreeMap<>();;
+    private SortedMap<String, Double> avgTempsByDay = new TreeMap<>();
+    @ElementCollection
+    private SortedMap<String, Double> avgTempsByWeek = new TreeMap<>();
+
 
 
     public Integer getId(){
@@ -85,8 +89,12 @@ public class Vine {
         return city;
     }
 
-    public Map<String, Double> getAvgTempsByDay(){
+    public SortedMap<String, Double> getAvgTempsByDay(){
         return avgTempsByDay;
+    }
+
+    public SortedMap<String, Double> getAvgTempsByWeek(){
+        return avgTempsByWeek;
     }
     public void setId(Integer id){
         this.id = id;
@@ -140,7 +148,9 @@ public class Vine {
         this.city = city;
     }
 
-    public void setAvgTempsByDay(Map<String, Double> avgTempsByDay){ this.avgTempsByDay = avgTempsByDay; }
+    public void setAvgTempsByDay(SortedMap<String, Double> avgTempsByDay){ this.avgTempsByDay = avgTempsByDay; }
+
+    public void setAvgTempsByWeek(SortedMap<String, Double> avgTempsByWeek){ this.avgTempsByWeek = avgTempsByWeek; }
 
 
     @Override

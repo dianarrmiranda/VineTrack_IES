@@ -203,7 +203,13 @@ class Generator:
                     temp = requests.get(f'http://api.ipma.pt/public-data/forecast/aggregate/{locales[city]}.json')
                     temp = temp.json()
 
-                    temp = {hour['dataPrev']: hour['tMed'] for hour in temp if 'tMed' in hour }
+                    dic = {}
+
+                    for hour in temp:
+                        if 'tMed' in hour:
+                            dic[hour['dataPrev']] = hour['tMed']
+                        else:
+                            dic[hour['dataPrev']] = str((float(hour['tMin']) + float(hour['tMax'])) / 2)
 
                     today = datetime.date.today().strftime('%Y-%m-%d')
                     time = datetime.datetime.now().strftime('%H')
@@ -229,7 +235,7 @@ class Generator:
                     if last_hours[self.id][1]  == False and today == last_hours[self.id][2]:
                                             
                         time = f'{time}:00:00'
-                        temperture = float(temp[f'{today}T{time}'])
+                        temperture = float(dic[f'{today}T{time}'])
 
                         message = {
                             'id': self.id,

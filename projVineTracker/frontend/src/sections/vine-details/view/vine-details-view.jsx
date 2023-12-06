@@ -26,7 +26,8 @@ export default function VineDetailsView() {
 
   const [currentDay, setCurrentDay] = useState(new Date().getDate());
 
-  const [avgTemps, setAvgTemps] = useState([]);
+  const [avgTempsByDay, setAvgTempsByDay] = useState([]);
+  const [avgTempsByWeek, setAvgTempsByWeek] = useState([]);
 
   useEffect(() => {
     const initialize = async () => {
@@ -96,7 +97,7 @@ export default function VineDetailsView() {
       }
     });
   
-    fetchData(`vines/avgTemperature/${id}`)
+    fetchData(`vines/avgTemperatureByDay/${id}`)
       .then(response => {
         if (response) {
           console.log("Average Temperature data fetched");
@@ -104,7 +105,22 @@ export default function VineDetailsView() {
           const labels = Object.keys(response);
           const values = Object.values(response);
 
-          setAvgTemps(labels.map((value, index) => {
+          setAvgTempsByDay(labels.map((value, index) => {
+            return {[value]: values[index]};
+          }));
+
+        }
+    });
+
+    fetchData(`vines/avgTemperatureByWeek/${id}`)
+      .then(response => {
+        if (response) {
+          console.log("Average Temperature data fetched");
+
+          const labels = Object.keys(response);
+          const values = Object.values(response);
+
+          setAvgTempsByWeek(labels.map((value, index) => {
             return {[value]: values[index]};
           }));
 
@@ -142,7 +158,9 @@ export default function VineDetailsView() {
             if (!newtempData.map((value, index) => {return Object.keys(value)[0]}).includes(JSON.parse(data.body).date)) {
               newtempData.push({[JSON.parse(data.body).date]: JSON.parse(data.body).value});
               setTempData(newtempData.sort((a, b) => Object.keys(b)[0] - Object.keys(a)[0]));
-              fetchData(`vines/avgTemperature/${id}`)
+
+
+              fetchData(`vines/avgTemperatureByDay/${id}`)
                 .then(response => {
                   if (response) {
                     console.log("Average Temperature data fetched");
@@ -150,7 +168,22 @@ export default function VineDetailsView() {
                     const labels = Object.keys(response);
                     const values = Object.values(response);
         
-                    setAvgTemps(labels.map((value, index) => {
+                    setAvgTempsByDay(labels.map((value, index) => {
+                      return {[value]: values[index]};
+                    }));
+        
+                  }
+              });
+              
+              fetchData(`vines/avgTemperatureByWeek/${id}`)
+                .then(response => {
+                  if (response) {
+                    console.log("Average Temperature data fetched");
+        
+                    const labels = Object.keys(response);
+                    const values = Object.values(response);
+        
+                    setAvgTempsByWeek(labels.map((value, index) => {
                       return {[value]: values[index]};
                     }));
         
@@ -197,7 +230,7 @@ export default function VineDetailsView() {
   console.log("Temperature", tempData);
   console.log("Latest value: ", latestValue);
   console.log("Weather Alerts: ", weatherAlertsData);
-  console.log("Average Temperature: ", avgTemps);
+  console.log("Average Temperature by day: ", avgTempsByDay);
 
   return (
     <Container maxWidth="xl">
@@ -276,7 +309,7 @@ export default function VineDetailsView() {
             <Card>
               <CardHeader title='Average Temperature'  />
               <Box sx={{ p: 3, pb: 1 }}>
-                {avgTemps && 
+                {avgTempsByDay.length > 0 && 
                   <TableContainer component={Paper}>
                   <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
@@ -286,7 +319,7 @@ export default function VineDetailsView() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {avgTemps.map((value) => (
+                      {avgTempsByDay.map((value) => (
                         <TableRow
                           key={Object.keys(value)[0]}
                           sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -301,8 +334,35 @@ export default function VineDetailsView() {
                   </Table>
                 </TableContainer>
                 }
-                {!avgTemps && <Typography variant="body2" sx={{ mb: 1 }}>No Temperatures</Typography>}
-              </Box>
+                {avgTempsByDay.length == 0 && avgTempsByWeek.length == 0 && <Typography variant="body2" sx={{ mb: 1 }}>No Temperatures</Typography>}
+                </Box>
+                <Box sx={{ p: 3, pb: 1 }}>
+                  {avgTempsByWeek.length > 0 && 
+                    <TableContainer component={Paper}>
+                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Week</TableCell>
+                          <TableCell >Average Temperature</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {avgTempsByWeek.map((value) => (
+                          <TableRow
+                            key={Object.keys(value)[0]}
+                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                          >
+                            <TableCell component="th" scope="row">
+                              {Object.keys(value)[0]}
+                            </TableCell>
+                            <TableCell>{Object.values(value)[0]}º C</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  }
+                </Box>
           </Card>
         </Grid>
 
