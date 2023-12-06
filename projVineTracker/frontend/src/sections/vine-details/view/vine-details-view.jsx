@@ -17,6 +17,7 @@ import Iconify from "src/components/iconify";
 import { styled } from '@mui/system';
 import clsx from 'clsx';
 import { FormControl, useFormControlContext } from '@mui/base/FormControl';
+import { set } from "lodash";
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
@@ -265,6 +266,8 @@ export default function VineDetailsView() {
       setError('Value cannot be empty');
     } else if (parseFloat(value) < 2 || parseFloat(value) > 4) {
       setError('Value must be between 2.0 and 4.0');
+    } else if (isNaN(parseFloat(value))) {
+      setError('Value must be a number');
     } else {
       // Validation passed, you can proceed with your form submission logic
       setError('');
@@ -276,7 +279,12 @@ export default function VineDetailsView() {
           const newPhValues = [...phValues];
           // put the new value in the first position
           newPhValues.unshift(response);
+          // if the list has more than 5 values, remove the last one
+          if (newPhValues.length > 5) {
+            newPhValues.pop();
+          }
           setPhValues(newPhValues);
+          setValue('');
         } else {
           console.log("PH value failed");
         }
