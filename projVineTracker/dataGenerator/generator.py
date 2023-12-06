@@ -347,12 +347,12 @@ class Generator:
 
                 if len(info) == 0:
                     continue
-                print(info)
+                print(info) # aqui o info já tem de ter a info dos nutrientes, provavelmetne não é select na Vine
                 info = info[0]
                 phase = info[5]
                 # temperature = info[7]
                 nutrients = info[8] # Nutrientes vai ser do tipo [ (Nitrogen, 0.5), (Phosphorus, 0.5), (Potassium, 0.5), (Calcium, 0.5), (Magnesium, 0.5), (Chloride, 0.5) ]
-
+                print(":::::" + nutrients + "::::::::")
                 self.cursor = self.connection.cursor()
                 self.cursor.execute(f'SELECT * FROM track where vine_id = {self.id} ORDER BY date DESC LIMIT 2')
                 values = self.cursor.fetchall()

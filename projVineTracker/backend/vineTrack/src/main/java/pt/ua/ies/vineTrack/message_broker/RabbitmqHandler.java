@@ -44,6 +44,7 @@ public class RabbitmqHandler {
         this.template.convertAndSend("/topic/update", message);
         JSONObject params = new JSONObject(message);
         String type = params.getString("sensor");
+        System.out.println("Tipo de sensorrrrrrr:"+ type);
 
         switch (type) {
             case "moisture":
@@ -180,14 +181,28 @@ public class RabbitmqHandler {
             case "nutrients":
                 int vineId4 = params.getInt("id");
                 double value4 = params.getDouble("value");
-                String nutrient = params.getString("nutrient");
-
+                // double pastValue4;
+                // store the track in the database
                 Vine vine4 = vineService.getVineById(vineId4);
-                LocalDateTime date4 = LocalDateTime.now();
+                List<Track> tracks4 = trackService.getLastMoistureTrackByVineId(vineId4);
+                Track lastMoistureTrack4 = !tracks4.isEmpty() ? tracks4.get(0) : null;
+                LocalDateTime lastMoistureTrackDate4 = lastMoistureTrack4 != null ? lastMoistureTrack4.getDate() : null;
+                pastValue = lastMoistureTrack4 != null ? lastMoistureTrack4.getValue() : 0;
+                LocalDateTime date4;
+                if (lastMoistureTrackDate4 != null) {
+                    date4 = lastMoistureTrackDate4.plusHours(1);
+                } else {
+                    date4 = LocalDateTime.now();
+                }
 
-                Track track4 = new Track(type, date4, value4, vine4);
+                LocalDate d4 = date4.toLocalDate();
+                LocalTime t4 = date4.toLocalTime();
+
+                Track track4 = new Track(type, date4, value4, vine4, t4.toString(), d4.toString());
+
                 trackService.saveTrack(track4);
-                trackService.removeOldTracks("nutrients", vineId4);
+
+
 
                 break;
             default:

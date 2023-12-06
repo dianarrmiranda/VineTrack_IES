@@ -92,7 +92,6 @@ public class VineController {
     @GetMapping(path = "/nutrients/{vineId}")
     public List<Double> getNutrientsByVineId(@PathVariable int vineId){
         System.out.println("Inside /nutrients: Vine id: " + vineId);
-         // return new ArrayList<>(); // TODO: pus só aqui esta lista para ele não se queixar de falta de return
          List<Track> tracks = vineService.getTracksByVineId(vineId);
          Iterator<Track> iterator = tracks.iterator();
          while (iterator.hasNext()) {
@@ -111,7 +110,7 @@ public class VineController {
          if (nutrientsValues.size() > 10) {
              nutrientsValues = nutrientsValues.subList(nutrientsValues.size() - 10, nutrientsValues.size());
          }
-         System.out.println("Nutrients: " + nutrientsValues);
+         System.out.println("Vine: " + vineId + " - " + "Nutrients: " + nutrientsValues);
          return nutrientsValues;
     }
 

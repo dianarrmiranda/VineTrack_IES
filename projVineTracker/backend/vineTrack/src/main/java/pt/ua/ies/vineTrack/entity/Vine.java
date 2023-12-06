@@ -53,7 +53,7 @@ public class Vine {
     private List<User> users;
 
     @Column(nullable = false)
-    @ManyToMany(mappedBy = "nutrients")
+    @ManyToMany(mappedBy = "vines")
     private List<Nutrient> Nutrients; //TODO: convém ver como os valores saem daqui
 
     public Integer getId(){
@@ -144,16 +144,17 @@ public class Vine {
         this.city = city;
     }
 
-    // public List<List<Object>> getNutrientsList() {
-    //     return NutrientsList;
-    // }
-
-    // public void setNutrientsList(List<List<Object>> nutrientsList) {
-    //     this.NutrientsList = nutrientsList;
-    // }
+    public List<Nutrient> getNutrientsList() {
+        return Nutrients;
+    }
+         public void setNutrientsList(List<Nutrient> nutrients) {
+         this.Nutrients = nutrients;
+     }
     @Override
     public String toString() {
         return name;
     }
+
+    // }
 
 }

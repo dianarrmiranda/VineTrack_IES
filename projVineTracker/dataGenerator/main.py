@@ -15,6 +15,7 @@ if __name__ == '__main__':
     moisture = loop.create_task(generator.moisture())
     temperature = loop.create_task(generator.temperature())
     weatherAlerts = loop.create_task(generator.weatherAlerts())
+    nutrients = loop.create_task(generator.nutrients())
 
-    loop.run_until_complete(asyncio.gather(moisture, temperature, weatherAlerts))
+    loop.run_until_complete(asyncio.gather(moisture, temperature, weatherAlerts, nutrients))
     loop.close()

@@ -25,8 +25,8 @@ public class Nutrient {
     @Column(nullable = false)
     private Double Chloride;
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "vine_id", referencedColumnName = "id")
+    @ManyToMany()
+    @JoinColumn(name = "nutrients", referencedColumnName = "id")
     private List<Vine> vines;
 
     public Nutrient() {
