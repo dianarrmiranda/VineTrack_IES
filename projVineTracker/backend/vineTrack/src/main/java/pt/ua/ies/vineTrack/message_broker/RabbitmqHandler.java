@@ -96,17 +96,16 @@ public class RabbitmqHandler {
                     if (waterConsumption > waterConsumptionLimit) {
                         Boolean isUnRead = true;
                         Notification notification = new Notification();
-                        // set description to  'Levels of the soil humidity are low.'
                         notification.setDescription("Water consumption is above the limit. Please check the vine " + vine.getName() + ".");
                         notification.setVine(vine); // Set the vine
                         notification.setType("waterConsumption"); // Set the type
                         notification.setAvatar("/public/assets/images/notifications/waterConsumption.png"); // Set the avatar
                         notification.setIsUnRead(isUnRead); // Set the isUnRead
                         notification.setDate(LocalDateTime.now()); // Set the date
-                        // notification.setVineId(vine.getId()); // Set the vineId directly
+                        notification.setVineId(vine.getId()); // Set the vineId directly
 
                         System.out.println("VINE ID: " + vineId);
-                        // System.out.println("Received Notification: type: " + notification.getType() + " avatar: " + notification.getAvatar() + " isUnRead: " + notification.getIsUnRead() + " vineId: " + notification.getVineId());
+                        System.out.println("Received Notification: type: " + notification.getType() + " avatar: " + notification.getAvatar() + " isUnRead: " + notification.getIsUnRead() + " vineId: " + notification.getVineId());
 
 
                         int totalNotifications = notificationService.getNumberOfNotificationsByVine(vine);
@@ -126,7 +125,7 @@ public class RabbitmqHandler {
                         notificationJson.put("type", notification.getType());
                         notificationJson.put("avatar", notification.getAvatar());
                         notificationJson.put("isUnRead", notification.getIsUnRead());
-                        // notificationJson.put("vineId", notification.getVineId());
+                        notificationJson.put("vineId", notification.getVineId());
                         notificationJson.put("description", notification.getDescription());
                         notificationJson.put("date", notification.getDate());
                         notificationJson.put("waterLimit", waterConsumptionLimit);
