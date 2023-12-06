@@ -321,6 +321,16 @@ public class VineController {
             Track track = new Track("ph", now, value, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
             trackService.saveTrack(track);
 
+            // only keep the last 5 tracks for each vine
+            List<Track> tracks = trackService.getTracksByVineId(vineId);
+            tracks.removeIf(track1 -> !track1.getType().equals("ph"));
+            // order the tracks by date from the oldest to the newest
+            tracks.sort(Comparator.comparing(Track::getDate));
+            while (tracks.size() > 5) {
+                trackService.deleteTrackById(tracks.get(0).getId());
+                tracks.remove(0);
+            }
+
             Map<String, String> map = new HashMap<>();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS");
             LocalDateTime date = LocalDateTime.parse(now.toString(), formatter);
