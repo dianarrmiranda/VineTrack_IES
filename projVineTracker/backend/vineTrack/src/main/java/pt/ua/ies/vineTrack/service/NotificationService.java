@@ -52,4 +52,8 @@ public class NotificationService {
         }
     }
 
+    public List<Notification> getNotificationsByVineId(Integer vineId){
+        return notificationRepo.getNotificationsByVine(vineService.getVineById(vineId));
+    }
+
 }
