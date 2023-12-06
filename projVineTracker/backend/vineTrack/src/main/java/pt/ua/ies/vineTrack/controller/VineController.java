@@ -347,8 +347,6 @@ public class VineController {
             // now we need to order the tracks by date from the newest to the oldest
             tracks.sort(Comparator.comparing(Track::getDate).reversed());
 
-            System.out.println("Vine: " + vineId + " - " + "Ph: " + tracks);
-
             List<Map<String, String>> list = new ArrayList<>();
 
             for (Track track : tracks) {
@@ -362,7 +360,6 @@ public class VineController {
                 String formattedDateTime = date.format(outputFormatter);
                 map.put("date", formattedDateTime);
                 map.put("value", Double.toString(track.getValue()));
-                System.out.println(map);
                 list.add(map);
             }
 
