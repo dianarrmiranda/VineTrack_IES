@@ -71,4 +71,12 @@ public class TrackService {
         List<Track> oldWaterConsumptionTracks = trackRepo.getOldWaterConsumptionTracks(lastTrackDate.minusDays(7));
         trackRepo.deleteAll(oldWaterConsumptionTracks);
     }
+
+    public List<Track> getLastTrackByVineId(Integer vineId) {
+        return trackRepo.getLastTrackByVineId(vineId);
+    }
+
+    public List<Track> getTracksByVineId(Integer vineId) {
+        return trackRepo.getTracksByVineId(vineId);
+    }
 }

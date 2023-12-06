@@ -7,17 +7,16 @@ import AppHumidityChart from "../app-humidity-chart";
 import AppTemperatureChart from "../app-temperature-chart";
 import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 
-import { fetchData } from "src/utils";
+import { fetchData, postData } from "src/utils";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
-import { Box, Card, CardHeader, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Modal, Stack } from "@mui/material";
+import { Box, Card, CardHeader, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Modal, Stack, TextField } from "@mui/material";
 import Iconify from "src/components/iconify";
 import { styled } from '@mui/system';
 import clsx from 'clsx';
 import { FormControl, useFormControlContext } from '@mui/base/FormControl';
-import { Input, inputClasses } from '@mui/base/Input';
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
@@ -222,35 +221,6 @@ export default function VineDetailsView() {
   };
 
   // Form
-
-  const StyledInput = styled(Input)(
-    ({ theme }) => `
-  
-    .${inputClasses.input} {
-      width: 320px;
-      font-family: 'IBM Plex Sans', sans-serif;
-      font-size: 0.875rem;
-      font-weight: 400;
-      line-height: 1.5;
-      padding: 8px 12px;
-      border-radius: 8px;
-      color: ${theme.palette.mode === 'dark' ? grey[300] : grey[900]};
-      background: ${theme.palette.mode === 'dark' ? grey[900] : '#fff'};
-      border: 1px solid ${theme.palette.mode === 'dark' ? grey[700] : grey[200]};
-      box-shadow: 0px 2px 2px ${theme.palette.mode === 'dark' ? grey[900] : grey[50]};
-  
-      &:hover {
-        border-color: ${blue[400]};
-      }
-  
-      &:focus {
-        outline: 0;
-        border-color: ${blue[400]};
-        box-shadow: 0 0 0 3px ${theme.palette.mode === 'dark' ? blue[600] : blue[200]};
-      }
-    }
-  `,
-  );
   
   const Label = styled(({ children, className }) => {
     const formControlContext = useFormControlContext();
@@ -277,58 +247,12 @@ export default function VineDetailsView() {
     );
   })`
     font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 0.875rem;
     margin-bottom: 4px;
   
     &.invalid {
       color: red;
     }
   `;
-  
-  const HelperText = styled((props) => {
-    const formControlContext = useFormControlContext();
-    const [dirty, setDirty] = useState(false);
-  
-    useEffect(() => {
-      if (formControlContext?.filled) {
-        setDirty(true);
-      }
-    }, [formControlContext]);
-  
-    if (formControlContext === undefined) {
-      return null;
-    }
-  
-    const { required, filled } = formControlContext;
-    const showRequiredError = dirty && required && !filled;
-  
-    return showRequiredError ? <p {...props}>This field is required.</p> : null;
-  })`
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 0.875rem;
-  `;
-
-  const blue = {
-    100: '#DAECFF',
-    200: '#b6daff',
-    400: '#3399FF',
-    500: '#007FFF',
-    600: '#0072E5',
-    900: '#003A75',
-  };
-  
-  const grey = {
-    50: '#F3F6F9',
-    100: '#E5EAF2',
-    200: '#DAE2ED',
-    300: '#C7D0DD',
-    400: '#B0B8C4',
-    500: '#9DA8B7',
-    600: '#6B7A90',
-    700: '#434D5B',
-    800: '#303740',
-    900: '#1C2025',
-  };
 
   // Form Control
   const [value, setValue] = useState('');
@@ -339,13 +263,27 @@ export default function VineDetailsView() {
 
     if (!value) {
       setError('Value cannot be empty');
-    } else if (parseFloat(value) < 2.9 || parseFloat(value) > 3.5) {
-      setError('Value must be between 2.9 and 3.5');
+    } else if (parseFloat(value) < 2 || parseFloat(value) > 4) {
+      setError('Value must be between 2.0 and 4.0');
     } else {
       // Validation passed, you can proceed with your form submission logic
       setError('');
-      // Perform further actions like submitting the form data
-      console.log('Form submitted with value:', value);
+      // Send data to backend
+      const res = postData(`vines/ph/${id}?value=${value}`);
+      res.then((response) => {
+        if (response) {
+          console.log("PH value added", response);
+          const newPhValues = [...phValues];
+          // put the new value in the first position
+          newPhValues.unshift(response);
+          setPhValues(newPhValues);
+        } else {
+          console.log("PH value failed");
+        }
+      }
+      , [id]);
+      // Close the modal
+      handleClose();
     }
   };
 
@@ -359,18 +297,15 @@ export default function VineDetailsView() {
     <>
       <FormControl>
         <Stack direction="row" alignItems="center" spacing={2}>
-          <Label>Value:</Label>
-          <StyledInput
-            placeholder=""
+          <Label sx={{ fontSize: '16px' }}>Value:</Label>
+          <TextField
             value={value}
             onChange={handleInputChange}
+            error={!!error}
+            helperText={error}
+            sx={{ width: '100%' }}
           />
         </Stack>
-        {error && (
-          <Typography variant="body2" color="error">
-            {error}
-          </Typography>
-        )}
         <Box display="flex" justifyContent="flex-end">
           <Button type="submit" variant="contained" color="inherit" sx={{ mt: 3 }}
           onClick={handleSubmit}>
@@ -380,6 +315,21 @@ export default function VineDetailsView() {
       </FormControl>
     </>
   );
+
+  // PH Values
+  const [phValues, setPhValues] = useState([]);
+  useEffect(() => {
+    fetchData(`vines/ph/${id}`)
+      .then(response => {
+        if (response) {
+          console.log("PH Values data fetched");
+          setPhValues(response);
+        } else {
+          console.log("PH Values data failed");
+        }
+      });
+  }
+  , [id]);
 
   return (
     <Container maxWidth="xl">
@@ -561,7 +511,7 @@ export default function VineDetailsView() {
               </Grid>
 
               <Box sx={{ p: 3, pb: 1 }}>
-                {weatherAlertsData && 
+                {phValues && 
                   <TableContainer component={Paper}>
                   <Table aria-label="simple table">
                     <TableHead>
@@ -571,22 +521,23 @@ export default function VineDetailsView() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {weatherAlertsData.map((row) => (
+                      {phValues.map((row) => (
+                        console.log(row),
                         <TableRow
                           key={row.name}
                           sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                         >
                           <TableCell component="th" scope="row">
-                            {row.type}
+                            {row.date}
                           </TableCell>
-                          <TableCell align="right">{row.level}</TableCell>
+                          <TableCell align="right">{row.value}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
                 </TableContainer>
                 }
-                {!weatherAlertsData && <Typography variant="body2" sx={{ mb: 1 }}>No weather alerts</Typography>}
+                {!phValues && <Typography variant="body2" sx={{ mb: 1 }}>No PH Values were found</Typography>}
               </Box>
 
 

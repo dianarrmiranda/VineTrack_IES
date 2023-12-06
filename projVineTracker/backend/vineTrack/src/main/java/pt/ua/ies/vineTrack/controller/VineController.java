@@ -1,5 +1,6 @@
 package pt.ua.ies.vineTrack.controller;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import pt.ua.ies.vineTrack.entity.Grape;
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -305,6 +307,66 @@ public class VineController {
             }
 
             return ResponseEntity.ok(vineService.deleteVineById(id));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping(path = "/ph/{vineId}")
+    public ResponseEntity<Map<String, String>> addPhTrack(@PathVariable Integer vineId, @RequestParam Double value){
+        try {
+            System.out.println("Received ph value: " + value);
+            Vine vine = vineService.getVineById(vineId);
+            LocalDateTime now = LocalDateTime.now();
+            Track track = new Track("ph", now, value, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
+            trackService.saveTrack(track);
+
+            Map<String, String> map = new HashMap<>();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS");
+            LocalDateTime date = LocalDateTime.parse(now.toString(), formatter);
+            // Define the desired output format
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss");
+
+            // Format the LocalDateTime object into a readable format
+            String formattedDateTime = date.format(outputFormatter);
+            map.put("date", formattedDateTime);
+            map.put("value", value.toString());
+
+            return ResponseEntity.ok(map);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping(path = "/ph/{vineId}") // gets the date and value of the ph tracks
+    public ResponseEntity<List<Map<String, String>>> getPhTracks(@PathVariable Integer vineId){
+        try {
+            List<Track> tracks = trackService.getTracksByVineId(vineId);
+            tracks.removeIf(track -> !track.getType().equals("ph"));
+
+            // now we need to order the tracks by date from the newest to the oldest
+            tracks.sort(Comparator.comparing(Track::getDate).reversed());
+
+            System.out.println("Vine: " + vineId + " - " + "Ph: " + tracks);
+
+            List<Map<String, String>> list = new ArrayList<>();
+
+            for (Track track : tracks) {
+                Map<String, String> map = new HashMap<>();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS");
+                LocalDateTime date = LocalDateTime.parse(track.getDay() + "T" + track.getTime(), formatter);
+                // Define the desired output format
+                DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss");
+
+                // Format the LocalDateTime object into a readable format
+                String formattedDateTime = date.format(outputFormatter);
+                map.put("date", formattedDateTime);
+                map.put("value", Double.toString(track.getValue()));
+                System.out.println(map);
+                list.add(map);
+            }
+
+            return ResponseEntity.ok(list);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
