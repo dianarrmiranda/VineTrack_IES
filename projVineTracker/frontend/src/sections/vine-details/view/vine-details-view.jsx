@@ -7,12 +7,17 @@ import AppHumidityChart from "../app-humidity-chart";
 import AppTemperatureChart from "../app-temperature-chart";
 import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 
-import { fetchData } from "src/utils";
+import { fetchData, postData } from "src/utils";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
-import { Box, Card, CardHeader, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { Box, Card, CardHeader, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Modal, Stack, TextField } from "@mui/material";
+import Iconify from "src/components/iconify";
+import { styled } from '@mui/system';
+import clsx from 'clsx';
+import { FormControl, useFormControlContext } from '@mui/base/FormControl';
+import { set } from "lodash";
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
@@ -198,6 +203,141 @@ export default function VineDetailsView() {
   console.log("Weather Alerts: ", weatherAlertsData);
   console.log("Weather Alerts Notification: ", weatherAlertsNotification);
   
+  // Modal
+
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    // width: 600,
+    bgcolor: 'background.paper',
+    // border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+  };
+
+  // Form
+  
+  const Label = styled(({ children, className }) => {
+    const formControlContext = useFormControlContext();
+    const [dirty, setDirty] = useState(false);
+  
+    useEffect(() => {
+      if (formControlContext?.filled) {
+        setDirty(true);
+      }
+    }, [formControlContext]);
+  
+    if (formControlContext === undefined) {
+      return <p>{children}</p>;
+    }
+  
+    const { error, required, filled } = formControlContext;
+    const showRequiredError = dirty && required && !filled;
+  
+    return (
+      <p className={clsx(className, error || showRequiredError ? 'invalid' : '')}>
+        {children}
+        {required ? ' *' : ''}
+      </p>
+    );
+  })`
+    font-family: 'IBM Plex Sans', sans-serif;
+    margin-bottom: 4px;
+  
+    &.invalid {
+      color: red;
+    }
+  `;
+
+  // Form Control
+  const [value, setValue] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!value) {
+      setError('Value cannot be empty');
+    } else if (parseFloat(value) < 2 || parseFloat(value) > 4) {
+      setError('Value must be between 2.0 and 4.0');
+    } else if (isNaN(parseFloat(value))) {
+      setError('Value must be a number');
+    } else {
+      // Validation passed, you can proceed with your form submission logic
+      setError('');
+      // Send data to backend
+      const res = postData(`vines/ph/${id}?value=${value}`);
+      res.then((response) => {
+        if (response) {
+          console.log("PH value added", response);
+          const newPhValues = [...phValues];
+          // put the new value in the first position
+          newPhValues.unshift(response);
+          // if the list has more than 5 values, remove the last one
+          if (newPhValues.length > 5) {
+            newPhValues.pop();
+          }
+          setPhValues(newPhValues);
+          setValue('');
+        } else {
+          console.log("PH value failed");
+        }
+      }
+      , [id]);
+      // Close the modal
+      handleClose();
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const newValue = e.target.value;
+    setValue(newValue);
+    setError(''); // Clear error message on input change
+  };
+
+  const renderForm = (
+    <>
+      <FormControl>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Label sx={{ fontSize: '16px' }}>Value:</Label>
+          <TextField
+            value={value}
+            onChange={handleInputChange}
+            error={!!error}
+            helperText={error}
+            sx={{ width: '100%' }}
+          />
+        </Stack>
+        <Box display="flex" justifyContent="flex-end">
+          <Button type="submit" variant="contained" color="inherit" sx={{ mt: 3 }}
+          onClick={handleSubmit}>
+            Submit
+          </Button>
+        </Box>
+      </FormControl>
+    </>
+  );
+
+  // PH Values
+  const [phValues, setPhValues] = useState([]);
+  useEffect(() => {
+    fetchData(`vines/ph/${id}`)
+      .then(response => {
+        if (response) {
+          console.log("PH Values data fetched");
+          setPhValues(response);
+        } else {
+          console.log("PH Values data failed");
+        }
+      });
+  }
+  , [id]);
 
   return (
     <Container maxWidth="xl">
@@ -357,6 +497,86 @@ export default function VineDetailsView() {
               ],
             }}
           />
+        </Grid>
+
+        <Grid xs={12} md={6} lg={4}>
+          <Card>
+
+              <Grid container alignItems="center" justifyContent="space-between">
+                <Grid item>
+                  <CardHeader title='PH Values' />
+                </Grid>
+                <Grid item sx={{pt: 4, pr: 3}}>
+                  <Button
+                    variant="contained"
+                    color="inherit"
+                    startIcon={<Iconify icon="eva:plus-fill" />}
+                    onClick={handleOpen}
+                  >
+                    Add New Value
+                  </Button>
+                </Grid>
+              </Grid>
+
+              <Box sx={{ p: 3, pb: 1 }}>
+                {phValues && 
+                  <TableContainer component={Paper}>
+                  <Table aria-label="simple table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Date</TableCell>
+                        <TableCell align="right">PH Value</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {phValues.map((row) => (
+                        console.log(row),
+                        <TableRow
+                          key={row.name}
+                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        >
+                          <TableCell component="th" scope="row">
+                            {row.date}
+                          </TableCell>
+                          <TableCell align="right">{row.value}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                }
+                {!phValues && <Typography variant="body2" sx={{ mb: 1 }}>No PH Values were found</Typography>}
+              </Box>
+
+
+              <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+              >
+                <Box sx={style}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    sx={{ mb: 5 }}
+                  >
+                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                      Add a new PH value from a grape sample
+                    </Typography>
+                  </Box>
+
+                  <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                  
+                  {renderForm}
+
+                  </Typography>
+                </Box>
+              </Modal>
+
+
+          </Card>
         </Grid>
       </Grid>
 
