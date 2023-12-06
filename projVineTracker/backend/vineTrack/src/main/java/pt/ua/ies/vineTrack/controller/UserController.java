@@ -93,7 +93,7 @@ public class UserController {
         List<Vine> vines = userService.getVinesByUser(user);
         List<Notification> notifications = new ArrayList<>();
         for (Vine vine : vines) {
-                notifications.addAll(notificationService.getNotificationsByVine(vine));
+                notifications.addAll(notificationService.getNotificationsByVineId(vine.getId()));
         }
         System.out.println(notifications);
         // invert the list
@@ -108,6 +108,7 @@ public class UserController {
         }
         return invertedNotifications;
     }
+
 
     @PutMapping("/markAsRead/{notificationId}")
     public ResponseEntity<Notification> markNotificationAsRead(@PathVariable int notificationId) {

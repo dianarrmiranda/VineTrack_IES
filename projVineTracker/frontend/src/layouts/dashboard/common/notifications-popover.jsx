@@ -43,23 +43,25 @@ export default function NotificationsPopover() {
   console.log(user.id);
 
   useEffect(() => {
-    const res = fetchData(`users/notifications/${user.id}`);
-    res.then((response) => {
-      if (response) {
+    const init = async () => {
+        const res = await fetchData(`users/notifications/${user.id}`);
         console.log("Notifications fetched");
-        console.log(response);
-        const notifications = response;
-        const notificationsData = notifications.map((value) => {
-          return {
-            id: value.id,
-            title: value.vine.name,
-            description: value.description,
-            avatar: value.avatar,
+        const notifications = res;
+        console.log("Notification: ", notifications);
+        const notificationsData = [];
+        for (const notification of notifications) {
+          // console.log("Notification Teste: ",notification);
+          notificationsData.push({
+            id: notification.id,
+            title: await fetchData(`vines/name/${notification.vineId}`),
+            description: notification.description,
             type: '',
-            createdAt: value.date,
-            isUnRead: value.isUnRead,
-          };
-        });
+            isUnRead: notification.isUnRead,
+            createdAt: notification.date,
+            avatar: notification.avatar,
+          });
+        }
+
 
         const unread = notificationsData.filter((item) => item.isUnRead);
         const read = notificationsData.filter((item) => !item.isUnRead);
@@ -69,10 +71,8 @@ export default function NotificationsPopover() {
         setUnreadNotifications(unread);
         setReadNotifications(read);
         setNotifications(notificationsData);
-      } else {
-        console.error('Failed to fetch notifications');
-      }
-    });
+        }
+    init();
   }, []);
 
 
@@ -81,20 +81,50 @@ export default function NotificationsPopover() {
   useEffect(() => {
     const ws = new SockJS("http://localhost:8080/vt_ws");
     const client = Stomp.over(ws);
-    client.connect({}, function () {
-      client.subscribe('/topic/notification', function (data) {
-        console.log("New notification: ", JSON.parse(data.body));
-        setLatestNotification(JSON.parse(data.body));
-        const newNotifications = [...notifications];
-        newNotifications.push(JSON.parse(data.body));
-        console.log("New notifications: ", newNotifications);
-        setNotifications(newNotifications);
-      }
-      );
-    });
-  }
-    , [notifications]);
 
+    const onMessageReceived = async (data) => {
+      const newNotification = JSON.parse(data.body);
+
+      // Check if the id is defined before processing the notification
+      // if (newNotification.id !== undefined) {
+        const newFormattedNotification = {
+          id: newNotification.id,
+          title: await fetchData(`vines/name/${newNotification.vineId}`),
+          description: newNotification.description,
+          type: '',
+          isUnRead: newNotification.isUnRead,
+          createdAt: newNotification.date,
+          avatar: newNotification.avatar,
+        };
+
+        setLatestNotification(newFormattedNotification);
+        console.log("New Notification: ", newFormattedNotification);
+
+        // Use a function to avoid duplicate notifications
+        setUnreadNotifications((prevUnread) => {
+          // Check if the notification with the same id already exists
+          if (!prevUnread.some((notification) => notification.id === newFormattedNotification.id)) {
+            return [...prevUnread, newFormattedNotification];
+          }
+          console.log("Unread Notifications: ", prevUnread);
+          return prevUnread;
+        });
+
+
+        setTotalUnRead((prevTotal) => prevTotal + 1);
+      // }
+    };
+
+    client.connect({}, function () {
+      const subscription = client.subscribe('/topic/notification', onMessageReceived);
+
+      // Cleanup function
+      return () => {
+        subscription.unsubscribe();
+        client.disconnect();
+      };
+    });
+  }, []);
 
 
 
@@ -121,13 +151,13 @@ export default function NotificationsPopover() {
     unreadNotifications.forEach((notification) => {
       markNotificationAsRead(notification.id);
     });
+
+    setTotalUnRead(0);
   };
 
   const handleMarkAsRead = (notificationId) => {
     setUnreadNotifications((prevUnread) =>
-      prevUnread.map((notification) =>
-        notification.id === notificationId ? { ...notification, isUnRead: false } : notification
-      )
+      prevUnread.filter((notification) => notification.id !== notificationId)
     );
 
     markNotificationAsRead(notificationId);
@@ -148,9 +178,6 @@ export default function NotificationsPopover() {
       ...prevRead,
       unreadNotifications.find((notification) => notification.id === notificationId),
     ]);
-
-    setUnreadNotifications((prevUnread) => prevUnread.filter((notification) => notification.id !== notificationId));
-
   };
 
   return (
@@ -195,20 +222,36 @@ export default function NotificationsPopover() {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Scrollbar sx={{ height: { xs: 340, sm: 'auto' } }}>
-        {(showAllNotifications ? [unreadNotifications, readNotifications] : [unreadNotifications]).map((notificationList, index) => (
-            <List disablePadding key={index}>
+        <List
+            disablePadding
+            subheader={
               <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
-                {index === 0 ? 'New' : 'Read'}
+                New
               </ListSubheader>
-              {notificationList.map((notification) => (
-                <NotificationItem
-                  key={notification.id}
-                  notification={notification}
-                  markAsRead={handleMarkAsRead}
-                />
-              ))}
-            </List>
-          ))}
+            }
+          >
+            {unreadNotifications.map((notification) => (
+              <NotificationItem key={notification.id} notification={notification} markAsRead={handleMarkAsRead}/>
+            ))}
+          </List>
+
+          <List
+            disablePadding
+            subheader={
+              <ListSubheader disableSticky sx={{ py: 1, px: 2.5, typography: 'overline' }}>
+                Read
+              </ListSubheader>
+            }
+          >
+            {readNotifications.map((notification) => (
+              <NotificationItem 
+              key={notification.id} 
+              notification={notification} 
+              markAsRead={handleMarkAsRead}
+              />
+            ))}
+          </List>
+
         </Scrollbar>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
@@ -240,7 +283,9 @@ function NotificationItem({ notification, markAsRead }) {
   const { avatar, title } = renderContent(notification);
 
   const handleClick = () => {
-    markAsRead(notification.id);
+    if (notification.isUnRead) {
+      markAsRead(notification.id);
+    }
   };
 
   return (
