@@ -20,7 +20,9 @@ import pt.ua.ies.vineTrack.service.NotificationService;
 import pt.ua.ies.vineTrack.entity.Vine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -95,9 +97,19 @@ public class UserController {
         for (Vine vine : vines) {
                 notifications.addAll(notificationService.getNotificationsByVineId(vine.getId()));
         }
-        System.out.println(notifications);
         // invert the list
         int count = 1;
+        List<Notification> notificationsToRemove = new ArrayList<>();
+        Map<Integer, String> map = new HashMap<>();
+        for (Notification notification : notifications) {
+            if (map.containsKey(notification.getVineId()) && map.get(notification.getVineId()).equals(notification.getType())) {
+                notificationsToRemove.add(notification);
+            } else {
+                map.put(notification.getVineId(), notification.getType());
+            }
+        }
+        // remove duplicated notifications
+        notifications.removeAll(notificationsToRemove);
         List<Notification> invertedNotifications = new ArrayList<>();
         for (int i = notifications.size() - 1; i >= 0; i--) {
             count++;

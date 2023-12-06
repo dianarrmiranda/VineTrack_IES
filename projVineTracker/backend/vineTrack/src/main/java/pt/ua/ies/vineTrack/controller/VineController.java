@@ -393,7 +393,9 @@ public class VineController {
             notification.setIsUnRead(true); // Set the isUnRead
             notification.setDate(LocalDateTime.now()); // Set the date
             notification.setVineId(vineId); // Set the vineId directly
-
+            // get the vine
+            Vine vine = vineService.getVineById(vineId);
+            notification.setVine(vine); // Set the vine
             notificationService.saveNotification(notification);
 
             JSONObject notificationJson = new JSONObject();
