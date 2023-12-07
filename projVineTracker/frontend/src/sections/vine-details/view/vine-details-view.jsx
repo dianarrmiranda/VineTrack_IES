@@ -18,7 +18,6 @@ import { styled } from '@mui/system';
 import clsx from 'clsx';
 import { FormControl, useFormControlContext } from '@mui/base/FormControl';
 import { set } from "lodash";
-import WaterLimitComponent from "src/components/waterlimit";
 
 // ----------------------------------------------------------------------
 
@@ -56,6 +55,18 @@ export default function VineDetailsView() {
 
     initialize();
   }, []);
+
+  useEffect(() => {
+    const initialize = async () => {
+      const res = fetchData(`vines/${id}`);
+
+      res.then((data) => {
+        setWaterLimit(data.maxWaterConsumption)
+      });
+    }
+
+    initialize();
+  }, [waterLimit]);
 
 
   useEffect(() => {
@@ -218,9 +229,6 @@ export default function VineDetailsView() {
 
 
   const handleUpdateWaterLimit = (e) => {
-    // Call your update function here, passing vineId and newWaterLimit
-    // Example: updateData(`vines/waterLimit/${vineId}`, { maxWaterConsumption: newWaterLimit });
-    // console.log(`Updating water limit for vine ${vineId} to ${newWaterLimit}`);
     e.preventDefault();
 
     console.log("Handling water limit update...")
@@ -240,7 +248,16 @@ export default function VineDetailsView() {
       const newWaterLimit = parseFloat(waterLimit);
       console.log("Water limit in frontend updated to ", newWaterLimit);
       // Send data to backend
-      updateData(`vines/waterLimit/${vineId}`, { waterLimit: newWaterLimit });
+      if (vineId !== undefined && Number.isInteger(vineId)) {
+        const res = updateData(`vines/waterLimit/${vineId}`, { waterLimit: newWaterLimit }, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      } else {
+        console.error("Invalid vineId:", vineId);
+      }
+      
 
       // Close the modal
       handleCloseWaterLimit();
@@ -429,10 +446,10 @@ export default function VineDetailsView() {
                   <Button
                     variant="contained"
                     color="inherit"
-                    startIcon={<Iconify icon="eva:plus-fill" />}
+                    startIcon={<Iconify icon="eva:edit-fill" />}
                     onClick={handleOpenWaterLimit}
                   >
-                    Water Consumption Limit
+                    Edit Consumption Limit
                   </Button>
                 </Grid>
               </Grid>

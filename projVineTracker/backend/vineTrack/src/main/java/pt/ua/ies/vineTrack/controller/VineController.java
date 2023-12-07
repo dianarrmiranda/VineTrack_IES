@@ -310,8 +310,9 @@ public class VineController {
     }
 
     @PutMapping("/waterLimit/{vineId}")
-    public ResponseEntity<Vine> UpdateWaterLimit(@PathVariable int vineId, @RequestBody Double waterLimit) {
+    public ResponseEntity<Vine> UpdateWaterLimit(@PathVariable int vineId, @RequestBody Map<String, Double> requestBody) {
         try {
+            Double waterLimit = requestBody.get("waterLimit");
             System.out.println("Received water limit: " + waterLimit + " for vine: " + vineId);
             Vine vine = vineService.getVineById(vineId);
             vine.setMaxWaterConsumption(waterLimit);
