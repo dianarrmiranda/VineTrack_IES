@@ -325,6 +325,18 @@ public class VineController {
     }
 
 
+    @GetMapping("/waterLimit/{vineId}")
+    public ResponseEntity<Double> getWaterLimit(@PathVariable int vineId) {
+        try {
+            Double waterLimit = vineService.getVineById(vineId).getMaxWaterConsumption();
+            System.out.println("Received water limit: " + waterLimit + " for vine: " + vineId);
+            return ResponseEntity.ok(waterLimit);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
     @PostMapping(path = "/ph/{vineId}")
     public ResponseEntity<Map<String, String>> addPhTrack(@PathVariable Integer vineId, @RequestParam Double value){
         try {

@@ -33,7 +33,7 @@ export default function VineDetailsView() {
 
   const [currentDay, setCurrentDay] = useState(new Date().getDate());
 
-  const [waterLimit, setWaterLimit] = useState(null);
+  const [waterLimit, setWaterLimit] = useState('');
   const [errorWaterLimit, setErrorWaterLimit] = useState('');
 
 
@@ -56,17 +56,6 @@ export default function VineDetailsView() {
     initialize();
   }, []);
 
-  useEffect(() => {
-    const initialize = async () => {
-      const res = fetchData(`vines/${id}`);
-
-      res.then((data) => {
-        setWaterLimit(data.maxWaterConsumption)
-      });
-    }
-
-    initialize();
-  }, [waterLimit]);
 
 
   useEffect(() => {
@@ -435,12 +424,26 @@ export default function VineDetailsView() {
   }
   , [id]);
 
+  // Water Consumption Limit
+  useEffect(() => {
+    fetchData(`vines/waterLimit/${vineId}`)
+      .then(response => {
+        if (response) {
+          console.log("Water Consumption Limit data fetched");
+          setWaterLimit(response);
+        } else {
+          console.log("Water Consumption Limit data failed");
+        }
+      });
+  }
+  , [id]);
+
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>
         Overview of {vine.name}
       </Typography>
-      <Typography variant="p" sx={{ mb: 5 }}>Water Consumption Limit: {vine.maxWaterConsumption} L</Typography>
+      <Typography variant="p" sx={{ mb: 5 }}>Water Consumption Limit: {waterLimit} L</Typography>
       <Grid container alignItems="center" justifyContent="space-between">
                 <Grid item sx={{pt: 4, pr: 3}}>
                   <Button
