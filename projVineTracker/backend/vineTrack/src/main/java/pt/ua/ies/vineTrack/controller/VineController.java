@@ -384,6 +384,14 @@ public class VineController {
 
     @PostMapping(path = "/harvest/{vineId}")
     public ResponseEntity<String> harvestVine(@PathVariable Integer vineId) {
+        // if there is already a harvest notification for this vine, and it is unread, we don't need to send another one
+        List<Notification> notifications = notificationService.getNotificationsByVineId(vineId);
+        for (Notification notification : notifications) {
+            if (notification.getType().equals("harvest") && notification.getIsUnRead()) {
+                return ResponseEntity.ok("sent");
+            }
+        }
+
         // we need to send a notification
         try {
             Notification notification = new Notification();
