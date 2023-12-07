@@ -2,8 +2,9 @@ package pt.ua.ies.vineTrack.controller;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import pt.ua.ies.vineTrack.entity.Grape;
 import pt.ua.ies.vineTrack.entity.Notification;
 import pt.ua.ies.vineTrack.entity.Track;
@@ -17,14 +18,6 @@ import pt.ua.ies.vineTrack.service.VineService;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -60,6 +53,8 @@ public class VineController {
     private NotificationService notificationService;
     @Autowired
     private SimpMessagingTemplate template; // for sending messages to the client through websocket
+
+    private static final double MAX_WATER_CONSUMPTION = 0.95; // max of 0.95L per m^2 per day
 
     @GetMapping(path = "/test")
     public Track getAllVinesTest(){
@@ -317,6 +312,7 @@ public class VineController {
             vine.setSize(size);
             vine.setImage("");
             vine.setDate(new Date(date.getTime()));
+            vine.setMaxWaterConsumption(MAX_WATER_CONSUMPTION*vine.getSize()); // default value defined
             for (Integer id : users) {
                 User user = userService.getUserById(id);
                 if (user.getVines() != null) {
@@ -410,6 +406,34 @@ public class VineController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PutMapping("/waterLimit/{vineId}")
+    public ResponseEntity<Vine> UpdateWaterLimit(@PathVariable int vineId, @RequestBody Map<String, Double> requestBody) {
+        try {
+            Double waterLimit = requestBody.get("waterLimit");
+            System.out.println("Received water limit: " + waterLimit + " for vine: " + vineId);
+            Vine vine = vineService.getVineById(vineId);
+            vine.setMaxWaterConsumption(waterLimit);
+            System.out.println("New water limit: " + vine.getMaxWaterConsumption());
+            vineService.save(vine);
+            return ResponseEntity.ok(vine);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+    @GetMapping("/waterLimit/{vineId}")
+    public ResponseEntity<Double> getWaterLimit(@PathVariable int vineId) {
+        try {
+            Double waterLimit = vineService.getVineById(vineId).getMaxWaterConsumption();
+            System.out.println("Received water limit: " + waterLimit + " for vine: " + vineId);
+            return ResponseEntity.ok(waterLimit);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 
     @PostMapping(path = "/ph/{vineId}")
     public ResponseEntity<Map<String, String>> addPhTrack(@PathVariable Integer vineId, @RequestParam Double value){

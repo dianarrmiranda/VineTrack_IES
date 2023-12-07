@@ -38,6 +38,8 @@ public class RabbitmqHandler {
     private TrackService trackService;
 
     private static final int MAX_NOTIFICATIONS = 10;
+    private static final double MAX_WATER_CONSUMPTION = 0.95; // max of 0.95L per m^2 per day
+
     @RabbitListener(queues = Config.QUEUE_NAME)
     public void receiveMessage(String message) {
         System.out.println("Received <" + message + ">");
@@ -89,6 +91,54 @@ public class RabbitmqHandler {
 
                     // only keep water consumption tracks that are less than 8 days old
                     trackService.removeOldWaterConsumptionTracks();
+
+                    // check if water consumption is above the limit
+                    double vineSize = vine.getSize();
+                    double waterConsumptionLimit = vine.getMaxWaterConsumption();
+
+                    // if water consumption is above the limit, send notification
+                    if (waterConsumption > waterConsumptionLimit) {
+                        Boolean isUnRead = true;
+                        Notification notification = new Notification();
+                        notification.setDescription("Water consumption is above the limit. Please check the vine " + vine.getName() + ".");
+                        notification.setVine(vine); // Set the vine
+                        notification.setType("waterConsumption"); // Set the type
+                        notification.setAvatar("/public/assets/images/notifications/waterConsumption.png"); // Set the avatar
+                        notification.setIsUnRead(isUnRead); // Set the isUnRead
+                        notification.setDate(LocalDateTime.now()); // Set the date
+                        notification.setVineId(vine.getId()); // Set the vineId directly
+
+                        System.out.println("VINE ID: " + vineId);
+                        System.out.println("Received Notification: type: " + notification.getType() + " avatar: " + notification.getAvatar() + " isUnRead: " + notification.getIsUnRead() + " vineId: " + notification.getVineId());
+
+
+                        int totalNotifications = notificationService.getNumberOfNotificationsByVine(vine);
+
+                        // If the total exceeds the maximum limit, remove older notifications
+                        if (totalNotifications > MAX_NOTIFICATIONS) {
+                            notificationService.removeOldestNotificationsForVine(vine.getId(), MAX_NOTIFICATIONS);
+                        }
+
+
+
+                        notificationService.saveNotification(notification);
+
+                        // send through websocket
+                        JSONObject notificationJson = new JSONObject();
+                        notificationJson.put("id", notification.getId());
+                        notificationJson.put("type", notification.getType());
+                        notificationJson.put("avatar", notification.getAvatar());
+                        notificationJson.put("isUnRead", notification.getIsUnRead());
+                        notificationJson.put("vineId", notification.getVineId());
+                        notificationJson.put("description", notification.getDescription());
+                        notificationJson.put("date", notification.getDate());
+                        notificationJson.put("waterLimit", waterConsumptionLimit);
+                        this.template.convertAndSend("/topic/notification", notificationJson.toString());
+
+
+                    }
+
+
                 }
 
                 // receive message, if the value is bellow expected save notification to the database

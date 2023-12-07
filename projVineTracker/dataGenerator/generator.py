@@ -113,8 +113,8 @@ class Generator:
                     if len(info) == 0:
                         continue
                     info = info[0]
-                    phase = info[6]
-                    temperature = info[8]
+                    phase = info[7]
+                    temperature = info[9]
                     if temperature < 12:
                         decreaseValue = phases[phase]['cool']
                     elif temperature < 18:
