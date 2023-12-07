@@ -29,8 +29,6 @@ public class VineService {
         return tracks;
     }
 
-
-
     public List<Track> getAllTracks(){
         return trackService.getAllTracks();
     }

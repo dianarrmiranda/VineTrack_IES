@@ -158,7 +158,6 @@ public class VineController {
 
         tracks.removeIf(track -> !track.getType().equals("waterConsumption"));
 
-        // map to store day: waterConsumption for that day
         Map<String, Double> waterConsumptionMap = new TreeMap<>();
 
         for (Track track : tracks) {
@@ -183,6 +182,55 @@ public class VineController {
         }
 
         return waterConsumptionValues;
+    }
+
+    @GetMapping(path = "/avgTemperature/{vineId}")
+    public Map<String, Double>  getAvgTemperatureByVineId(@PathVariable int vineId){
+        List<Track> tracks = vineService.getTracksByVineId(vineId);
+        tracks.removeIf(track -> !track.getType().equals("temperature"));
+
+        Vine v = vineService.getVineById(vineId);
+
+        Map<String, Double> avgTempsByDay = v.getAvgTempsByDay();
+
+        for (Track track : tracks) {
+            String day = track.getDay();
+            double temperature = track.getValue();
+            if (avgTempsByDay.containsKey(day)) {
+                avgTempsByDay.put(day, (avgTempsByDay.get(day) + temperature) / 2);
+            } else {
+                avgTempsByDay.put(day, temperature);
+            }
+        }
+        v.setAvgTempsByDay(avgTempsByDay);
+
+        for (int i = 0; i <= avgTempsByDay.size(); i++ ){
+            String[] fullDay = ((String) avgTempsByDay.keySet().toArray()[i]).split("-");
+            String day = fullDay[2];
+            String month = fullDay[1];
+            String year = fullDay[0];
+
+            if (i != 0){
+                String[] fullDayLast = ((String) avgTempsByDay.keySet().toArray()[i-1]).split("-");
+                String dayLast  = fullDay[2];
+                String monthLast  = fullDay[1];
+                String yearLast  = fullDay[0];
+
+                if (!month.equals(monthLast)){
+                    System.out.println("another month");
+                }
+            }
+
+            if (i < 7 ){
+                
+            }
+
+
+        }
+
+        System.out.println("Vine: " + vineId + " - " + "Avg temperature: " + avgTempsByDay);
+
+        return avgTempsByDay;
     }
 
     @GetMapping(path = "/name/{vineId}")

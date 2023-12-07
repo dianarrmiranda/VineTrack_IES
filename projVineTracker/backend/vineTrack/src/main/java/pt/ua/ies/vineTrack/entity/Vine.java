@@ -2,19 +2,13 @@ package pt.ua.ies.vineTrack.entity;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "vine")
@@ -50,6 +44,9 @@ public class Vine {
     @Column(nullable = false)
     @ManyToMany(mappedBy = "vines")
     private List<User> users;
+
+    @ElementCollection
+    private Map<String, Double> avgTempsByDay = new TreeMap<>();;
 
 
     public Integer getId(){
@@ -88,6 +85,9 @@ public class Vine {
         return city;
     }
 
+    public Map<String, Double> getAvgTempsByDay(){
+        return avgTempsByDay;
+    }
     public void setId(Integer id){
         this.id = id;
     }
@@ -139,6 +139,8 @@ public class Vine {
     public void setCity(String city) {
         this.city = city;
     }
+
+    public void setAvgTempsByDay(Map<String, Double> avgTempsByDay){ this.avgTempsByDay = avgTempsByDay; }
 
 
     @Override

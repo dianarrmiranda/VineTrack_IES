@@ -41,12 +41,13 @@ public class RabbitmqHandler {
     @RabbitListener(queues = Config.QUEUE_NAME)
     public void receiveMessage(String message) {
         System.out.println("Received <" + message + ">");
-        this.template.convertAndSend("/topic/update", message);
+        
         JSONObject params = new JSONObject(message);
         String type = params.getString("sensor");
 
         switch (type) {
             case "moisture":
+                this.template.convertAndSend("/topic/update", message);
                 int vineId = params.getInt("id");
                 double value = params.getDouble("value");
                 double pastValue;
@@ -111,6 +112,7 @@ public class RabbitmqHandler {
 
                 break;
             case "temperature":
+                
                 int vineId2 = params.getInt("id");
                 double value2 = params.getDouble("value");
                 String time = params.getString("date");
@@ -121,10 +123,25 @@ public class RabbitmqHandler {
 
                 Track track2 = new Track(type, date2, value2, vine2, time, day);
 
-                trackService.saveTrack(track2);
-                
-                vine2.setTemperature(value2);
-                vineService.save(vine2);
+                List<Track> allTracks = trackService.getAllTracks();
+                allTracks.removeIf(trackid -> trackid.getVine().getId() != vineId2);
+                allTracks.removeIf(tractype -> !tractype.getType().equals("temperature"));
+
+                boolean exists = false;
+
+                for (Track tr : allTracks) {
+                    if (tr.getDay().equals(day) && tr.getTime().equals(time)) {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if (!exists){
+                    this.template.convertAndSend("/topic/update", message);
+                    trackService.saveTrack(track2);
+                    vine2.setTemperature(value2);
+                    vineService.save(vine2);
+                }
 
                 break;
             case "weatherAlerts":
@@ -135,44 +152,49 @@ public class RabbitmqHandler {
                 LocalDateTime date3 = LocalDateTime.now();
 
                 Track track3 = new Track(type, date3, value3, vine3);
-                trackService.saveTrack(track3);
-                trackService.removeOldTracks("weatherAlerts",vineId3);
 
-                Map<String, List<String>> map = new HashMap<>();
-                String val = StringUtils.substringBetween(value3, "{", "}");
-                
-                String[] keyValuePairs = val.split(",(?![^\\[]*\\])");
-                
+                List<Track> allTracks3 = trackService.getAllTracks();
+                allTracks3.removeIf(trackid -> trackid.getVine().getId() != vineId3);
+                allTracks3.removeIf(tractype -> !tractype.getType().equals("weatherAlerts"));
 
-                for(String pair : keyValuePairs) {
-                    String[] keyValue = pair.split(": ");
-                    String listString = keyValue[1].substring(1, keyValue[1].length() - 1);
-                    String[] listItems = listString.split(", ");
-                    List<String> list = Arrays.asList(listItems);
-                    map.put(keyValue[0], list);
+                boolean exists3 = false;
+                for (Track tr : allTracks3) {
+                    if (value3.equals(tr.getValString())) {
+                        exists3 = true;
+                        break;
+                    }
                 }
 
-                for (String key : map.keySet()) {
+                if (!exists3){
+                    this.template.convertAndSend("/topic/update", message);
+                    trackService.saveTrack(track3);
+                    trackService.removeOldTracks("weatherAlerts",vineId3);
 
-                    if (!map.get(key).get(2).equals("'green'")){
+                    Map<String, List<String>> map = getStringListMap(value3);
 
-                        Boolean isUnRead = true;
-                        Notification notification = new Notification("weatherAlerts", "/assets/images/notifications/rain.png", isUnRead, vine3);
+                    for (String key : map.keySet()) {
+
+                        if (!map.get(key).get(2).equals("'green'")){
+
+                            Boolean isUnRead = true;
+                            Notification notification = new Notification("weatherAlerts", "/assets/images/notifications/rain.png", isUnRead, vine3);
+                            
+                            notification.setDescription(key.replaceAll("'", "") + ": " + map.get(key).get(3).replaceAll("'", ""));
+
+                            int totalNotifications;
+                            totalNotifications = notificationService.getNumberOfNotificationsByVine(vine3);
+
+                            // If the total exceeds the maximum limit, remove older notifications
+                            if (totalNotifications > MAX_NOTIFICATIONS) {
+                                notificationService.removeOldestNotificationsForVine(vine3.getId(), MAX_NOTIFICATIONS);
+                            }
                         
-                        notification.setDescription(key.replaceAll("'", "") + ": " + map.get(key).get(3).replaceAll("'", ""));
+                            // send through websocket
+                            JSONObject notificationJson = new JSONObject(notification);
+                            this.template.convertAndSend("/topic/notification", notificationJson.toString());
 
-                        int totalNotifications = notificationService.getNumberOfNotificationsByVine(vine3);
-
-                        // If the total exceeds the maximum limit, remove older notifications
-                        if (totalNotifications > MAX_NOTIFICATIONS) {
-                            notificationService.removeOldestNotificationsForVine(vine3.getId(), MAX_NOTIFICATIONS);
+                            notificationService.saveNotification(notification);
                         }
-                    
-                        // send through websocket
-                        JSONObject notificationJson = new JSONObject(notification);
-                        this.template.convertAndSend("/topic/notification", notificationJson.toString());
-
-                        notificationService.saveNotification(notification);
                     }
                 }
 
@@ -180,7 +202,24 @@ public class RabbitmqHandler {
             default:
                 break;
 
-        
         }
     }
+
+    private static Map<String, List<String>> getStringListMap(String value3) {
+        Map<String, List<String>> map = new HashMap<>();
+        String val = StringUtils.substringBetween(value3, "{", "}");
+
+        String[] keyValuePairs = val.split(",(?![^\\[]*\\])");
+
+
+        for(String pair : keyValuePairs) {
+            String[] keyValue = pair.split(": ");
+            String listString = keyValue[1].substring(1, keyValue[1].length() - 1);
+            String[] listItems = listString.split(", ");
+            List<String> list = Arrays.asList(listItems);
+            map.put(keyValue[0], list);
+        }
+        return map;
+    }
+
 }

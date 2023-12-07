@@ -209,22 +209,24 @@ class Generator:
                     time = datetime.datetime.now().strftime('%H')
 
                     if self.id not in last_hours:
-                        last_hours[self.id] = [int(time), False]
+                        last_hours[self.id] = [int(time), False, today]
                     else:
                         if last_hours[self.id][0] + 1 == 24:
                             last_hours[self.id][1] = True 
                             last_hours[self.id][0] = 0
+                            last_hours[self.id][2] = today
                             time = '00'
+                        elif last_hours[self.id][2] != today:
+                            last_hours[self.id][1] = False 
+                            last_hours[self.id][0] = int(time)
+                            last_hours[self.id][2] = today
                         else:
                             last_hours[self.id][0] = last_hours[self.id][0] + 1
+                            last_hours[self.id][1] = False
+                            last_hours[self.id][2] = today
                             time = str(last_hours[self.id][0])
 
-                    if last_day != today:
-                        last_hours[self.id][1] = False 
-                        last_day = today
-
-                    if last_hours[self.id][1]  == False and today == last_day:
-                        last_day = today
+                    if last_hours[self.id][1]  == False and today == last_hours[self.id][2]:
                                             
                         time = f'{time}:00:00'
                         temperture = float(temp[f'{today}T{time}'])
