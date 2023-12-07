@@ -203,31 +203,39 @@ class Generator:
                     temp = requests.get(f'http://api.ipma.pt/public-data/forecast/aggregate/{locales[city]}.json')
                     temp = temp.json()
 
-                    temp = {hour['dataPrev']: hour['tMed'] for hour in temp if 'tMed' in hour }
+                    dic = {}
+
+                    for hour in temp:
+                        if 'tMed' in hour:
+                            dic[hour['dataPrev']] = hour['tMed']
+                        else:
+                            dic[hour['dataPrev']] = str((float(hour['tMin']) + float(hour['tMax'])) / 2)
 
                     today = datetime.date.today().strftime('%Y-%m-%d')
                     time = datetime.datetime.now().strftime('%H')
 
                     if self.id not in last_hours:
-                        last_hours[self.id] = [int(time), False]
+                        last_hours[self.id] = [int(time), False, today]
                     else:
                         if last_hours[self.id][0] + 1 == 24:
                             last_hours[self.id][1] = True 
-                            last_hours[self.id][0] = 0
+                            last_hours[self.id][0] = 00
+                            last_hours[self.id][2] = today
                             time = '00'
+                        elif last_hours[self.id][2] != today:
+                            last_hours[self.id][1] = False 
+                            last_hours[self.id][0] = int(time)
+                            last_hours[self.id][2] = today
                         else:
                             last_hours[self.id][0] = last_hours[self.id][0] + 1
-                            time = str(last_hours[self.id][0])
+                            last_hours[self.id][1] = False
+                            last_hours[self.id][2] = today
+                            time = str(last_hours[self.id][0]).zfill(2)
 
-                    if last_day != today:
-                        last_hours[self.id][1] = False 
-                        last_day = today
-
-                    if last_hours[self.id][1]  == False and today == last_day:
-                        last_day = today
+                    if last_hours[self.id][1]  == False and today == last_hours[self.id][2]:
                                             
                         time = f'{time}:00:00'
-                        temperture = float(temp[f'{today}T{time}'])
+                        temperture = float(dic[f'{today}T{time}'])
 
                         message = {
                             'id': self.id,
