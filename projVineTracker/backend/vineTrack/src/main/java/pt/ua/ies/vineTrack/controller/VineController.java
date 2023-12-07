@@ -203,7 +203,7 @@ public class VineController {
             }
         }
         v.setAvgTempsByDay(avgTempsByDay);
-
+/*
         for (int i = 0; i <= avgTempsByDay.size(); i++ ){
             String[] fullDay = ((String) avgTempsByDay.keySet().toArray()[i]).split("-");
             String day = fullDay[2];
@@ -222,11 +222,13 @@ public class VineController {
             }
 
             if (i < 7 ){
-                
+
             }
 
 
         }
+
+ */
 
         System.out.println("Vine: " + vineId + " - " + "Avg temperature: " + avgTempsByDay);
 

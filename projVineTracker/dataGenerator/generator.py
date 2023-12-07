@@ -213,7 +213,7 @@ class Generator:
                     else:
                         if last_hours[self.id][0] + 1 == 24:
                             last_hours[self.id][1] = True 
-                            last_hours[self.id][0] = 0
+                            last_hours[self.id][0] = 00
                             last_hours[self.id][2] = today
                             time = '00'
                         elif last_hours[self.id][2] != today:
@@ -224,7 +224,7 @@ class Generator:
                             last_hours[self.id][0] = last_hours[self.id][0] + 1
                             last_hours[self.id][1] = False
                             last_hours[self.id][2] = today
-                            time = str(last_hours[self.id][0])
+                            time = str(last_hours[self.id][0]).zfill(2)
 
                     if last_hours[self.id][1]  == False and today == last_hours[self.id][2]:
                                             
