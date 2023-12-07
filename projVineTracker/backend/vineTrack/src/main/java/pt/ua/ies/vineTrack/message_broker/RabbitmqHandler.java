@@ -184,57 +184,57 @@ public class RabbitmqHandler {
                     }
                 }
 
-                if (!exists3){
+                if (!exists3) {
                     this.template.convertAndSend("/topic/update", message);
                     trackService.saveTrack(track3);
-                    trackService.removeOldTracks("weatherAlerts",vineId3);
+                    trackService.removeOldTracks("weatherAlerts", vineId3);
 
                     Map<String, List<String>> map = getStringListMap(value3);
 
                     for (String key : map.keySet()) {
 
-                        if (!map.get(key).get(2).equals("'green'")){
+                        if (!map.get(key).get(2).equals("'green'")) {
 
-                        Boolean isUnRead = true;
-                        Notification notification = new Notification();
-                        // "weatherAlerts", "/assets/images/notifications/rain.png", isUnRead, vine3
-                        notification.setDescription("Levels of the soil humidity are low.");
-                        notification.setVine(vine3); // Set the vine
-                        notification.setType("weatherAlerts"); // Set the type
-                        notification.setAvatar("/public/assets/images/notifications/rain.png"); // Set the avatar
-                        notification.setIsUnRead(isUnRead); // Set the isUnRead
-                        notification.setVineId(vine3.getId()); // Set the vineId directly
+                            Boolean isUnRead = true;
+                            Notification notification = new Notification();
+                            // "weatherAlerts", "/assets/images/notifications/rain.png", isUnRead, vine3
+                            notification.setDescription("Levels of the soil humidity are low.");
+                            notification.setVine(vine3); // Set the vine
+                            notification.setType("weatherAlerts"); // Set the type
+                            notification.setAvatar("/public/assets/images/notifications/rain.png"); // Set the avatar
+                            notification.setIsUnRead(isUnRead); // Set the isUnRead
+                            notification.setVineId(vine3.getId()); // Set the vineId directly
 
 
-                        notification.setDescription(key.replaceAll("'", "") + ": " + map.get(key).get(3).replaceAll("'", ""));
+                            notification.setDescription(key.replaceAll("'", "") + ": " + map.get(key).get(3).replaceAll("'", ""));
 
                             int totalNotifications;
                             totalNotifications = notificationService.getNumberOfNotificationsByVine(vine3);
 
-                        // If the total exceeds the maximum limit, remove older notifications
-                        if (totalNotifications > MAX_NOTIFICATIONS) {
-                            notificationService.removeOldestNotificationsForVine(vine3.getId(), MAX_NOTIFICATIONS);
+                            // If the total exceeds the maximum limit, remove older notifications
+                            if (totalNotifications > MAX_NOTIFICATIONS) {
+                                notificationService.removeOldestNotificationsForVine(vine3.getId(), MAX_NOTIFICATIONS);
+                            }
+
+                            notificationService.saveNotification(notification);
+
+                            // send through websocket
+                            JSONObject notificationJson = new JSONObject();
+                            notificationJson.put("id", notification.getId());
+                            notificationJson.put("type", notification.getType());
+                            notificationJson.put("avatar", notification.getAvatar());
+                            notificationJson.put("isUnRead", notification.getIsUnRead());
+                            notificationJson.put("vineId", notification.getVineId());
+                            notificationJson.put("description", notification.getDescription());
+                            notificationJson.put("date", notification.getDate());
+                            this.template.convertAndSend("/topic/notification", notificationJson.toString());
                         }
-
-                        notificationService.saveNotification(notification);
-
-                        // send through websocket
-                        JSONObject notificationJson = new JSONObject();
-                        notificationJson.put("id", notification.getId());
-                        notificationJson.put("type", notification.getType());
-                        notificationJson.put("avatar", notification.getAvatar());
-                        notificationJson.put("isUnRead", notification.getIsUnRead());
-                        notificationJson.put("vineId", notification.getVineId());
-                        notificationJson.put("description", notification.getDescription());
-                        notificationJson.put("date", notification.getDate());
-                        this.template.convertAndSend("/topic/notification", notificationJson.toString());
                     }
-                }
 
+                }
                 break;
             default:
-                break;
-
+                throw new IllegalStateException("Unexpected value: " + type);
         }
     }
 
