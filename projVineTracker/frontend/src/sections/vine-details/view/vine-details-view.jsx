@@ -7,7 +7,7 @@ import AppHumidityChart from "../app-humidity-chart";
 import AppTemperatureChart from "../app-temperature-chart";
 import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 
-import { fetchData, postData } from "src/utils";
+import { fetchData, postData, updateData } from "src/utils";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import SockJS from "sockjs-client";
@@ -18,6 +18,7 @@ import { styled } from '@mui/system';
 import clsx from 'clsx';
 import { FormControl, useFormControlContext } from '@mui/base/FormControl';
 import { set } from "lodash";
+
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
@@ -31,6 +32,13 @@ export default function VineDetailsView() {
 
   const [currentDay, setCurrentDay] = useState(new Date().getDate());
 
+  const [waterLimit, setWaterLimit] = useState('');
+  const [errorWaterLimit, setErrorWaterLimit] = useState('');
+
+
+  const [vineId, setVineId] = useState(null);
+  const [size, setSize] = useState(null);
+
   const [avgTempsByDay, setAvgTempsByDay] = useState([]);
   const [avgTempsByWeek, setAvgTempsByWeek] = useState([]);
 
@@ -40,11 +48,16 @@ export default function VineDetailsView() {
 
       res.then((data) => {
         setVine(data);
+        setVineId(data.id);
+        setSize(data.size);
+        setWaterLimit(data.maxWaterConsumption)
+        console.log("Vine data fetched: ", data);
       });
     }
 
     initialize();
   }, []);
+
 
 
   useEffect(() => {
@@ -236,11 +249,54 @@ export default function VineDetailsView() {
   console.log("Latest value: ", latestValue);
   console.log("Weather Alerts: ", weatherAlertsData);
   console.log("Average Temperature by day: ", avgTempsByDay);
+
+
+  const handleUpdateWaterLimit = (e) => {
+    e.preventDefault();
+
+    console.log("Handling water limit update...")
+
+    if (!waterLimit) {
+      setErrorWaterLimit('Value cannot be empty');
+    } else if (parseFloat(waterLimit) < 0) {
+      setErrorWaterLimit('Value must be positive');
+    } else if (isNaN(parseFloat(waterLimit))) {
+      setErrorWaterLimit('Value must be a number');
+    } else {
+      // Validation passed, you can proceed with your form submission logic
+      setErrorWaterLimit('');
+      setWaterLimit(parseFloat(waterLimit));
+      console.log("Vine id: ", vineId);
+      // pass the water limit to a double
+      const newWaterLimit = parseFloat(waterLimit);
+      console.log("Water limit in frontend updated to ", newWaterLimit);
+      // Send data to backend
+      if (vineId !== undefined && Number.isInteger(vineId)) {
+        const res = updateData(`vines/waterLimit/${vineId}`, { waterLimit: newWaterLimit }, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+      } else {
+        console.error("Invalid vineId:", vineId);
+      }
+      
+
+      // Close the modal
+      handleCloseWaterLimit();
+    }
+  };
   // Modal
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const [openWaterLimit, setOpenWaterLimit] = useState(false);
+  const handleOpenWaterLimit = () => setOpenWaterLimit(true);
+  const handleCloseWaterLimit = () => setOpenWaterLimit(false);
+
+
 
   const style = {
     position: 'absolute',
@@ -357,6 +413,35 @@ export default function VineDetailsView() {
     </>
   );
 
+  const handleInputChangeWaterLimit = (e) => {
+    const newValue = e.target.value;
+    setWaterLimit(newValue);
+    setErrorWaterLimit(''); // Clear error message on input change
+  };
+
+  const renderFormWaterLimit = (
+    <>
+      <FormControl>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Label sx={{ fontSize: '16px' }}>Value:</Label>
+          <TextField
+            value={waterLimit}
+            onChange={handleInputChangeWaterLimit}
+            error={!!errorWaterLimit}
+            helperText={errorWaterLimit}
+            sx={{ width: '100%' }}
+          />
+        </Stack>
+        <Box display="flex" justifyContent="flex-end">
+          <Button type="submit" variant="contained" color="inherit" sx={{ mt: 3 }}
+          onClick={handleUpdateWaterLimit}>
+            Submit
+          </Button>
+        </Box>
+      </FormControl>
+    </>
+  );
+
   // PH Values
   const [phValues, setPhValues] = useState([]);
   useEffect(() => {
@@ -372,11 +457,39 @@ export default function VineDetailsView() {
   }
   , [id]);
 
+  // Water Consumption Limit
+  useEffect(() => {
+    fetchData(`vines/waterLimit/${vineId}`)
+      .then(response => {
+        if (response) {
+          console.log("Water Consumption Limit data fetched");
+          setWaterLimit(response);
+        } else {
+          console.log("Water Consumption Limit data failed");
+        }
+      });
+  }
+  , [id]);
+
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>
         Overview of {vine.name}
       </Typography>
+      <Typography variant="p" sx={{ mb: 5 }}>Water Consumption Limit: {waterLimit} L</Typography>
+      <Grid container alignItems="center" justifyContent="space-between">
+                <Grid item sx={{pt: 4, pr: 3}}>
+                  <Button
+                    variant="contained"
+                    color="inherit"
+                    startIcon={<Iconify icon="eva:edit-fill" />}
+                    onClick={handleOpenWaterLimit}
+                  >
+                    Edit Consumption Limit
+                  </Button>
+                </Grid>
+              </Grid>
+      <br></br>
 
       <Typography variant="h5" sx={{ mb: 5 }}>
         Sensor Data
@@ -669,6 +782,36 @@ export default function VineDetailsView() {
                   </Typography>
                 </Box>
               </Modal>
+
+              <Modal
+                open={openWaterLimit}
+                onClose={handleCloseWaterLimit}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+              >
+                <Box sx={style}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    sx={{ mb: 5 }}
+                  >
+                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                      Update Water Consumption Limit
+                    </Typography>
+                  </Box>
+
+                  <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                    <Typography sx={{ mb: 2 }}>
+                      Recommended value: {size*0.95}
+                    </Typography>
+                  
+                  {renderFormWaterLimit}
+
+                  </Typography>
+                </Box>
+              </Modal>
+
 
 
           </Card>
