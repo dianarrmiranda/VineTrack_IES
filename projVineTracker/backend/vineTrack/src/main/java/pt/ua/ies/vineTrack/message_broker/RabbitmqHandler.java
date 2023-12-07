@@ -74,6 +74,9 @@ public class RabbitmqHandler {
 
                 trackService.saveTrack(track);
 
+                // only save the 10 most recent moisture tracks for each vine
+                trackService.removeOldTracks("moisture", vineId);
+
 
                 // water consumption
                 if (value - pastValue > 0) { //watered

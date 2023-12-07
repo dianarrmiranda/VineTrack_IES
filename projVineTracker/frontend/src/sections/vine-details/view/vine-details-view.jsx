@@ -374,6 +374,21 @@ export default function VineDetailsView() {
           }
           setPhValues(newPhValues);
           setValue('');
+
+          // check if all values are between 2.9 and 3.5
+          const allValues = newPhValues.map((value, index) => {return value.value});
+          const allValuesValid = allValues.every((value, index) => {return value >= 2.9 && value <= 3.5});
+          if (allValuesValid) {
+            // if they are, send notification
+            const res = postData(`vines/harvest/${id}`);
+            res.then((response) => {
+              if (response) {
+                console.log("Notification sent");
+              } else {
+                console.log("Notification failed");
+              }
+            });
+          }
         } else {
           console.log("PH value failed");
         }

@@ -130,7 +130,7 @@ class Generator:
                     self.cursor.execute(f"SELECT * FROM track where type='moisture' and vine_id = {self.id} ORDER BY date DESC LIMIT 2")
                     values = self.cursor.fetchall()
                     values = values[::-1]
-                    if values[1][-2] < 35:
+                    if values[1][-2] < 40:
                         # vai haver uma probabilidade de 80% de regar
                         if random.randint(0, 100) < 80:
                             newValue = values[1][-2] + random.uniform(15, 25)

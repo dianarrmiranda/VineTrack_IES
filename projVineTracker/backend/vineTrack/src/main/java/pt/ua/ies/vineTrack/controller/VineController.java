@@ -2,7 +2,7 @@ package pt.ua.ies.vineTrack.controller;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pt.ua.ies.vineTrack.entity.Grape;
@@ -51,6 +51,8 @@ public class VineController {
     private TrackService trackService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private SimpMessagingTemplate template; // for sending messages to the client through websocket
 
     private static final double MAX_WATER_CONSUMPTION = 0.95; // max of 0.95L per m^2 per day
 
@@ -496,6 +498,46 @@ public class VineController {
 
             return ResponseEntity.ok(list);
         } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping(path = "/harvest/{vineId}")
+    public ResponseEntity<String> harvestVine(@PathVariable Integer vineId) {
+        // if there is already a harvest notification for this vine, and it is unread, we don't need to send another one
+        List<Notification> notifications = notificationService.getNotificationsByVineId(vineId);
+        for (Notification notification : notifications) {
+            if (notification.getType().equals("harvest") && notification.getIsUnRead()) {
+                return ResponseEntity.ok("sent");
+            }
+        }
+
+        // we need to send a notification
+        try {
+            Notification notification = new Notification();
+            notification.setDescription("Ready to Harvest.");
+            notification.setType("harvest"); // Set the type
+            notification.setAvatar("/public/assets/images/notifications/harvest.png"); // Set the avatar
+            notification.setIsUnRead(true); // Set the isUnRead
+            notification.setDate(LocalDateTime.now()); // Set the date
+            notification.setVineId(vineId); // Set the vineId directly
+            // get the vine
+            Vine vine = vineService.getVineById(vineId);
+            notification.setVine(vine); // Set the vine
+            notificationService.saveNotification(notification);
+
+            JSONObject notificationJson = new JSONObject();
+            notificationJson.put("id", notification.getId());
+            notificationJson.put("type", notification.getType());
+            notificationJson.put("avatar", notification.getAvatar());
+            notificationJson.put("isUnRead", notification.getIsUnRead());
+            notificationJson.put("vineId", notification.getVineId());
+            notificationJson.put("description", notification.getDescription());
+            notificationJson.put("date", notification.getDate());
+            this.template.convertAndSend("/topic/notification", notificationJson.toString());
+
+            return ResponseEntity.ok("sent");
+        } catch (Exception e){
             return ResponseEntity.notFound().build();
         }
     }
