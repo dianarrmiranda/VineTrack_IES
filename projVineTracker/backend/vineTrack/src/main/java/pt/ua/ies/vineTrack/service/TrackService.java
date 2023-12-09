@@ -7,6 +7,7 @@ import pt.ua.ies.vineTrack.entity.Track;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TrackService {
@@ -33,22 +34,26 @@ public class TrackService {
     public void removeOldTracks(String type, Integer id) {
         List<Track> tracks = trackRepo.findAllByTypeOrderByDateAsc(type);
         
-        tracks.removeIf(track -> track.getVine().getId() != id);
+        tracks.removeIf(track -> !Objects.equals(track.getVine().getId(), id));
 
-        if (type.equals("moisture")) {
-            while (tracks.size() > 10) {
-                trackRepo.delete(tracks.get(0));
-                tracks.remove(0);
+        switch (type) {
+            case "moisture" -> {
+                while (tracks.size() > 10) {
+                    trackRepo.delete(tracks.get(0));
+                    tracks.remove(0);
+                }
             }
-        }else if (type.equals("temperature")) {
-            while (tracks.size() > 24) {
-                trackRepo.delete(tracks.get(0));
-                tracks.remove(0);
+            case "temperature" -> {
+                while (tracks.size() > 24) {
+                    trackRepo.delete(tracks.get(0));
+                    tracks.remove(0);
+                }
             }
-        }else if (type.equals("weatherAlerts")) {
-            while (tracks.size() > 1) {
-                trackRepo.delete(tracks.get(0));
-                tracks.remove(0);
+            case "weatherAlerts" -> {
+                while (tracks.size() > 1) {
+                    trackRepo.delete(tracks.get(0));
+                    tracks.remove(0);
+                }
             }
         }
 
@@ -70,5 +75,13 @@ public class TrackService {
         // get the waterConsumption tracks older than 7 days ago using column day
         List<Track> oldWaterConsumptionTracks = trackRepo.getOldWaterConsumptionTracks(lastTrackDate.minusDays(7));
         trackRepo.deleteAll(oldWaterConsumptionTracks);
+    }
+
+    public List<Track> getLastTrackByVineId(Integer vineId) {
+        return trackRepo.getLastTrackByVineId(vineId);
+    }
+
+    public List<Track> getTracksByVineId(Integer vineId) {
+        return trackRepo.getTracksByVineId(vineId);
     }
 }

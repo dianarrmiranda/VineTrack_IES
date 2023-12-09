@@ -1,7 +1,10 @@
 package pt.ua.ies.vineTrack.controller;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import pt.ua.ies.vineTrack.entity.Grape;
 import pt.ua.ies.vineTrack.entity.Notification;
 import pt.ua.ies.vineTrack.entity.Track;
@@ -15,14 +18,6 @@ import pt.ua.ies.vineTrack.service.VineService;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -30,8 +25,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -56,6 +53,10 @@ public class VineController {
     private TrackService trackService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private SimpMessagingTemplate template; // for sending messages to the client through websocket
+
+    private static final double MAX_WATER_CONSUMPTION = 0.95; // max of 0.95L per m^2 per day
 
     @GetMapping(path = "/test")
     public Track getAllVinesTest(){
@@ -118,6 +119,8 @@ public class VineController {
     public Map<String, Double> getTemperatureByVineId(@PathVariable int vineId){
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         Iterator<Track> iterator = tracks.iterator();
+        DecimalFormat df = new DecimalFormat("#.##");
+
         while (iterator.hasNext()) {
             Track track = iterator.next();
             if (!track.getType().equals("temperature")) {
@@ -135,7 +138,7 @@ public class VineController {
 
         for (Track track : tracks) {
             if (track.getDay().equals(LocalDate.now().toString())) {
-                tempValues.add(track.getValue());
+                tempValues.add(Double.parseDouble(df.format(track.getValue())));
                 tempTimes.add(track.getTime());
             }
         }
@@ -185,7 +188,6 @@ public class VineController {
 
         tracks.removeIf(track -> !track.getType().equals("waterConsumption"));
 
-        // map to store day: waterConsumption for that day
         Map<String, Double> waterConsumptionMap = new TreeMap<>();
 
         for (Track track : tracks) {
@@ -210,6 +212,100 @@ public class VineController {
         }
 
         return waterConsumptionValues;
+    }
+
+    @GetMapping(path = "/avgTemperatureByDay/{vineId}")
+    public Map<String, Double>  getAvgTemperatureByDayByVineId(@PathVariable int vineId){
+        DecimalFormat df = new DecimalFormat("#.##");
+
+        List<Track> tracks = vineService.getTracksByVineId(vineId);
+        tracks.removeIf(track -> !track.getType().equals("temperature"));
+
+        Vine v = vineService.getVineById(vineId);
+
+        SortedMap<String, Double> avgTempsByDay = v.getAvgTempsByDay();
+        String lastDay = "";
+        Iterator<Track> iterator = tracks.iterator();
+        while (iterator.hasNext()) {
+            Track track = iterator.next();
+            String day = track.getDay();
+
+            //Delete tracks dos dias que já terminaram
+            if (!day.equals(lastDay)){
+                for (Track tr : tracks){
+                    if (tr.getDay().equals(lastDay)){
+                        trackService.deleteTrackById(tr.getId());
+                    }
+                }
+            }
+
+            lastDay = day;
+
+            double temperature = Double.parseDouble(df.format(track.getValue()));
+            if (avgTempsByDay.containsKey(day)) {
+                avgTempsByDay.put(day,  Double.parseDouble(df.format((avgTempsByDay.get(day) + temperature) / 2)));
+            } else {
+                avgTempsByDay.put(day, temperature);
+            }
+        }
+
+        v.setAvgTempsByDay(avgTempsByDay);
+
+        SortedMap<String, Double> avgTempByWeek = v.getAvgTempsByWeek();
+
+        String currentWeek = "";
+        double weekSum = 0;
+        int dayCount = 0;
+        double weekAverage;
+
+        int size = avgTempsByDay.size();
+
+        for (int i = 0; i < size; i++) {
+            String[] fullDay = ((String) avgTempsByDay.keySet().toArray()[dayCount]).split("-");
+            String day = fullDay[2];
+            String month = fullDay[1];
+            String year = fullDay[0];
+
+            String dayF = (String) avgTempsByDay.keySet().toArray()[dayCount];
+
+            weekSum = weekSum + avgTempsByDay.get(dayF);
+            dayCount++;
+
+            if (dayCount == 7) {
+                weekAverage = Double.parseDouble(df.format(weekSum / dayCount));
+                String[] fullDay1 = ((String) avgTempsByDay.keySet().toArray()[dayCount-7]).split("-");
+                String day1 = fullDay1[2];
+                String month1 = fullDay1[1];
+
+                currentWeek = day1 + "/" + month1 + " - " + day + "/" + month + " (" + year + ")";
+                avgTempByWeek.put(currentWeek, weekAverage);
+
+                weekSum = 0;
+                dayCount = 0;
+                
+                for (int x = i-6; x <= i; x++){
+                    String d = (String) avgTempsByDay.keySet().toArray()[0];
+                    avgTempsByDay.keySet().remove(d);
+                }
+            }
+        }
+
+        v.setAvgTempsByWeek(avgTempByWeek);
+        vineService.save(v);
+
+        System.out.println("Vine: " + vineId + " - " + "Avg temperature by day: " + avgTempsByDay);
+        return avgTempsByDay;
+
+    }
+
+    @GetMapping(path = "/avgTemperatureByWeek/{vineId}")
+    public Map<String, Double> getAvgTemperatureByWeekByVineId(@PathVariable int vineId){
+        Vine v = vineService.getVineById(vineId);
+        SortedMap<String, Double> avgTempByWeek = v.getAvgTempsByWeek();
+
+        System.out.println("Vine: " + vineId + " - " + "Avg temperature by week: " + avgTempByWeek);
+
+        return avgTempByWeek;
     }
 
     @GetMapping(path = "/name/{vineId}")
@@ -243,6 +339,7 @@ public class VineController {
             vine.setSize(size);
             vine.setImage("");
             vine.setDate(new Date(date.getTime()));
+            vine.setMaxWaterConsumption(MAX_WATER_CONSUMPTION*vine.getSize()); // default value defined
             for (Integer id : users) {
                 User user = userService.getUserById(id);
                 if (user.getVines() != null) {
@@ -339,6 +436,141 @@ public class VineController {
 
             return ResponseEntity.ok(vineService.deleteVineById(id));
         } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/waterLimit/{vineId}")
+    public ResponseEntity<Vine> UpdateWaterLimit(@PathVariable int vineId, @RequestBody Map<String, Double> requestBody) {
+        try {
+            Double waterLimit = requestBody.get("waterLimit");
+            System.out.println("Received water limit: " + waterLimit + " for vine: " + vineId);
+            Vine vine = vineService.getVineById(vineId);
+            vine.setMaxWaterConsumption(waterLimit);
+            System.out.println("New water limit: " + vine.getMaxWaterConsumption());
+            vineService.save(vine);
+            return ResponseEntity.ok(vine);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+    @GetMapping("/waterLimit/{vineId}")
+    public ResponseEntity<Double> getWaterLimit(@PathVariable int vineId) {
+        try {
+            Double waterLimit = vineService.getVineById(vineId).getMaxWaterConsumption();
+            System.out.println("Received water limit: " + waterLimit + " for vine: " + vineId);
+            return ResponseEntity.ok(waterLimit);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+    @PostMapping(path = "/ph/{vineId}")
+    public ResponseEntity<Map<String, String>> addPhTrack(@PathVariable Integer vineId, @RequestParam Double value){
+        try {
+            System.out.println("Received ph value: " + value);
+            Vine vine = vineService.getVineById(vineId);
+            LocalDateTime now = LocalDateTime.now();
+            Track track = new Track("ph", now, value, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
+            trackService.saveTrack(track);
+
+            // only keep the last 5 tracks for each vine
+            List<Track> tracks = trackService.getTracksByVineId(vineId);
+            tracks.removeIf(track1 -> !track1.getType().equals("ph"));
+            // order the tracks by date from the oldest to the newest
+            tracks.sort(Comparator.comparing(Track::getDate));
+            while (tracks.size() > 5) {
+                trackService.deleteTrackById(tracks.get(0).getId());
+                tracks.remove(0);
+            }
+
+            Map<String, String> map = new HashMap<>();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS");
+            LocalDateTime date = LocalDateTime.parse(now.toString(), formatter);
+            // Define the desired output format
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss");
+
+            // Format the LocalDateTime object into a readable format
+            String formattedDateTime = date.format(outputFormatter);
+            map.put("date", formattedDateTime);
+            map.put("value", value.toString());
+
+            return ResponseEntity.ok(map);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping(path = "/ph/{vineId}") // gets the date and value of the ph tracks
+    public ResponseEntity<List<Map<String, String>>> getPhTracks(@PathVariable Integer vineId){
+        try {
+            List<Track> tracks = trackService.getTracksByVineId(vineId);
+            tracks.removeIf(track -> !track.getType().equals("ph"));
+
+            // now we need to order the tracks by date from the newest to the oldest
+            tracks.sort(Comparator.comparing(Track::getDate).reversed());
+
+            List<Map<String, String>> list = new ArrayList<>();
+
+            for (Track track : tracks) {
+                Map<String, String> map = new HashMap<>();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS");
+                LocalDateTime date = LocalDateTime.parse(track.getDay() + "T" + track.getTime(), formatter);
+                // Define the desired output format
+                DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss");
+
+                // Format the LocalDateTime object into a readable format
+                String formattedDateTime = date.format(outputFormatter);
+                map.put("date", formattedDateTime);
+                map.put("value", Double.toString(track.getValue()));
+                list.add(map);
+            }
+
+            return ResponseEntity.ok(list);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping(path = "/harvest/{vineId}")
+    public ResponseEntity<String> harvestVine(@PathVariable Integer vineId) {
+        // if there is already a harvest notification for this vine, and it is unread, we don't need to send another one
+        List<Notification> notifications = notificationService.getNotificationsByVineId(vineId);
+        for (Notification notification : notifications) {
+            if (notification.getType().equals("harvest") && notification.getIsUnRead()) {
+                return ResponseEntity.ok("sent");
+            }
+        }
+
+        // we need to send a notification
+        try {
+            Notification notification = new Notification();
+            notification.setDescription("Ready to Harvest.");
+            notification.setType("harvest"); // Set the type
+            notification.setAvatar("/public/assets/images/notifications/harvest.png"); // Set the avatar
+            notification.setIsUnRead(true); // Set the isUnRead
+            notification.setDate(LocalDateTime.now()); // Set the date
+            notification.setVineId(vineId); // Set the vineId directly
+            // get the vine
+            Vine vine = vineService.getVineById(vineId);
+            notification.setVine(vine); // Set the vine
+            notificationService.saveNotification(notification);
+
+            JSONObject notificationJson = new JSONObject();
+            notificationJson.put("id", notification.getId());
+            notificationJson.put("type", notification.getType());
+            notificationJson.put("avatar", notification.getAvatar());
+            notificationJson.put("isUnRead", notification.getIsUnRead());
+            notificationJson.put("vineId", notification.getVineId());
+            notificationJson.put("description", notification.getDescription());
+            notificationJson.put("date", notification.getDate());
+            this.template.convertAndSend("/topic/notification", notificationJson.toString());
+
+            return ResponseEntity.ok("sent");
+        } catch (Exception e){
             return ResponseEntity.notFound().build();
         }
     }
