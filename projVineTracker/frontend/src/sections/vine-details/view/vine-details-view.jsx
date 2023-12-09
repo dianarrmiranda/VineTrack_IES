@@ -304,6 +304,9 @@ export default function VineDetailsView() {
   const [dateProduction, setDateProduction] = useState("");
   const [production, setProduction] = useState("");
 
+  const [alertDateProduction, setAlertDateProduction] = useState(false)
+  const [alertProduction, setAlertProduction] = useState(false);
+
 
 
   const style = {
@@ -416,21 +419,34 @@ export default function VineDetailsView() {
   const handelSubmitProduction = (e) => {
     e.preventDefault();
     
-    const res = postData(`vines/production/${id}?value=${production}&date=${dateProduction}`);
-    console.log("p ", production);
-    console.log("d ", dateProduction);
-    console.log("res ", res);
-    res.then((response) => {
-      if (response) {
-        console.log("Production value added", response);
-        setProduction('');
-      } else {
-        console.log("Production value failed");
-      }
+    if (!production || production < 0) {
+      setAlertProduction(true);
+    }else {
+      setAlertProduction(false);
     }
-    , [id]);
-    // Close the modal
-    handleCloseProduction();
+    if (!dateProduction) {
+      setAlertDateProduction(true);
+    }else{
+      setAlertDateProduction(false);
+    }
+
+    if (production > 0 && production && dateProduction) {
+      const res = postData(`vines/production/${id}?value=${production}&date=${dateProduction}`);
+      console.log("p ", production);
+      console.log("d ", dateProduction);
+      console.log("res ", res);
+      res.then((response) => {
+        if (response) {
+          console.log("Production value added", response);
+          setProduction('');
+        } else {
+          console.log("Production value failed");
+        }
+      }
+      , [id]);
+      // Close the modal
+      handleCloseProduction();
+    }
     
   };
 
@@ -902,6 +918,7 @@ export default function VineDetailsView() {
                     onChange={(e) => setProduction(e.target.value)}
                     value={production}
                   />
+                  {alertProduction && <Typography sx={{ mb: 2, color: 'red' }}>Value cannot be empty or negative</Typography>}
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                       label="Date"
@@ -914,7 +931,7 @@ export default function VineDetailsView() {
                       }}
                     />
                   </LocalizationProvider>
-
+                  {alertDateProduction && <Typography sx={{ mb: 2, color: 'red' }}>Date cannot be empty</Typography>}
                   <Button
                     variant="contained"
                     color="primary"
