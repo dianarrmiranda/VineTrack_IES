@@ -108,22 +108,6 @@ export default function AppView() {
   }, [vineIds]);
 
 
-
-  const data = {
-    vine1: {2023: 1234, 2022: 122, 2025:13},
-    vine2: {2021:435, 2023:23}
-   };
-  
-  const allKeys = [...Object.keys(data.vine1), ...Object.keys(data.vine2)];
-  // Usar um Set para garantir unicidade e converter de volta para um array
-  const labels = [...new Set(allKeys)].sort();
-  const series = Object.entries(data).map(([key, value]) => {
-   return {
-     name: key,
-     data: labels.map(year => value[year] || 0)
-   };
-  });
-
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>
