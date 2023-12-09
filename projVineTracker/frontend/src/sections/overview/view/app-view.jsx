@@ -7,7 +7,6 @@ import AppHumidityChart from "../app-production-chart";
 import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 import { useEffect, useState } from "react";
 import { fetchData } from "src/utils";
-import { size } from "lodash";
 // ----------------------------------------------------------------------
 
 
@@ -72,6 +71,59 @@ export default function AppView() {
     initialize();
   }, [waterConsumption]);
 
+  const [vineProduction, setVineProduction] = useState([]);
+  const [labelsProduction, setLabelsProduction] = useState([]);
+  const [seriesProduction, setSeriesProduction] = useState([]);
+  useEffect(() => {
+    const initialize = async () => {
+      const vineProduction = {};
+      for (const vineId of vineIds) {
+        const vineName = await fetchData(`vines/name/${vineId}`);
+        const production = await fetchData(`vines/production/${vineId}`);
+     
+        vineProduction[vineName] = production;
+
+      } 
+
+      const allKeys = Object.entries(vineProduction).reduce((acc, [vine, years]) => {
+        return [...acc, ...Object.keys(years)];
+      }, []);
+
+      const labels = [...new Set(allKeys)].sort();
+
+      const series = Object.entries(vineProduction).map(([key, value]) => {
+        return {
+          name: key,
+          data: labels.map(year => value[year] || 0)
+        };
+       });
+       
+      console.log(series);
+
+      setSeriesProduction(series);
+      setLabelsProduction(labels);
+      setVineProduction(vineProduction);
+    };
+    initialize();
+  }, [vineIds]);
+
+
+
+  const data = {
+    vine1: {2023: 1234, 2022: 122, 2025:13},
+    vine2: {2021:435, 2023:23}
+   };
+  
+  const allKeys = [...Object.keys(data.vine1), ...Object.keys(data.vine2)];
+  // Usar um Set para garantir unicidade e converter de volta para um array
+  const labels = [...new Set(allKeys)].sort();
+  const series = Object.entries(data).map(([key, value]) => {
+   return {
+     name: key,
+     data: labels.map(year => value[year] || 0)
+   };
+  });
+
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>
@@ -88,33 +140,8 @@ export default function AppView() {
             title="Production Volume"
             subheader=" in Liters (L)"
             chart={{
-              labels: [
-                "09/30/2019",
-                "09/30/2020",
-                "09/30/2021",
-                "09/30/2022",
-                "09/30/2023",
-              ],
-              series: [
-                {
-                  name: "vine1",
-                  type: "line",
-                  fill: "solid",
-                  data: [70, 78, 68, 50, 45],
-                },
-                {
-                  name: "vine2",
-                  type: "line",
-                  fill: "solid",
-                  data: [20, 59, 30, 14, 70],
-                },
-                {
-                  name: "vine3",
-                  type: "line",
-                  fill: "solid",
-                  data: [54, 80, 70, 90, 73],
-                },
-              ],
+              labels: labelsProduction,
+              series: seriesProduction,
             }}
           />
         </Grid>

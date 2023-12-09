@@ -909,9 +909,9 @@ export default function VineDetailsView() {
                       sx={{ mb: 2 }}
                       inputFormat="yyyy-MM-dd"
                       onChange={(newValue) => {
-                        const formattedDate = newValue.format('YYYY-MM-DD');
-                        setDateProduction(formattedDate);
-                       }}
+                        const year = newValue.year();
+                        setDateProduction(year);
+                      }}
                     />
                   </LocalizationProvider>
 
