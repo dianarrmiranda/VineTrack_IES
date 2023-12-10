@@ -472,6 +472,21 @@ export default function VineDetailsView() {
   }
   , [id]);
 
+  // Water Consumption Weekly
+  const [waterConsumptionWeekly, setWaterConsumptionWeekly] = useState([]);
+  useEffect(() => {
+    fetchData(`vines/waterConsumptionWeek/${id}`)
+      .then(response => {
+        if (response) {
+          console.log("Water Consumption Weekly data fetched");
+          setWaterConsumptionWeekly(response);
+        } else {
+          console.log("Water Consumption Weekly data failed");
+        }
+      });
+  }
+  , [id]);
+
   // Water Consumption Limit
   useEffect(() => {
     fetchData(`vines/waterLimit/${vineId}`)
@@ -705,7 +720,7 @@ export default function VineDetailsView() {
                   color: "#0000FF",
                   fill: "solid",
                   unit: "L",
-                  data: [18, 19, 20, 22, 24, 28, 30, 31, 28],
+                  data: waterConsumptionWeekly,
                 },
               ],
             }}
