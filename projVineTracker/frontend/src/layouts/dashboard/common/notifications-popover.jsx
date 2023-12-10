@@ -104,11 +104,15 @@ export default function NotificationsPopover() {
         setUnreadNotifications((prevUnread) => {
           // Check if the notification with the same id already exists
           if (!prevUnread.some((notification) => notification.id === newFormattedNotification.id)) {
+            setNotifications((prevNotifications) => [newFormattedNotification, ...prevNotifications]);
             return [...prevUnread, newFormattedNotification];
+
           }
           console.log("Unread Notifications: ", prevUnread);
           return prevUnread;
         });
+
+      
 
 
         setTotalUnRead((prevTotal) => prevTotal + 1);
