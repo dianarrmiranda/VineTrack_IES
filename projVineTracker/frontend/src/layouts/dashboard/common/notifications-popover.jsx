@@ -139,14 +139,7 @@ export default function NotificationsPopover() {
   };
 
   const handleMarkAllAsRead = () => {
-    setReadNotifications((prevRead) => [
-      ...prevRead,
-      ...unreadNotifications.map((notification) => ({
-        ...notification,
-        isUnRead: false,
-      })),
-    ]);
-
+    unreadNotifications.forEach((notification) => markNotificationAsRead(notification.id));
     setUnreadNotifications([]);
     setTotalUnRead(0);
   };
