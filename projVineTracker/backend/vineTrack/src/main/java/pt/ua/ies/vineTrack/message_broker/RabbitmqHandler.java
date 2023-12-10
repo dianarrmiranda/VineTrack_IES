@@ -83,7 +83,6 @@ public class RabbitmqHandler {
                     double waterConsumption = waterPercentage * 4 / 100 * vine.getSize();
                     // 2 decimal places
                     waterConsumption = Math.round(waterConsumption * 100.0) / 100.0;
-
                     trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
                     System.out.println("Water consumption: " + waterConsumption);
 
@@ -102,6 +101,8 @@ public class RabbitmqHandler {
                         if (trackWeekNumber == weekNumber) {
                             // there is a track for this week, add the water consumption to the total
                             double totalWaterConsumption = waterConsumptionTrack.getValue() + waterConsumption;
+                            // 2 decimal places
+                            totalWaterConsumption = Math.round(totalWaterConsumption * 100.0) / 100.0;
                             waterConsumptionTrack.setValue(totalWaterConsumption);
                             trackService.saveTrack(waterConsumptionTrack);
                             exists = true;
