@@ -28,6 +28,7 @@ export default function VineDetailsView() {
   const [vine, setVine] = useState({});
   
   const [moistureData, setMoistureData] = useState(null);
+  const [nutrientsData, setNutrientsData] = useState(null);
   const [tempData, setTempData] = useState([]);
   const [weatherAlertsData, setWeatherAlertsData] = useState([]);
 
@@ -75,6 +76,22 @@ export default function VineDetailsView() {
         setMoistureData(moistureData);
       } else {
         console.log("Moisture data failed");
+      }
+    });
+
+    fetchData(`vines/nutrients/${id}`)
+    .then(response => {
+      if (response) {
+        console.log("Nutrients data fetched");
+        
+        // nutrients is a list of doubles
+        const nutrients = response;
+        const nutrientsData = nutrients.map((value, index) => {
+          return value;
+        });
+        setMoistureData(nutrientsData);
+      } else {
+        console.log("Nutrients data failed");
       }
     });
 
@@ -220,6 +237,13 @@ export default function VineDetailsView() {
             console.log("New moisture data: ", newMoistureData);
             setMoistureData(newMoistureData);
           }
+          if (JSON.parse(data.body).sensor == "nutrients") {
+            const newNutrientsData = [...nutrientsData];
+            newNutrientsData.shift();
+            newNutrientsData.push(JSON.parse(data.body).value);
+            console.log("New nutrients data: ", newNutrientsData);
+            setMoistureData(newNutrientsData);
+          }
           if (JSON.parse(data.body).sensor == "weatherAlerts") {
             console.log("New weather alert: ", JSON.parse(data.body).value);
             
@@ -243,9 +267,10 @@ export default function VineDetailsView() {
       });
     });
   }
-  , [id, moistureData], [id, tempData], [id, weatherAlertsData]);
+  , [id, moistureData], [id,nutrientsData ] ,[id, tempData], [id, weatherAlertsData]);
 
   console.log("Moisture", moistureData);
+  console.log("Nutrients", nutrientsData);
   console.log("Temperature", tempData);
   console.log("Latest value: ", latestValue);
   console.log("Weather Alerts: ", weatherAlertsData);
