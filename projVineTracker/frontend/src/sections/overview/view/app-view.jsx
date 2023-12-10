@@ -199,22 +199,6 @@ export default function AppView() {
                 "11/01/2023",
               ],
               series: [
-                {
-                  name: "Water",
-                  type: "bar",
-                  color: "#0000FF",
-                  fill: "solid",
-                  unit: "L",
-                  data: [18, 19, 20, 22, 24, 28, 30, 31, 28, 24, 22],
-                },
-                {
-                  name: "Fertilizer",
-                  type: "bar",
-                  color: "#00FF00",
-                  fill: "solid",
-                  unit: "kg",
-                  data: [10, 10, 11, 11, 10, 8, 8, 9, 11, 12, 13],
-                },
               ],
             }}
           />
