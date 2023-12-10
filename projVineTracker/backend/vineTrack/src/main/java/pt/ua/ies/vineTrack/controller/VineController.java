@@ -35,7 +35,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
-import org.javatuples.Pair;
 
 
 
@@ -93,20 +92,20 @@ public class VineController {
     @GetMapping(path = "/nutrients/{vineId}")
     public List<Double> getNutrientsByVineId(@PathVariable int vineId){
         System.out.println("Inside /nutrients: Vine id: " + vineId);
-         List<Track> tracks = vineService.getTracksByVineId(vineId);
-         Iterator<Track> iterator = tracks.iterator();
-         while (iterator.hasNext()) {
-             Track track = iterator.next();
+         List<Track> tracks2 = vineService.getTracksByVineId(vineId);
+         Iterator<Track> iterator2 = tracks2.iterator();
+         while (iterator2.hasNext()) {
+             Track track = iterator2.next();
              if (!track.getType().equals("nutrients")) {
-                 iterator.remove();
+                 iterator2.remove();
              }
          }
          // now we need to order the tracks by date from the oldest to the newest
-         tracks.sort(Comparator.comparing(Track::getDate));
+         tracks2.sort(Comparator.comparing(Track::getDate));
          // finally we need to get only the moisture values
-         List<Double> nutrientsValues = new ArrayList<>(tracks.stream().map(Track::getValue).toList());
+         List<Double> nutrientsValues = new ArrayList<>(tracks2.stream().map(Track::getValue).toList());
          while (nutrientsValues.size() < 10) {
-             nutrientsValues.add(0, 0.0);
+             nutrientsValues.add(0, 0.0); // TODO: é assim que queremos armazenar as coisas?
          }
          if (nutrientsValues.size() > 10) {
              nutrientsValues = nutrientsValues.subList(nutrientsValues.size() - 10, nutrientsValues.size());

@@ -288,18 +288,19 @@ public class RabbitmqHandler {
                 }
                 break;
             case "nutrients":
+                System.out.println("Entrei no RabbitMQ Handler-nutrients");
                 int vineId4 = params.getInt("id");
                 double value4 = params.getDouble("value");
                 // double pastValue4;
                 // store the track in the database
                 Vine vine4 = vineService.getVineById(vineId4);
-                List<Track> tracks4 = trackService.getLastMoistureTrackByVineId(vineId4);
-                Track lastMoistureTrack4 = !tracks4.isEmpty() ? tracks4.get(0) : null;
-                LocalDateTime lastMoistureTrackDate4 = lastMoistureTrack4 != null ? lastMoistureTrack4.getDate() : null;
-                pastValue = lastMoistureTrack4 != null ? lastMoistureTrack4.getValue() : 0;
+                List<Track> tracks4 = trackService.getLastNutrientsTrackByVineId(vineId4);
+                Track lastNutrientsTrack4 = !tracks4.isEmpty() ? tracks4.get(0) : null;
+                LocalDateTime lastNutrientsTrackDate4 = lastNutrientsTrack4 != null ? lastNutrientsTrack4.getDate() : null;
+                pastValue = lastNutrientsTrack4 != null ? lastNutrientsTrack4.getValue() : 0;
                 LocalDateTime date4;
-                if (lastMoistureTrackDate4 != null) {
-                    date4 = lastMoistureTrackDate4.plusHours(1);
+                if (lastNutrientsTrackDate4 != null) {
+                    date4 = lastNutrientsTrackDate4.plusHours(1);
                 } else {
                     date4 = LocalDateTime.now();
                 }
@@ -310,9 +311,6 @@ public class RabbitmqHandler {
                 Track track4 = new Track(type, date4, value4, vine4, t4.toString(), d4.toString());
 
                 trackService.saveTrack(track4);
-
-
-
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + type);

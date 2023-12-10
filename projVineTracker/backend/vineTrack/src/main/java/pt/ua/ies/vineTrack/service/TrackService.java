@@ -49,6 +49,12 @@ public class TrackService {
                     tracks.remove(0);
                 }
             }
+            case "nutrients" -> {
+                while (tracks.size() > 6) {
+                    trackRepo.delete(tracks.get(0));
+                    tracks.remove(0);
+                }
+            }
             case "weatherAlerts" -> {
                 while (tracks.size() > 1) {
                     trackRepo.delete(tracks.get(0));
@@ -62,6 +68,10 @@ public class TrackService {
     // get last moisture track date for a vine
     public List<Track> getLastMoistureTrackByVineId(Integer vineId){
         return trackRepo.getLastMoistureTrackByVineId(vineId);
+    }
+
+    public List<Track> getLastNutrientsTrackByVineId(Integer vineId){
+        return trackRepo.getLastNutrientsTrackByVineId(vineId);
     }
 
     // remove the waterConsumption tracks older than 7 days ago
