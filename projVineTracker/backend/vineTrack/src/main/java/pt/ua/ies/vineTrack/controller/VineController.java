@@ -560,4 +560,33 @@ public class VineController {
             return ResponseEntity.notFound().build();
         }
     }
+
+
+    @GetMapping(path = "production/{vineId}")
+    public ResponseEntity<Map<String, Double>> getProductionLevels(@PathVariable Integer vineId) {
+        try {
+            Vine vine = vineService.getVineById(vineId);
+            SortedMap<String, Double> productionLevels = vine.getProductionLiters();
+            return ResponseEntity.ok(productionLevels);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping(path = "production/{vineId}")
+    public ResponseEntity<String> setProductionLevels(@PathVariable Integer vineId, @RequestParam Double value, @RequestParam String date) {
+        System.out.println("Received production value: " + value + " for vine: " + vineId + " on date: " + date);
+
+        
+        try {
+            Vine vine = vineService.getVineById(vineId);
+            SortedMap<String, Double> productionLevels = vine.getProductionLiters();
+            productionLevels.putAll(Map.of(date, value));
+            vine.setProductionLiters(productionLevels);
+            vineService.save(vine);
+            return ResponseEntity.ok("ok");
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

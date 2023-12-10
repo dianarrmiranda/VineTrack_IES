@@ -3,7 +3,6 @@ package pt.ua.ies.vineTrack.message_broker;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
@@ -298,15 +297,15 @@ public class RabbitmqHandler {
                             Boolean isUnRead = true;
                             Notification notification = new Notification();
                             // "weatherAlerts", "/assets/images/notifications/rain.png", isUnRead, vine3
-                            notification.setDescription("Levels of the soil humidity are low.");
+                            notification.setDescription(map.get(key).get(3).replaceAll("'", ""));
                             notification.setVine(vine3); // Set the vine
                             notification.setType("weatherAlerts"); // Set the type
                             notification.setAvatar("/public/assets/images/notifications/rain.png"); // Set the avatar
                             notification.setIsUnRead(isUnRead); // Set the isUnRead
+                            notification.setDate(LocalDateTime.now()); // Set the date
                             notification.setVineId(vine3.getId()); // Set the vineId directly
 
 
-                            notification.setDescription(key.replaceAll("'", "") + ": " + map.get(key).get(3).replaceAll("'", ""));
 
                             int totalNotifications;
                             totalNotifications = notificationService.getNumberOfNotificationsByVine(vine3);
@@ -315,6 +314,7 @@ public class RabbitmqHandler {
                             if (totalNotifications > MAX_NOTIFICATIONS) {
                                 notificationService.removeOldestNotificationsForVine(vine3.getId(), MAX_NOTIFICATIONS);
                             }
+
 
                             notificationService.saveNotification(notification);
 
