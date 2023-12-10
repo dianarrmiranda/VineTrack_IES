@@ -53,6 +53,8 @@ public class Vine {
     private SortedMap<String, Double> avgTempsByDay = new TreeMap<>();
     @ElementCollection
     private SortedMap<String, Double> avgTempsByWeek = new TreeMap<>();
+    @ElementCollection
+    private SortedMap<String, Double> productionLiters = new TreeMap<>();
 
 
     @Column(nullable = false)
@@ -102,6 +104,11 @@ public class Vine {
     public SortedMap<String, Double> getAvgTempsByWeek(){
         return avgTempsByWeek;
     }
+
+    public SortedMap<String, Double> getProductionLiters() {
+        return productionLiters;
+    }
+
     public void setId(Integer id){
         this.id = id;
     }
@@ -165,6 +172,10 @@ public class Vine {
     public void setAvgTempsByDay(SortedMap<String, Double> avgTempsByDay){ this.avgTempsByDay = avgTempsByDay; }
 
     public void setAvgTempsByWeek(SortedMap<String, Double> avgTempsByWeek){ this.avgTempsByWeek = avgTempsByWeek; }
+
+    public void setProductionLiters(SortedMap<String, Double> productionLiters) {
+        this.productionLiters = productionLiters;
+    }
 
     public List<Nutrient> getNutrientsList() {
         return Nutrients;

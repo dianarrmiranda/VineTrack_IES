@@ -17,7 +17,8 @@ import Iconify from "src/components/iconify";
 import { styled } from '@mui/system';
 import clsx from 'clsx';
 import { FormControl, useFormControlContext } from '@mui/base/FormControl';
-import { set } from "lodash";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 // ----------------------------------------------------------------------
 
@@ -295,6 +296,16 @@ export default function VineDetailsView() {
   const [openWaterLimit, setOpenWaterLimit] = useState(false);
   const handleOpenWaterLimit = () => setOpenWaterLimit(true);
   const handleCloseWaterLimit = () => setOpenWaterLimit(false);
+  
+  const [openProduction, setOpenProduction] = useState(false);
+  const handleOpenProduction = () => setOpenProduction(true);
+  const handleCloseProduction = () => setOpenProduction(false);
+
+  const [dateProduction, setDateProduction] = useState("");
+  const [production, setProduction] = useState("");
+
+  const [alertDateProduction, setAlertDateProduction] = useState(false)
+  const [alertProduction, setAlertProduction] = useState(false);
 
 
 
@@ -405,6 +416,42 @@ export default function VineDetailsView() {
     setError(''); // Clear error message on input change
   };
 
+  const handelSubmitProduction = (e) => {
+    e.preventDefault();
+    
+    if (!production || production < 0) {
+      setAlertProduction(true);
+    }else {
+      setAlertProduction(false);
+    }
+    if (!dateProduction) {
+      setAlertDateProduction(true);
+    }else{
+      setAlertDateProduction(false);
+    }
+
+    if (production > 0 && production && dateProduction) {
+      const res = postData(`vines/production/${id}?value=${production}&date=${dateProduction}`);
+      console.log("p ", production);
+      console.log("d ", dateProduction);
+      console.log("res ", res);
+      res.then((response) => {
+        if (response) {
+          console.log("Production value added", response);
+          setProduction('');
+        } else {
+          console.log("Production value failed");
+        }
+      }
+      , [id]);
+      // Close the modal
+      handleCloseProduction();
+    }
+    
+  };
+
+
+
   const renderForm = (
     <>
       <FormControl>
@@ -488,22 +535,43 @@ export default function VineDetailsView() {
 
   return (
     <Container maxWidth="xl">
-      <Typography variant="h4" sx={{ mb: 5 }}>
+      <Typography variant="h3" sx={{ mb: 5 }}>
         Overview of {vine.name}
       </Typography>
-      <Typography variant="p" sx={{ mb: 5 }}>Water Consumption Limit: {waterLimit} L</Typography>
-      <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item sx={{pt: 4, pr: 3}}>
-                  <Button
-                    variant="contained"
-                    color="inherit"
-                    startIcon={<Iconify icon="eva:edit-fill" />}
-                    onClick={handleOpenWaterLimit}
-                  >
-                    Edit Consumption Limit
-                  </Button>
-                </Grid>
-              </Grid>
+      <Grid container>
+      <Grid item xs={6}>
+        <Typography variant="h5" sx={{ mb: 5 }}>Water Consumption Limit: {waterLimit} L</Typography>
+        <Grid container alignItems="center" justifyContent="space-between">
+          <Grid item>
+            <Button
+              variant="contained"
+              color="inherit"
+              startIcon={<Iconify icon="eva:edit-fill" />}
+              onClick={handleOpenWaterLimit}
+            >
+              Edit Consumption Limit
+            </Button>
+          </Grid>
+        </Grid>
+      </Grid>
+      <Grid item xs={6} justifyContent="flex-end">
+        <Typography variant="h5" sx={{ mb: 5 }}>Production Level</Typography>
+        <Grid container alignItems="center">
+          <Grid item >
+            <Button
+              variant="contained"
+              color="inherit"
+              startIcon={<Iconify icon="eva:edit-fill" />}
+              onClick={handleOpenProduction}
+            >
+              Add Production Information
+            </Button>
+          </Grid>
+        </Grid>
+      </Grid>
+      </Grid>
+
+      <br></br>
       <br></br>
 
       <Typography variant="h5" sx={{ mb: 5 }}>
@@ -824,6 +892,62 @@ export default function VineDetailsView() {
                   {renderFormWaterLimit}
 
                   </Typography>
+                </Box>
+              </Modal>
+              <Modal
+                open={openProduction}
+                onClose={handleCloseProduction}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+              >
+                <Box sx={style}>
+                  <Typography
+                    id="modal-modal-title"
+                    variant="h6"
+                    component="h2"
+                    sx={{ mb: 2 }}
+                  >
+                    Add Production Information
+                  </Typography>
+                  <TextField
+                    required
+                    id="outlined-required"
+                    label="Value (L)"
+                    fullWidth
+                    sx={{ mb: 2 }}
+                    onChange={(e) => setProduction(e.target.value)}
+                    value={production}
+                  />
+                  {alertProduction && <Typography sx={{ mb: 2, color: 'red' }}>Value cannot be empty or negative</Typography>}
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Date"
+                      slotProps={{ textField: { fullWidth: true } }}
+                      sx={{ mb: 2 }}
+                      inputFormat="yyyy-MM-dd"
+                      onChange={(newValue) => {
+                        const year = newValue.year();
+                        setDateProduction(year);
+                      }}
+                    />
+                  </LocalizationProvider>
+                  {alertDateProduction && <Typography sx={{ mb: 2, color: 'red' }}>Date cannot be empty</Typography>}
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ mt: 3 }}
+                    onClick={handelSubmitProduction}
+                  >
+                    Submit
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="inherit"
+                    sx={{ mt: 3, ml: 2 }}
+                    onClick={handleCloseProduction}
+                  >
+                    Cancel
+                  </Button>
                 </Box>
               </Modal>
 
