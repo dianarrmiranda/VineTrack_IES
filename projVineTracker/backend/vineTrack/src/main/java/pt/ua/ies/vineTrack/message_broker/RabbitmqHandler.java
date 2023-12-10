@@ -119,8 +119,8 @@ public class RabbitmqHandler {
                     List<Track> waterConsumptionWeekTracks = trackService.getWaterConsumptionWeekTracksByVineId(vineId);
                     // sort them by date
                     waterConsumptionWeekTracks.sort(Comparator.comparing(Track::getDate));
-                    // we only want the last 8 tracks
-                    while (waterConsumptionWeekTracks.size() > 8) {
+                    // we only want the last 9 tracks
+                    while (waterConsumptionWeekTracks.size() > 9) {
                         waterConsumptionWeekTracks.remove(0);
                     }
                     // get the values
@@ -128,8 +128,8 @@ public class RabbitmqHandler {
                     for (Track waterConsumptionWeekTrack : waterConsumptionWeekTracks) {
                         waterConsumptionWeekValues.add(waterConsumptionWeekTrack.getValue());
                     }
-                    // if there are less than 8 tracks, add 0s to the beginning
-                    while (waterConsumptionWeekValues.size() < 8) {
+                    // if there are less than 9 tracks, add 0s to the beginning
+                    while (waterConsumptionWeekValues.size() < 9) {
                         waterConsumptionWeekValues.add(0, 0.0);
                     }
                     // send through websocket

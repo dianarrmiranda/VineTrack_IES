@@ -487,6 +487,24 @@ export default function VineDetailsView() {
   }
   , [id]);
 
+  // Water Consumption Weekly - websocket
+  useEffect(() => {
+    const ws = new SockJS("http://localhost:8080/vt_ws");
+    const client = Stomp.over(ws);
+    client.connect({}, function () {
+      client.subscribe('/topic/waterConsumptionWeek', function (data) {
+        if (JSON.parse(data.body).vineId == id) {
+          console.log("New water consumption weekly data: ", JSON.parse(data.body).waterConsumptionWeekValues);
+          // we receive a list of doubles
+          const waterConsumptionWeekly = JSON.parse(data.body).waterConsumptionWeekValues;
+          setWaterConsumptionWeekly(waterConsumptionWeekly);
+        }
+      }
+      );
+    });
+  }
+  , [id, waterConsumptionWeekly]);
+
   // Water Consumption Limit
   useEffect(() => {
     fetchData(`vines/waterLimit/${vineId}`)
