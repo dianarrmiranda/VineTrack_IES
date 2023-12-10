@@ -114,6 +114,29 @@ public class RabbitmqHandler {
                         trackService.saveTrack(waterConsumptionTrack);
                     }
 
+                    // send weekly water consumption through websocket
+                    // get all weekly water consumption tracks for this vine
+                    List<Track> waterConsumptionWeekTracks = trackService.getWaterConsumptionWeekTracksByVineId(vineId);
+                    // sort them by date
+                    waterConsumptionWeekTracks.sort(Comparator.comparing(Track::getDate));
+                    // we only want the last 8 tracks
+                    while (waterConsumptionWeekTracks.size() > 8) {
+                        waterConsumptionWeekTracks.remove(0);
+                    }
+                    // get the values
+                    List<Double> waterConsumptionWeekValues = new ArrayList<>();
+                    for (Track waterConsumptionWeekTrack : waterConsumptionWeekTracks) {
+                        waterConsumptionWeekValues.add(waterConsumptionWeekTrack.getValue());
+                    }
+                    // if there are less than 8 tracks, add 0s to the beginning
+                    while (waterConsumptionWeekValues.size() < 8) {
+                        waterConsumptionWeekValues.add(0, 0.0);
+                    }
+                    // send through websocket
+                    JSONObject waterConsumptionWeekJson = new JSONObject();
+                    waterConsumptionWeekJson.put("vineId", vineId);
+                    waterConsumptionWeekJson.put("waterConsumptionWeekValues", waterConsumptionWeekValues);
+                    this.template.convertAndSend("/topic/waterConsumptionWeek", waterConsumptionWeekJson.toString());
 
                     // check if water consumption is above the limit
                     double vineSize = vine.getSize();
