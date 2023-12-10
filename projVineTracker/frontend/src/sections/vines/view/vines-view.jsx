@@ -85,6 +85,7 @@ export default function VinesView() {
   const [size, setSize] = useState("");
   const [grapeType, setGrapeType] = useState([]);
   const [grapeTypeIds, setGrapeTypeIds] = useState([]);
+  const [grapeTypeNames, setGrapeTypeNames] = useState([]);
   const [plantingDate, setPlantingDate] = useState("");
   const [fileName, setFileName] = useState("");
   const [file, setFile] = useState(null);
@@ -129,21 +130,37 @@ export default function VinesView() {
   };
 
   const handleChangeTypeGrapes = (event) => {
+    
     const {
       target: { value },
     } = event;
-    setGrapeType(typeof value === "string" ? value.split(",") : value);
+   
+    const filteredValue = value.filter(element => element !== undefined);
+     
+    setGrapeType(typeof filteredValue === "string" ? filteredValue.split(",") : filteredValue);
+
+    setGrapeTypeNames(filteredValue);
+    setAreaGrapes(prevAreaGrapes => {
+      const newAreaGrapes = {};
+      Object.keys(prevAreaGrapes).forEach(grapeName => {
+        if (filteredValue.includes(grapeName)) {
+          newAreaGrapes[grapeName] = prevAreaGrapes[grapeName];
+        }
+      });
+
+      return newAreaGrapes;
+    });
 
     const ids = [];
     grapes.forEach((grape) => {
-      value.forEach((grapeName) => {
+      filteredValue.forEach((grapeName) => {
         if (grape.name === grapeName) {
           ids.push(grape.id);
         }
       });
     });
     setGrapeTypeIds(ids);
-  };
+   };
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -191,6 +208,17 @@ export default function VinesView() {
       setAlertCity(false);
     }
 
+    let gp = {};
+
+    if (grapeTypeIds.length > 1) {
+      const totalArea = Object.values(areaGrapes).reduce((total, value) => total + parseFloat(value), 0);
+      if (totalArea !== Number(size)){ setAlertAreaGrapes(true); } else { setAlertAreaGrapes(false); }
+    }else {
+      gp = grapeTypeNames.map((grape) => ({ [grape]: size }))[0];
+      setAreaGrapes(gp);
+      setAlertAreaGrapes(false);
+    }
+
     if (
       name.length >= 3 &&
       location.length >= 3 &&
@@ -198,7 +226,8 @@ export default function VinesView() {
       file !== null &&
       regex.exec(fileName) &&
       file.size <= 1000000 &&
-      city !== ""
+      city !== "" &&
+      ((Object.values(areaGrapes).reduce((total, value) => total + parseFloat(value), 0) === Number(size) && grapeTypeIds.length > 1) || grapeTypeIds.length === 1 )
     ) {
       const user = JSON.parse(localStorage.getItem("user"));
       
@@ -215,6 +244,8 @@ export default function VinesView() {
         grapeTypeIds.map((id) => id)
       );
       formData.append("file", file, file.name);
+      formData.append("areaGrapes", grapeTypeIds.length > 1 ? JSON.stringify(areaGrapes) : JSON.stringify(gp));
+
 
       const res = postData("vines", formData);
 
@@ -286,6 +317,10 @@ export default function VinesView() {
       .catch(err => console.error(err));
   }, []);
 
+  const [areaGrapes, setAreaGrapes] = useState({});
+  const [alertAreaGrapes, setAlertAreaGrapes] = useState(false);
+
+  
 
   return (
     <Container>
@@ -430,6 +465,42 @@ export default function VinesView() {
               </MenuItem>
             </Select>
           </div>
+          {grapeType.length > 1 && (
+             grapeTypeNames.map((grape) => (
+              <>
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                  <Typography 
+                    id="modal-modal-title"
+                    variant="p"
+                    component="p"
+                    sx={{ mb: 2,  mr: 1}}
+                  >
+                    {grape}:
+                  </Typography>
+                  <TextField
+                    required
+                    id="outlined-required"
+                    label="Area (m²)"
+                    fullWidth
+                    sx={{ mb: 2 }}
+                    value={areaGrapes[grape] || ''}
+                    onChange={(e) => {
+                      setAreaGrapes(prevAreaGrapes => ({
+                        ...prevAreaGrapes,
+                        [grape]: e.target.value
+                      }));
+                    }}
+                  />
+                </div>
+              </>
+             ))
+            )}
+          {alertAreaGrapes && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {" "}
+              The sum of the areas of the grapes must be equal to the vine area{" "}
+            </Alert>
+          )}
           <div>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker

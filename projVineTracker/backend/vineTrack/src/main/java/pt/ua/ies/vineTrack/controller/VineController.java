@@ -302,7 +302,7 @@ public class VineController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Vine> addVine(@RequestParam String name, @RequestParam String location, @RequestParam String city, @RequestParam Double size, @RequestParam java.util.Date date, @RequestParam(required = false) MultipartFile img, @RequestParam List<Integer> users, @RequestParam List<Integer> typeGrap){
+    public ResponseEntity<Vine> addVine(@RequestParam String name, @RequestParam String location, @RequestParam String city, @RequestParam Double size, @RequestParam java.util.Date date, @RequestParam(required = false) MultipartFile img, @RequestParam List<Integer> users, @RequestParam List<Integer> typeGrap, @RequestParam String areaGrapes){
 
         try {
             Vine vine = new Vine();
@@ -338,6 +338,16 @@ public class VineController {
                     vine.setTypeGrap(grapes);
                 }
             }
+            
+            JSONObject jsonObject = new JSONObject(areaGrapes);
+            Map<String, Double> areaGrapesMap = new HashMap<>();
+            
+            for (String key : jsonObject.keySet()) {
+               areaGrapesMap.put(key, jsonObject.getDouble(key));
+            }
+
+            vine.setAreaGrapes(areaGrapesMap);
+            
 
             vineService.save(vine);
 
