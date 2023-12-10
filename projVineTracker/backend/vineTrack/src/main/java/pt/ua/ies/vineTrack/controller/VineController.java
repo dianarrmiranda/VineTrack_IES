@@ -579,4 +579,37 @@ public class VineController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping(path = "areaGrapes/")
+    public ResponseEntity<Map<String, Double>> getAreaGrapes() {
+        try {
+            List<Vine> vines = vineService.getAllVines();
+            Map<String, Double> areaGrapes  = new HashMap<>();
+            double totalArea = 0;
+            for (Vine vine : vines) {
+                for (String key : vine.getAreaGrapes().keySet()) {
+                    if (areaGrapes.containsKey(key)) {
+                        areaGrapes.put(key, areaGrapes.get(key) + vine.getAreaGrapes().get(key));
+                    } else {
+                        areaGrapes.put(key, vine.getAreaGrapes().get(key));
+                    }
+
+                    
+                }
+                totalArea += vine.getSize();
+            }
+
+            for (String key : areaGrapes.keySet()) {
+                double value = areaGrapes.get(key);
+                value = value * 100 / totalArea;
+                DecimalFormat df = new DecimalFormat("0.00");
+                value = Double.parseDouble(df.format(value));
+                areaGrapes.put(key, value);
+             }
+
+            return ResponseEntity.ok(areaGrapes);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
