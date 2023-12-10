@@ -541,4 +541,23 @@ public class VineController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping(path = "/waterConsumptionWeek/{vineId}")
+    public ResponseEntity<List<Double>> getWaterConsumptionWeekTracksByVineId(@PathVariable Integer vineId){
+        try {
+            List<Track> tracks = trackService.getWaterConsumptionWeekTracksByVineId(vineId);
+            // now we need to order the tracks by date from the oldest to the newest
+            tracks.sort(Comparator.comparing(Track::getDate));
+            List<Double> waterConsumptionValues = new ArrayList<>(tracks.stream().map(Track::getValue).toList());
+            while (waterConsumptionValues.size() < 10) {
+                waterConsumptionValues.add(0, 0.0);
+            }
+            if (waterConsumptionValues.size() > 10) {
+                waterConsumptionValues = waterConsumptionValues.subList(waterConsumptionValues.size() - 10, waterConsumptionValues.size());
+            }
+            return ResponseEntity.ok(waterConsumptionValues);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

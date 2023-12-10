@@ -19,10 +19,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.temporal.WeekFields;
+import java.util.*;
 
 @Component
 public class RabbitmqHandler {
@@ -91,6 +89,31 @@ public class RabbitmqHandler {
 
                     // only keep water consumption tracks that are less than 8 days old
                     trackService.removeOldWaterConsumptionTracks();
+
+                    // we need to add the water consumption to the vine's total water consumption for the week
+                    // get the week number
+                    int weekNumber = weekNumber(d);
+                    boolean exists = false;
+                    // see if there is a track for this week
+                    List<Track> waterConsumptionTracks = trackService.getWaterConsumptionWeekTracksByVineId(vineId);
+                    for (Track waterConsumptionTrack : waterConsumptionTracks) {
+                        LocalDate trackDate = waterConsumptionTrack.getDate().toLocalDate();
+                        int trackWeekNumber = weekNumber(trackDate);
+                        if (trackWeekNumber == weekNumber) {
+                            // there is a track for this week, add the water consumption to the total
+                            double totalWaterConsumption = waterConsumptionTrack.getValue() + waterConsumption;
+                            waterConsumptionTrack.setValue(totalWaterConsumption);
+                            trackService.saveTrack(waterConsumptionTrack);
+                            exists = true;
+                            break;
+                        }
+                    }
+                    // if there is no track for this week, create one
+                    if (!exists) {
+                        Track waterConsumptionTrack = new Track("waterConsumptionWeek", date, waterConsumption, vine, t.toString(), d.toString());
+                        trackService.saveTrack(waterConsumptionTrack);
+                    }
+
 
                     // check if water consumption is above the limit
                     double vineSize = vine.getSize();
@@ -308,4 +331,7 @@ public class RabbitmqHandler {
         return map;
     }
 
+    private static int weekNumber(LocalDate date) {
+        return date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
+    }
 }
