@@ -678,14 +678,14 @@ export default function VineDetailsView() {
       <br></br>
 
       <Typography variant="h5" sx={{ mb: 5 }}>
-        Environmental Impact
+        Water Consumption Weekly
       </Typography>
 
       <Grid container spacing={3}>
         <Grid xs={12} md={6} lg={8}>
           <AppEnvironmentalImpactChart
-            title="Environmental Impact"
-            subheader={`By Usage per Month`}
+            title="Water Consumption"
+            subheader={`in Litres (L)`}
             chart={{
               labels: [
                 "01/01/2023",
@@ -708,14 +708,6 @@ export default function VineDetailsView() {
                   fill: "solid",
                   unit: "L",
                   data: [18, 19, 20, 22, 24, 28, 30, 31, 28, 24, 22],
-                },
-                {
-                  name: "Fertilizer",
-                  type: "bar",
-                  color: "#00FF00",
-                  fill: "solid",
-                  unit: "kg",
-                  data: [10, 10, 11, 11, 10, 8, 8, 9, 11, 12, 13],
                 },
               ],
             }}
