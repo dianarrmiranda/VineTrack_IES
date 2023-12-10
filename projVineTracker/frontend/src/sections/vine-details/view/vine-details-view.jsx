@@ -688,17 +688,15 @@ export default function VineDetailsView() {
             subheader={`in Litres (L)`}
             chart={{
               labels: [
-                "01/01/2023",
-                "02/01/2023",
-                "03/01/2023",
-                "04/01/2023",
-                "05/01/2023",
-                "06/01/2023",
-                "07/01/2023",
-                "08/01/2023",
-                "09/01/2023",
-                "10/01/2023",
-                "11/01/2023",
+                "8 weeks ago",
+                "7 weeks ago",
+                "6 weeks ago",
+                "5 weeks ago",
+                "4 weeks ago",
+                "3 weeks ago",
+                "2 weeks ago",
+                "last week",
+                "this week",
               ],
               series: [
                 {
@@ -707,7 +705,7 @@ export default function VineDetailsView() {
                   color: "#0000FF",
                   fill: "solid",
                   unit: "L",
-                  data: [18, 19, 20, 22, 24, 28, 30, 31, 28, 24, 22],
+                  data: [18, 19, 20, 22, 24, 28, 30, 31, 28],
                 },
               ],
             }}
