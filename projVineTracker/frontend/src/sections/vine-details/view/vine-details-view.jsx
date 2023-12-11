@@ -426,7 +426,7 @@ export default function VineDetailsView() {
           // check if all values are between 2.9 and 3.5
           const allValues = newPhValues.map((value, index) => {return value.value});
           const allValuesValid = allValues.every((value, index) => {return value >= 2.9 && value <= 3.5});
-          if (allValuesValid) {
+          if (allValuesValid && newPhValues.length == 5) {
             // if they are, send notification
             const res = postData(`vines/harvest/${id}`);
             res.then((response) => {
@@ -555,6 +555,39 @@ export default function VineDetailsView() {
       });
   }
   , [id]);
+
+  // Water Consumption Weekly
+  const [waterConsumptionWeekly, setWaterConsumptionWeekly] = useState([]);
+  useEffect(() => {
+    fetchData(`vines/waterConsumptionWeek/${id}`)
+      .then(response => {
+        if (response) {
+          console.log("Water Consumption Weekly data fetched");
+          setWaterConsumptionWeekly(response);
+        } else {
+          console.log("Water Consumption Weekly data failed");
+        }
+      });
+  }
+  , [id]);
+
+  // Water Consumption Weekly - websocket
+  useEffect(() => {
+    const ws = new SockJS("http://localhost:8080/vt_ws");
+    const client = Stomp.over(ws);
+    client.connect({}, function () {
+      client.subscribe('/topic/waterConsumptionWeek', function (data) {
+        if (JSON.parse(data.body).vineId == id) {
+          console.log("New water consumption weekly data: ", JSON.parse(data.body).waterConsumptionWeekValues);
+          // we receive a list of doubles
+          const waterConsumptionWeekly = JSON.parse(data.body).waterConsumptionWeekValues;
+          setWaterConsumptionWeekly(waterConsumptionWeekly);
+        }
+      }
+      );
+    });
+  }
+  , [id, waterConsumptionWeekly]);
 
   // Water Consumption Limit
   useEffect(() => {
@@ -786,27 +819,25 @@ export default function VineDetailsView() {
       <br></br>
 
       <Typography variant="h5" sx={{ mb: 5 }}>
-        Environmental Impact
+        Water Consumption Weekly
       </Typography>
 
       <Grid container spacing={3}>
         <Grid xs={12} md={6} lg={8}>
           <AppEnvironmentalImpactChart
-            title="Environmental Impact"
-            subheader={`By Usage per Month`}
+            title="Water Consumption"
+            subheader={`in Litres (L)`}
             chart={{
               labels: [
-                "01/01/2023",
-                "02/01/2023",
-                "03/01/2023",
-                "04/01/2023",
-                "05/01/2023",
-                "06/01/2023",
-                "07/01/2023",
-                "08/01/2023",
-                "09/01/2023",
-                "10/01/2023",
-                "11/01/2023",
+                "8 weeks ago",
+                "7 weeks ago",
+                "6 weeks ago",
+                "5 weeks ago",
+                "4 weeks ago",
+                "3 weeks ago",
+                "2 weeks ago",
+                "last week",
+                "this week",
               ],
               series: [
                 {
@@ -815,15 +846,7 @@ export default function VineDetailsView() {
                   color: "#0000FF",
                   fill: "solid",
                   unit: "L",
-                  data: [18, 19, 20, 22, 24, 28, 30, 31, 28, 24, 22],
-                },
-                {
-                  name: "Fertilizer",
-                  type: "bar",
-                  color: "#00FF00",
-                  fill: "solid",
-                  unit: "kg",
-                  data: [10, 10, 11, 11, 10, 8, 8, 9, 11, 12, 13],
+                  data: waterConsumptionWeekly,
                 },
               ],
             }}

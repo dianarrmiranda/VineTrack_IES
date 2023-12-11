@@ -54,7 +54,9 @@ public class Vine {
     @ElementCollection
     private SortedMap<String, Double> avgTempsByWeek = new TreeMap<>();
     @ElementCollection
-    private SortedMap<String, Double> productionLiters = new TreeMap<>();
+    private SortedMap<String, Double> productionLiters = new TreeMap<>();   
+    @ElementCollection
+    private Map<String, Double> areaGrapes = new TreeMap<>();
 
 
     @Column(nullable = false)
@@ -107,6 +109,10 @@ public class Vine {
 
     public SortedMap<String, Double> getProductionLiters() {
         return productionLiters;
+    }
+
+    public Map<String, Double> getAreaGrapes() {
+        return areaGrapes;
     }
 
     public void setId(Integer id){
@@ -175,6 +181,10 @@ public class Vine {
 
     public void setProductionLiters(SortedMap<String, Double> productionLiters) {
         this.productionLiters = productionLiters;
+    }
+
+    public void setAreaGrapes(Map<String, Double> areaGrapes) {
+        this.areaGrapes = areaGrapes;
     }
 
     public List<Nutrient> getNutrientsList() {
