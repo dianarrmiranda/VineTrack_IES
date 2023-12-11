@@ -79,17 +79,29 @@ export default function VineDetailsView() {
       }
     });
 
+    function transformNutrientsData(rawData) {
+      // Assuming rawData is an array of nutrient values
+      // and you have a way to map these values to nutrient names
+      const nutrientNames = ["Nitrogen", "Phosphorus", "Potassium","Calcium" ,"Magnesium","Chloride"];
+      return rawData.map((value, index) => ({
+        label: nutrientNames[index],
+        value: value
+      }));
+    }
+
     fetchData(`vines/nutrients/${id}`)
     .then(response => {
       if (response) {
         console.log("Nutrients data fetched");
         
+        const transformedData = transformNutrientsData(response);
+        setNutrientsData(transformedData);
         // nutrients is a list of doubles
-        const nutrients = response;
-        const nutrientsData = nutrients.map((value, index) => {
-          return value;
-        });
-        setMoistureData(nutrientsData);
+        // const nutrients = response;
+        // const nutrientsData = nutrients.map((value, index) => {
+        //   return value;
+        // });
+        // setMoistureData(nutrientsData);
       } else {
         console.log("Nutrients data failed");
       }
@@ -637,12 +649,15 @@ export default function VineDetailsView() {
           <AppNutritionChart
             title="Nutrition Values"
             chart={{
-              series: [
-                { label: "Nitrogen (N)", value: 48.0 },
-                { label: "Phosphorus (P)", value: 11.3 },
-                { label: "Potassium (K)", value: 21.3 },
-                { label: "Magnesium (Mg)", value: 19.5 },
-              ],
+              labels: nutrientsData.map((value, index) => {return Object.keys(value)[0]}),
+              // series: [
+              //   // { label: "Nitrogen (N)", value: 48.0 },
+              //   // { label: "Phosphorus (P)", value: 11.3 },
+              //   // { label: "Potassium (K)", value: 21.3 },
+              //   // { label: "Magnesium (Mg)", value: 19.5 },
+                
+              // ],
+              series: nutrientsData
             }}
           />
         </Grid>

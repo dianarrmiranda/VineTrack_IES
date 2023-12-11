@@ -383,9 +383,9 @@ class Generator:
                             
                             # vai haver uma probabilidade de 20% de o agricultor colocar o nutriente em falta
                                 if random.randint(0, 4) == 1:
-                                    newValue = values[1][-2] + random.uniform(15, 25)
+                                    nutrients["Nitrogen"] = values[1][-2] + round(random.uniform(15, 25),2)
                                 else:
-                                    newValue = self.decrease_moisture(phases["flower"]["Nitrogen"][0], phases["flower"]["Nitrogen"][1], values[1][-2])
+                                    nutrients["Nitrogen"] = round(self.decrease_moisture(phases["flower"]["Nitrogen"][0], phases["flower"]["Nitrogen"][1], values[1][-2]),2)
                             elif values[1][-2] - values[0][-2] > 0:
                                 # vai aumentar até cheagar ao valor de humidade ideal
                                 
@@ -393,18 +393,18 @@ class Generator:
                                     if value > 1.6 and value < 2.7:
                                     
                                     #já está no valor ideal
-                                        newValue = self.decrease_moisture(phases["flower"]["Nitrogen"][0], phases["flower"]["Nitrogen"][1], values[1][-2])
+                                        nutrients["Nitrogen"] = round(self.decrease_moisture(phases["flower"]["Nitrogen"][0], phases["flower"]["Nitrogen"][1], values[1][-2]),2)
                                     else:
-                                        newValue = random.uniform(idealPFlower["Nitrogen"][0], idealPFlower["Nitrogen"][1])
+                                        nutrients["Nitrogen"] = round(random.uniform(idealPFlower["Nitrogen"][0], idealPFlower["Nitrogen"][1]),2)
                                 elif phase == 'fruit':
                                     if value > 1.5 and value < 2.4:
                                     
                                     #já está no valor ideal
-                                        newValue = self.decrease_moisture(phases["fruit"]["Nitrogen"][0], phases["fruit"]["Nitrogen"][1], values[1][-2])
+                                        nutrients["Nitrogen"] = round(self.decrease_moisture(phases["fruit"]["Nitrogen"][0], phases["fruit"]["Nitrogen"][1], values[1][-2]),2)
                                     else:
-                                        newValue = random.uniform(idealPFruit["fruit"]["Nitrogen"][0], idealPFruit["fruit"]["Nitrogen"][1])
+                                        nutrients["Nitrogen"] = round(random.uniform(idealPFruit["fruit"]["Nitrogen"][0], idealPFruit["fruit"]["Nitrogen"][1]),2)
                             else:
-                                newValue = self.decrease_moisture(phases["fruit"]["Nitrogen"][0], phases["fruit"]["Nitrogen"][1], values[1][-2]) # Colocar aqui um dividir por 2 para ser mais lento????
+                                nutrients["Nitrogen"] = round(self.decrease_moisture(phases["fruit"]["Nitrogen"][0], phases["fruit"]["Nitrogen"][1], values[1][-2]),2) # Colocar aqui um dividir por 2 para ser mais lento????
                         case 'Phosphorus':
                             if value > 0.14 and value < 0.55:
                                 value += 0.1
@@ -422,29 +422,28 @@ class Generator:
                             
                             # vai haver uma probabilidade de 30% de o valor passar dos 0.5
                                 if random.randint(0, 9) == 1:
-                                    newValue = values[1][-2] + random.uniform(35, 45)
+                                    nutrients["Chloride"] = round(values[1][-2] + random.uniform(35, 45),2)
                                 else:
-                                    newValue = self.decrease_moisture(phases["flower"]["Chloride"][0], phases["flower"]["Chloride"][1], values[1][-2])
+                                    nutrients["Chloride"]  = round(self.decrease_moisture(0,phases["flower"]["Chloride"][0], values[1][-2]),2)
                             elif values[1][-2] - values[0][-2] > 0:
                                 # vai aumentar até chegar ao valor limite
                                 
                                 if value > 0.5:
                                 # Já está a passar o valor limite
-                                    newValue = self.decrease_moisture(phases["flower"]["Chloride"][0], phases["flower"]["Chloride"][1], values[1][-2])
+                                    nutrients["Chloride"]  = round(self.decrease_moisture(0,phases["flower"]["Chloride"][0], values[1][-2]),2)
                                 else:
-                                    newValue = random.uniform(0,idealPFruit["flower"]["Chloride"][0])
+                                    nutrients["Chloride"]  = round(random.uniform(0,idealPFruit["Chloride"][0]),2)
                             else:
-                                newValue = self.decrease_moisture(phases["flower"]["Chloride"][0], phases["flower"]["Chloride"][1], values[1][-2])
+                                nutrients["Chloride"]  = round(self.decrease_moisture(0,phases["flower"]["Chloride"][0], values[1][-2]),2)
                         case _:
                             print("Invalid nutrient")
                             pass
                 
-
-                newValue = round(newValue, 2) # pus 2 casas porque os valores são muito pequenos
                 message = {
                     'id': self.id,
                     'sensor': 'nutrients',
-                    'value': newValue
+                    'phase': phase,
+                    'value': nutrients
                 }
                 self.sender.send(message)
 

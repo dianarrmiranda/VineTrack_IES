@@ -41,6 +41,16 @@ public class Nutrient {
         Magnesium = magnesium;
         Chloride = chloride;
     }
+
+    public Nutrient(Double nitrogen, Double phosphorus, Double potassium, Double calcium, Double magnesium, Double chloride, String phase) {
+        Nitrogen = nitrogen;
+        Phosphorus = phosphorus;
+        Potassium = potassium;
+        Calcium = calcium;
+        Magnesium = magnesium;
+        Chloride = chloride;
+        phase = phase;
+    }
     public Integer getId() {
         return id;
     }
@@ -103,5 +113,13 @@ public class Nutrient {
 
     public void setChloride(Double chloride) {
         Chloride = chloride;
+    }
+
+    public String getPhase() {
+        return phase;
+    }
+
+    public void setPhase(String phase) {
+        phase = phase;
     }
 }

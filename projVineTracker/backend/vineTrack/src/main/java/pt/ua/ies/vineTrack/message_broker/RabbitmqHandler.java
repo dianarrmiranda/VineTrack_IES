@@ -294,12 +294,16 @@ public class RabbitmqHandler {
             case "nutrients":
                 System.out.println("Entrei no RabbitMQ Handler-nutrients");
                 int vineId4 = params.getInt("id");
-                double value4 = params.getDouble("value");
-                // store the nutrients in the database
-                Vine vine4 = vineService.getVineById(vineId4);
-                List<Nutrient> nutri = nutrientService.getNutrientsByVineId(vineId4);
+                String phase = params.getString("phase");
+                JSONObject nutrientValues = params.getJSONObject("value");
+                Double N = nutrientValues.getDouble("Nitrogen");
+                Double Ph = nutrientValues.getDouble("Phosphorus");
+                Double K = nutrientValues.getDouble("Potassium");
+                Double Ca = nutrientValues.getDouble("Calcium");
+                Double Mg = nutrientValues.getDouble("Magnesium");
+                Double Cl = nutrientValues.getDouble("Chloride");
 
-                Nutrient nutrient = new Nutrient(0.0,0.0,0.0,0.0,0.0,0.0);
+                Nutrient nutrient = new Nutrient(N,Ph,K,Ca,Mg,Cl, phase);
                  nutrientService.saveNutrient(nutrient);
                 break;
             default:
