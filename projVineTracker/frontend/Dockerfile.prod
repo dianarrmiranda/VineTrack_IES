@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY yarn*.lock ./
 COPY . .
-ENV VITE_APP_SERVER_URL http://deti-ies-04.ua.pt:3030
+ENV VITE_APP_SERVER_URL http://deti-ies-04.ua.pt
 RUN npm install
 RUN npm run build
 
