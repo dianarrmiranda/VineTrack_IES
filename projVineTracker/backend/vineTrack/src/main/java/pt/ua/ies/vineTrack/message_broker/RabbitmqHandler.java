@@ -18,10 +18,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.temporal.WeekFields;
+import java.util.*;
 
 @Component
 public class RabbitmqHandler {
@@ -84,12 +82,61 @@ public class RabbitmqHandler {
                     double waterConsumption = waterPercentage * 4 / 100 * vine.getSize();
                     // 2 decimal places
                     waterConsumption = Math.round(waterConsumption * 100.0) / 100.0;
-
                     trackService.saveTrack(new Track("waterConsumption", date, waterConsumption, vine, t.toString(), d.toString()));
                     System.out.println("Water consumption: " + waterConsumption);
 
                     // only keep water consumption tracks that are less than 8 days old
                     trackService.removeOldWaterConsumptionTracks();
+
+                    // we need to add the water consumption to the vine's total water consumption for the week
+                    // get the week number
+                    int weekNumber = weekNumber(d);
+                    boolean exists = false;
+                    // see if there is a track for this week
+                    List<Track> waterConsumptionTracks = trackService.getWaterConsumptionWeekTracksByVineId(vineId);
+                    for (Track waterConsumptionTrack : waterConsumptionTracks) {
+                        LocalDate trackDate = waterConsumptionTrack.getDate().toLocalDate();
+                        int trackWeekNumber = weekNumber(trackDate);
+                        if (trackWeekNumber == weekNumber) {
+                            // there is a track for this week, add the water consumption to the total
+                            double totalWaterConsumption = waterConsumptionTrack.getValue() + waterConsumption;
+                            // 2 decimal places
+                            totalWaterConsumption = Math.round(totalWaterConsumption * 100.0) / 100.0;
+                            waterConsumptionTrack.setValue(totalWaterConsumption);
+                            trackService.saveTrack(waterConsumptionTrack);
+                            exists = true;
+                            break;
+                        }
+                    }
+                    // if there is no track for this week, create one
+                    if (!exists) {
+                        Track waterConsumptionTrack = new Track("waterConsumptionWeek", date, waterConsumption, vine, t.toString(), d.toString());
+                        trackService.saveTrack(waterConsumptionTrack);
+                    }
+
+                    // send weekly water consumption through websocket
+                    // get all weekly water consumption tracks for this vine
+                    List<Track> waterConsumptionWeekTracks = trackService.getWaterConsumptionWeekTracksByVineId(vineId);
+                    // sort them by date
+                    waterConsumptionWeekTracks.sort(Comparator.comparing(Track::getDate));
+                    // we only want the last 9 tracks
+                    while (waterConsumptionWeekTracks.size() > 9) {
+                        waterConsumptionWeekTracks.remove(0);
+                    }
+                    // get the values
+                    List<Double> waterConsumptionWeekValues = new ArrayList<>();
+                    for (Track waterConsumptionWeekTrack : waterConsumptionWeekTracks) {
+                        waterConsumptionWeekValues.add(waterConsumptionWeekTrack.getValue());
+                    }
+                    // if there are less than 9 tracks, add 0s to the beginning
+                    while (waterConsumptionWeekValues.size() < 9) {
+                        waterConsumptionWeekValues.add(0, 0.0);
+                    }
+                    // send through websocket
+                    JSONObject waterConsumptionWeekJson = new JSONObject();
+                    waterConsumptionWeekJson.put("vineId", vineId);
+                    waterConsumptionWeekJson.put("waterConsumptionWeekValues", waterConsumptionWeekValues);
+                    this.template.convertAndSend("/topic/waterConsumptionWeek", waterConsumptionWeekJson.toString());
 
                     // check if water consumption is above the limit
                     double vineSize = vine.getSize();
@@ -308,4 +355,7 @@ public class RabbitmqHandler {
         return map;
     }
 
+    private static int weekNumber(LocalDate date) {
+        return date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
+    }
 }

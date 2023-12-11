@@ -23,7 +23,7 @@ export default function AppEnvironmentalImpactChart({ title, subheader, chart, .
         },
         labels,
         xaxis: {
-            type: 'datetime',
+            type: '',
         },
         tooltip: {
             shared: true,
