@@ -527,7 +527,7 @@ public class VineController {
             Notification notification = new Notification();
             notification.setDescription("Ready to Harvest.");
             notification.setType("harvest"); // Set the type
-            notification.setAvatar("/public/assets/images/notifications/harvest.png"); // Set the avatar
+            notification.setAvatar("../../../resources/static/images/harvest.png"); // Set the avatar
             notification.setIsUnRead(true); // Set the isUnRead
             notification.setDate(LocalDateTime.now()); // Set the date
             notification.setVineId(vineId); // Set the vineId directly
