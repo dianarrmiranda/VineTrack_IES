@@ -165,7 +165,7 @@ export default function VineDetailsView() {
       setTempData([]);
       setCurrentDay(today);
     }
-    const ws = new SockJS("http://localhost:8080/vt_ws");
+    const ws = new SockJS(`${process.env.REACT_APP_SERVER_URL}:8080/vt_ws`);
     const client = Stomp.over(ws);
     client.connect({}, function () {
       client.subscribe('/topic/update', function (data) {
@@ -536,7 +536,7 @@ export default function VineDetailsView() {
 
   // Water Consumption Weekly - websocket
   useEffect(() => {
-    const ws = new SockJS("http://localhost:8080/vt_ws");
+    const ws = new SockJS(`${process.env.REACT_APP_SERVER_URL}:8080/vt_ws`);
     const client = Stomp.over(ws);
     client.connect({}, function () {
       client.subscribe('/topic/waterConsumptionWeek', function (data) {

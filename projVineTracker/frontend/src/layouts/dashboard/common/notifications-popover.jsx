@@ -79,7 +79,7 @@ export default function NotificationsPopover() {
   // websocket
   const [latestNotification, setLatestNotification] = useState(null);
   useEffect(() => {
-    const ws = new SockJS("http://localhost:8080/vt_ws");
+    const ws = new SockJS(`${process.env.REACT_APP_SERVER_URL}:8080/vt_ws`);
     const client = Stomp.over(ws);
 
     const onMessageReceived = async (data) => {

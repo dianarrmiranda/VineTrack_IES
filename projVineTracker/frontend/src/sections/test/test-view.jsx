@@ -27,7 +27,7 @@ export default function TestView() {
     const [received, setReceived] = useState([]);
 
     const connect = () => {
-        const socket = new SockJS('http://localhost:8080/endpoint');
+        const socket = new SockJS(`${process.env.REACT_APP_SERVER_URL}:8080/endpoint`);
         const stomp = Stomp.over(socket);
         stomp.connect({}, frame => {
             setStompClient(stomp);
