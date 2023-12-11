@@ -117,3 +117,4 @@ fabric.properties
 ### VS Code ###
 .vscode/
 
+./projVineTracker/frontend/dist
