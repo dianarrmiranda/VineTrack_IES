@@ -173,7 +173,6 @@ public class RabbitmqHandler {
                         JSONObject notificationJson = new JSONObject();
                         notificationJson.put("id", notification.getId());
                         notificationJson.put("type", notification.getType());
-                        notificationJson.put("avatar", notification.getAvatar());
                         notificationJson.put("isUnRead", notification.getIsUnRead());
                         notificationJson.put("vineId", notification.getVineId());
                         notificationJson.put("description", notification.getDescription());
@@ -220,7 +219,6 @@ public class RabbitmqHandler {
                     JSONObject notificationJson = new JSONObject();
                     notificationJson.put("id", notification.getId());
                     notificationJson.put("type", notification.getType());
-                    notificationJson.put("avatar", notification.getAvatar());
                     notificationJson.put("isUnRead", notification.getIsUnRead());
                     notificationJson.put("vineId", notification.getVineId());
                     notificationJson.put("description", notification.getDescription());
@@ -322,7 +320,6 @@ public class RabbitmqHandler {
                             JSONObject notificationJson = new JSONObject();
                             notificationJson.put("id", notification.getId());
                             notificationJson.put("type", notification.getType());
-                            notificationJson.put("avatar", notification.getAvatar());
                             notificationJson.put("isUnRead", notification.getIsUnRead());
                             notificationJson.put("vineId", notification.getVineId());
                             notificationJson.put("description", notification.getDescription());
