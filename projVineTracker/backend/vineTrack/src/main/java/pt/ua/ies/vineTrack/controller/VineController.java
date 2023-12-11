@@ -10,6 +10,8 @@ import pt.ua.ies.vineTrack.entity.Notification;
 import pt.ua.ies.vineTrack.entity.Track;
 import pt.ua.ies.vineTrack.entity.User;
 import pt.ua.ies.vineTrack.entity.Vine;
+import pt.ua.ies.vineTrack.entity.Nutrient;
+import pt.ua.ies.vineTrack.service.NutrientService;
 import pt.ua.ies.vineTrack.service.GrapeService;
 import pt.ua.ies.vineTrack.service.NotificationService;
 import pt.ua.ies.vineTrack.service.TrackService;
@@ -35,7 +37,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
-
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @CrossOrigin("*")
@@ -52,6 +55,8 @@ public class VineController {
     private TrackService trackService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private NutrientService nutrientService;
     @Autowired
     private SimpMessagingTemplate template; // for sending messages to the client through websocket
 
@@ -91,20 +96,21 @@ public class VineController {
 
     @GetMapping(path = "/nutrients/{vineId}")
     public List<Double> getNutrientsByVineId(@PathVariable int vineId){
-         List<Track> tracks2 = vineService.getTracksByVineId(vineId);
-         Iterator<Track> iterator2 = tracks2.iterator();
-         while (iterator2.hasNext()) {
-             Track track = iterator2.next();
-             if (!track.getType().equals("nutrients")) {
-                 iterator2.remove();
-             }
-         }
-         // now we need to order the tracks by date from the oldest to the newest
-         tracks2.sort(Comparator.comparing(Track::getDate));
+         List<Nutrient> Nutrients = nutrientService.getNutrientsByVineId(vineId);
+         Iterator<Nutrient> iterator2 = Nutrients.iterator();
+
          // finally we need to get only the moisture values
-         List<Double> nutrientsValues = new ArrayList<>(tracks2.stream().map(Track::getValue).toList());
+         List<Double> nutrientsValues = (Nutrients.stream().flatMap(nutrient -> Stream.of(
+                 nutrient.getNitrogen(),
+                 nutrient.getPhosphorus(),
+                 nutrient.getPotassium(),
+                 nutrient.getCalcium(),
+                 nutrient.getMagnesium(),
+                 nutrient.getChloride()))
+                 .collect(Collectors.toList())
+         );
          while (nutrientsValues.size() < 6) {
-             nutrientsValues.add(0, 0.0); 
+             nutrientsValues.add(0, 0.0);
          }
          if (nutrientsValues.size() > 10) {
              nutrientsValues = nutrientsValues.subList(nutrientsValues.size() - 10, nutrientsValues.size());
@@ -373,11 +379,12 @@ public class VineController {
             trackService.saveTrack(track1);
             trackService.saveTrack(track2);
 
-            Track track4 = new Track("nutrients", now, 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
+/*            Track track4 = new Track("nutrients", now, 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
             Track track3 = new Track("nutrients", LocalDateTime.now(), 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
             trackService.saveTrack(track3);
-            trackService.saveTrack(track4);
-
+            trackService.saveTrack(track4);*/
+            Nutrient nutrient = new Nutrient(0.0,0.0,0.0,0.0,0.0,0.0);
+            nutrientService.saveNutrient(nutrient);
 
             if (!img.isEmpty()){
                 try {

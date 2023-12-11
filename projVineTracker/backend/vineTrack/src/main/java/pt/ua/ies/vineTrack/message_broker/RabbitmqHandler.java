@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import pt.ua.ies.vineTrack.entity.Nutrient;
 import pt.ua.ies.vineTrack.entity.Track;
 import pt.ua.ies.vineTrack.entity.Vine;
 import pt.ua.ies.vineTrack.entity.Notification;
+import pt.ua.ies.vineTrack.service.NutrientService;
 import pt.ua.ies.vineTrack.service.TrackService;
 import pt.ua.ies.vineTrack.service.VineService;
 import pt.ua.ies.vineTrack.service.NotificationService;
@@ -29,6 +31,8 @@ public class RabbitmqHandler {
     private SimpMessagingTemplate template; // for sending messages to the client through websocket
     @Autowired
     private VineService vineService;
+    @Autowired
+    private NutrientService nutrientService;
 
     @Autowired
     private NotificationService notificationService;
@@ -291,26 +295,12 @@ public class RabbitmqHandler {
                 System.out.println("Entrei no RabbitMQ Handler-nutrients");
                 int vineId4 = params.getInt("id");
                 double value4 = params.getDouble("value");
-                // double pastValue4;
-                // store the track in the database
+                // store the nutrients in the database
                 Vine vine4 = vineService.getVineById(vineId4);
-                List<Track> tracks4 = trackService.getLastNutrientsTrackByVineId(vineId4);
-                Track lastNutrientsTrack4 = !tracks4.isEmpty() ? tracks4.get(0) : null;
-                LocalDateTime lastNutrientsTrackDate4 = lastNutrientsTrack4 != null ? lastNutrientsTrack4.getDate() : null;
-                pastValue = lastNutrientsTrack4 != null ? lastNutrientsTrack4.getValue() : 0;
-                LocalDateTime date4;
-                if (lastNutrientsTrackDate4 != null) {
-                    date4 = lastNutrientsTrackDate4.plusHours(1);
-                } else {
-                    date4 = LocalDateTime.now();
-                }
+                List<Nutrient> nutri = nutrientService.getNutrientsByVineId(vineId4);
 
-                LocalDate d4 = date4.toLocalDate();
-                LocalTime t4 = date4.toLocalTime();
-
-                Track track4 = new Track(type, date4, value4, vine4, t4.toString(), d4.toString());
-
-                trackService.saveTrack(track4);
+                Nutrient nutrient = new Nutrient(0.0,0.0,0.0,0.0,0.0,0.0);
+                 nutrientService.saveNutrient(nutrient);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + type);

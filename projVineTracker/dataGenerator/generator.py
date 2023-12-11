@@ -351,16 +351,23 @@ class Generator:
 
                 # vine = self.vines[self.id]
                 self.cursor = self.connection.cursor()
-                self.cursor.execute('SELECT * FROM vine WHERE id = %s', (self.id,))
+                self.cursor.execute('SELECT * FROM nutrient WHERE id = %s', (self.id,))
                 info = self.cursor.fetchall()
 
                 if len(info) == 0:
                     continue
-                print(info) # aqui o info já tem de ter a info dos nutrientes, provavelmetne não é select na Vine
+                print(info) # O info vai ter o id, a fase e os nutrientes da tabela nutrient
                 info = info[0]
-                phase = info[5]
-                # temperature = info[7]
-                nutrients = info[8] # Nutrientes vai ser do tipo [ (Nitrogen, 0.5), (Phosphorus, 0.5), (Potassium, 0.5), (Calcium, 0.5), (Magnesium, 0.5), (Chloride, 0.5) ]
+                phase = info[-1]
+                # Nutrientes vai ser do tipo [ (Nitrogen, 0.5), (Phosphorus, 0.5), (Potassium, 0.5), (Calcium, 0.5), (Magnesium, 0.5), (Chloride, 0.5) ]
+                nutrients = {
+                    "Nitrogen": info[1],
+                    "Phosphorus": info[2],
+                    "Potassium": info[3],
+                    "Calcium": info[4],
+                    "Magnesium": info[5],
+                    "Chloride": info[6]
+                }
                 print(":::::,  ", nutrients)
                 self.cursor = self.connection.cursor()
                 self.cursor.execute(f'SELECT * FROM track where vine_id = {self.id} ORDER BY date DESC LIMIT 2')
@@ -371,6 +378,7 @@ class Generator:
                 idealPFruit = { "Nitrogen": [1.5,2.4],"Phosphorus": [0.12, 0.45],"Potassium": [0.55, 1.05],"Calcium": [1.5, 2.4],"Magnesium": [0.2, 0.6],"Chloride": [0.5]}
                 
                 for nutrient in nutrients:
+                    print("nutrient: ", nutrient)
                     match nutrient[0]: # Switch case precisa de correr em python 3.10
                         case 'Nitrogen':
                             if values[1][-2] < 1.3: # com este valor, o agirultor vai colocar o nutriente em falta, já que está abaixo do valor ideal de qualquer fase
@@ -432,6 +440,7 @@ class Generator:
                         case _:
                             print("Invalid nutrient")
                             pass
+                
 
                 newValue = round(newValue, 2) # pus 2 casas porque os valores são muito pequenos
                 message = {

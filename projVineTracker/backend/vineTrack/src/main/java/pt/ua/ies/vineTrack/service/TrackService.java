@@ -70,10 +70,6 @@ public class TrackService {
         return trackRepo.getLastMoistureTrackByVineId(vineId);
     }
 
-    public List<Track> getLastNutrientsTrackByVineId(Integer vineId){
-        return trackRepo.getLastNutrientsTrackByVineId(vineId);
-    }
-
     // remove the waterConsumption tracks older than 7 days ago
     public void removeOldWaterConsumptionTracks() {
         // get last track's day

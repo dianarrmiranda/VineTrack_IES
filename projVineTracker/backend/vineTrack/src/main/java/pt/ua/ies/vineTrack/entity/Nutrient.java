@@ -13,7 +13,6 @@ public class Nutrient {
 
     @Column(nullable = false)
     private Double Nitrogen;
-
     @Column(nullable = false)
     private Double Phosphorus;
     @Column(nullable = false)
@@ -25,6 +24,8 @@ public class Nutrient {
     @Column(nullable = false)
     private Double Chloride;
 
+    private String phase="bud";
+
     @ManyToMany()
     @JoinColumn(name = "nutrients", referencedColumnName = "id")
     private List<Vine> vines;
@@ -32,6 +33,14 @@ public class Nutrient {
     public Nutrient() {
     }
 
+    public Nutrient(Double nitrogen, Double phosphorus, Double potassium, Double calcium, Double magnesium, Double chloride) {
+        Nitrogen = nitrogen;
+        Phosphorus = phosphorus;
+        Potassium = potassium;
+        Calcium = calcium;
+        Magnesium = magnesium;
+        Chloride = chloride;
+    }
     public Integer getId() {
         return id;
     }
