@@ -24,7 +24,7 @@ public class Nutrient {
     @Column(nullable = false)
     private Double Chloride;
 
-    private String phase="bud";
+    private String phase="flower"; // os nutrientes só têm 2 fases: flower e fruit
 
     @ManyToMany()
     @JoinColumn(name = "nutrients", referencedColumnName = "id")
