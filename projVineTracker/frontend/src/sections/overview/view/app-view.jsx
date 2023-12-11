@@ -98,12 +98,23 @@ export default function AppView() {
         };
        });
        
-      console.log(series);
-
       setSeriesProduction(series);
       setLabelsProduction(labels);
       setVineProduction(vineProduction);
     };
+    initialize();
+  }, [vineIds]);
+
+  const [areaGrapes, setAreaGrapes] = useState([]);
+  useEffect(() => {
+    const initialize = async () => {
+      const grapes = await fetchData(`vines/areaGrapes/`);
+
+      const areaGrapesList = Object.entries(grapes).map(([label, value]) => ({ label, value }));
+
+      setAreaGrapes(areaGrapesList);
+    };
+
     initialize();
   }, [vineIds]);
 
@@ -135,13 +146,7 @@ export default function AppView() {
             title="Types of Grapes"
             subheader=" in Percentage (%)"
             chart={{
-              series: [
-                { label: "Concord", value: 10.7 },
-                { label: "Chardonnay", value: 15.3 },
-                { label: "Cabernet Sauvignon", value: 30.0 },
-                { label: "Pinot Noir", value: 24.5 },
-                { label: "Shiraz/Syrah", value: 19.5 },
-              ],
+              series: areaGrapes,
             }}
           />
         </Grid>

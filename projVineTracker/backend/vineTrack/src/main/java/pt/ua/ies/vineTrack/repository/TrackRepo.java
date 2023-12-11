@@ -32,4 +32,7 @@ public interface TrackRepo extends JpaRepository<Track, Integer> {
     // get the waterConsumption tracks older than 7 days ago using column day
     @Query("SELECT t FROM Track t WHERE t.type = 'waterConsumption' AND STR_TO_DATE(t.day, '%Y-%m-%d') < :day")
     List<Track> getOldWaterConsumptionTracks(@Param("day") LocalDate day);
+
+    @Query("SELECT t FROM Track t WHERE t.type = 'waterConsumptionWeek' AND t.vine.id = ?1")
+    List<Track> getWaterConsumptionWeekTracksByVineId(int vineId);
 }

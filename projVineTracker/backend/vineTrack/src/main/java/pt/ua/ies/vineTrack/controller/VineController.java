@@ -302,7 +302,7 @@ public class VineController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Vine> addVine(@RequestParam String name, @RequestParam String location, @RequestParam String city, @RequestParam Double size, @RequestParam java.util.Date date, @RequestParam(required = false) MultipartFile img, @RequestParam List<Integer> users, @RequestParam List<Integer> typeGrap){
+    public ResponseEntity<Vine> addVine(@RequestParam String name, @RequestParam String location, @RequestParam String city, @RequestParam Double size, @RequestParam java.util.Date date, @RequestParam(required = false) MultipartFile img, @RequestParam List<Integer> users, @RequestParam List<Integer> typeGrap, @RequestParam String areaGrapes){
 
         try {
             Vine vine = new Vine();
@@ -338,6 +338,16 @@ public class VineController {
                     vine.setTypeGrap(grapes);
                 }
             }
+            
+            JSONObject jsonObject = new JSONObject(areaGrapes);
+            Map<String, Double> areaGrapesMap = new HashMap<>();
+            
+            for (String key : jsonObject.keySet()) {
+               areaGrapesMap.put(key, jsonObject.getDouble(key));
+            }
+
+            vine.setAreaGrapes(areaGrapesMap);
+            
 
             vineService.save(vine);
 
@@ -542,6 +552,26 @@ public class VineController {
         }
     }
 
+    @GetMapping(path = "/waterConsumptionWeek/{vineId}")
+    public ResponseEntity<List<Double>> getWaterConsumptionWeekTracksByVineId(@PathVariable Integer vineId){
+        try {
+            List<Track> tracks = trackService.getWaterConsumptionWeekTracksByVineId(vineId);
+            // now we need to order the tracks by date from the oldest to the newest
+            tracks.sort(Comparator.comparing(Track::getDate));
+            List<Double> waterConsumptionValues = new ArrayList<>(tracks.stream().map(Track::getValue).toList());
+            while (waterConsumptionValues.size() < 9) {
+                waterConsumptionValues.add(0, 0.0);
+            }
+            if (waterConsumptionValues.size() > 9) {
+                waterConsumptionValues = waterConsumptionValues.subList(waterConsumptionValues.size() - 9, waterConsumptionValues.size());
+            }
+            return ResponseEntity.ok(waterConsumptionValues);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
     @GetMapping(path = "production/{vineId}")
     public ResponseEntity<Map<String, Double>> getProductionLevels(@PathVariable Integer vineId) {
         try {
@@ -565,6 +595,39 @@ public class VineController {
             vine.setProductionLiters(productionLevels);
             vineService.save(vine);
             return ResponseEntity.ok("ok");
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping(path = "areaGrapes/")
+    public ResponseEntity<Map<String, Double>> getAreaGrapes() {
+        try {
+            List<Vine> vines = vineService.getAllVines();
+            Map<String, Double> areaGrapes  = new HashMap<>();
+            double totalArea = 0;
+            for (Vine vine : vines) {
+                for (String key : vine.getAreaGrapes().keySet()) {
+                    if (areaGrapes.containsKey(key)) {
+                        areaGrapes.put(key, areaGrapes.get(key) + vine.getAreaGrapes().get(key));
+                    } else {
+                        areaGrapes.put(key, vine.getAreaGrapes().get(key));
+                    }
+
+                    
+                }
+                totalArea += vine.getSize();
+            }
+
+            for (String key : areaGrapes.keySet()) {
+                double value = areaGrapes.get(key);
+                value = value * 100 / totalArea;
+                DecimalFormat df = new DecimalFormat("0.00");
+                value = Double.parseDouble(df.format(value));
+                areaGrapes.put(key, value);
+             }
+
+            return ResponseEntity.ok(areaGrapes);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
