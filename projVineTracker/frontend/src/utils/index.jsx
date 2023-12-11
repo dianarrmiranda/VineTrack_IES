@@ -11,6 +11,7 @@ const fetchData = async (endpoint) => {
 };
 
 const postData = async (endpoint, data) => {
+    console.log(`${API_BASE_URL}/${endpoint}`, data);
     try {
         const response = await axios.post(`${API_BASE_URL}/${endpoint}`, data);
         return response.data;
