@@ -343,7 +343,8 @@ public class VineController {
             vine.setSize(size);
             vine.setImage("");
             vine.setDate(new Date(date.getTime()));
-            vine.setMaxWaterConsumption(MAX_WATER_CONSUMPTION*vine.getSize()); // default value defined
+            // round two decimal places
+            vine.setMaxWaterConsumption( Math.round((size * MAX_WATER_CONSUMPTION) * 100.0) / 100.0);
             for (Integer id : users) {
                 User user = userService.getUserById(id);
                 if (user.getVines() != null) {
@@ -430,6 +431,15 @@ public class VineController {
         byte[] image = Files.readAllBytes(path);
 
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image);
+    }
+
+    @GetMapping(path = "/notificationImage/{id}")
+    public ResponseEntity<byte[]> getNotificationImageById(@PathVariable Integer id) throws IOException{
+        Notification notification = notificationService.getNotificationById(id);
+        Path path = Paths.get(notification.getAvatar());
+        byte[] image = Files.readAllBytes(path);
+
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image);
     }
 
     @DeleteMapping(path = "/{id}")
@@ -565,7 +575,7 @@ public class VineController {
             Notification notification = new Notification();
             notification.setDescription("Ready to Harvest.");
             notification.setType("harvest"); // Set the type
-            notification.setAvatar("/public/assets/images/notifications/harvest.png"); // Set the avatar
+            notification.setAvatar("src/main/resources/static/images/harvest.png"); // Set the avatar
             notification.setIsUnRead(true); // Set the isUnRead
             notification.setDate(LocalDateTime.now()); // Set the date
             notification.setVineId(vineId); // Set the vineId directly
@@ -577,7 +587,6 @@ public class VineController {
             JSONObject notificationJson = new JSONObject();
             notificationJson.put("id", notification.getId());
             notificationJson.put("type", notification.getType());
-            notificationJson.put("avatar", notification.getAvatar());
             notificationJson.put("isUnRead", notification.getIsUnRead());
             notificationJson.put("vineId", notification.getVineId());
             notificationJson.put("description", notification.getDescription());

@@ -194,7 +194,7 @@ export default function VineDetailsView() {
       setTempData([]);
       setCurrentDay(today);
     }
-    const ws = new SockJS("http://localhost:8080/vt_ws");
+    const ws = new SockJS(`${import.meta.env.VITE_APP_SERVER_URL}:8080/vt_ws`);
     const client = Stomp.over(ws);
     client.connect({}, function () {
       client.subscribe('/topic/update', function (data) {
@@ -514,7 +514,7 @@ export default function VineDetailsView() {
 
   const handleInputChangeWaterLimit = (e) => {
     const newValue = e.target.value;
-    setWaterLimit(newValue);
+    setWaterLimit(parseFloat(newValue));
     setErrorWaterLimit(''); // Clear error message on input change
   };
 
@@ -573,7 +573,7 @@ export default function VineDetailsView() {
 
   // Water Consumption Weekly - websocket
   useEffect(() => {
-    const ws = new SockJS("http://localhost:8080/vt_ws");
+    const ws = new SockJS(`${import.meta.env.VITE_APP_SERVER_URL}:8080/vt_ws`);
     const client = Stomp.over(ws);
     client.connect({}, function () {
       client.subscribe('/topic/waterConsumptionWeek', function (data) {
@@ -595,7 +595,7 @@ export default function VineDetailsView() {
       .then(response => {
         if (response) {
           console.log("Water Consumption Limit data fetched");
-          setWaterLimit(response);
+          setWaterLimit(parseFloat(response));
         } else {
           console.log("Water Consumption Limit data failed");
         }
