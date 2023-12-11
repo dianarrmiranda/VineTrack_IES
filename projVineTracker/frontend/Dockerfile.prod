@@ -1,0 +1,14 @@
+FROM node:18-alpine as builder
+WORKDIR /app
+COPY package*.json ./
+COPY yarn*.lock ./
+COPY . .
+ENV REACT_APP_SERVER_URL http://deti-ies-04.ua.pt:3030
+RUN npm install
+RUN npm run build
+
+FROM nginx:1.25.3
+WORKDIR /app
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+
