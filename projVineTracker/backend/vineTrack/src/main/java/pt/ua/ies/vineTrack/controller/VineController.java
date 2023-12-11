@@ -395,6 +395,15 @@ public class VineController {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image);
     }
 
+    @GetMapping(path = "/notificationImage/{id}")
+    public ResponseEntity<byte[]> getNotificationImageById(@PathVariable Integer id) throws IOException{
+        Notification notification = notificationService.getNotificationById(id);
+        Path path = Paths.get(notification.getAvatar());
+        byte[] image = Files.readAllBytes(path);
+
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image);
+    }
+
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<String> deleteVineById(@PathVariable Integer id){
         try {
@@ -528,7 +537,7 @@ public class VineController {
             Notification notification = new Notification();
             notification.setDescription("Ready to Harvest.");
             notification.setType("harvest"); // Set the type
-            notification.setAvatar("/public/assets/images/notifications/harvest.png"); // Set the avatar
+            notification.setAvatar("src/main/resources/static/images/harvest.png"); // Set the avatar
             notification.setIsUnRead(true); // Set the isUnRead
             notification.setDate(LocalDateTime.now()); // Set the date
             notification.setVineId(vineId); // Set the vineId directly
@@ -540,7 +549,6 @@ public class VineController {
             JSONObject notificationJson = new JSONObject();
             notificationJson.put("id", notification.getId());
             notificationJson.put("type", notification.getType());
-            notificationJson.put("avatar", notification.getAvatar());
             notificationJson.put("isUnRead", notification.getIsUnRead());
             notificationJson.put("vineId", notification.getVineId());
             notificationJson.put("description", notification.getDescription());

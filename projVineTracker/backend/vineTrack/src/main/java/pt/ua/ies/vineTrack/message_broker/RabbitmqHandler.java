@@ -149,7 +149,7 @@ public class RabbitmqHandler {
                         notification.setDescription("Water consumption is above the limit. Please check the vine " + vine.getName() + ".");
                         notification.setVine(vine); // Set the vine
                         notification.setType("waterConsumption"); // Set the type
-                        notification.setAvatar("/public/assets/images/notifications/waterConsumption.png"); // Set the avatar
+                        notification.setAvatar("src/main/resources/static/images/waterConsumption.png"); // Set the avatar
                         notification.setIsUnRead(isUnRead); // Set the isUnRead
                         notification.setDate(LocalDateTime.now()); // Set the date
                         notification.setVineId(vine.getId()); // Set the vineId directly
@@ -173,7 +173,6 @@ public class RabbitmqHandler {
                         JSONObject notificationJson = new JSONObject();
                         notificationJson.put("id", notification.getId());
                         notificationJson.put("type", notification.getType());
-                        notificationJson.put("avatar", notification.getAvatar());
                         notificationJson.put("isUnRead", notification.getIsUnRead());
                         notificationJson.put("vineId", notification.getVineId());
                         notificationJson.put("description", notification.getDescription());
@@ -196,7 +195,7 @@ public class RabbitmqHandler {
                     notification.setDescription("Levels of the soil humidity are low.");
                     notification.setVine(vine); // Set the vine
                     notification.setType("moisture"); // Set the type
-                    notification.setAvatar("/public/assets/images/notifications/water.png"); // Set the avatar
+                    notification.setAvatar("src/main/resources/static/images/water.png"); // Set the avatar
                     notification.setIsUnRead(isUnRead); // Set the isUnRead
                     notification.setDate(LocalDateTime.now()); // Set the date
                     notification.setVineId(vine.getId()); // Set the vineId directly
@@ -220,7 +219,6 @@ public class RabbitmqHandler {
                     JSONObject notificationJson = new JSONObject();
                     notificationJson.put("id", notification.getId());
                     notificationJson.put("type", notification.getType());
-                    notificationJson.put("avatar", notification.getAvatar());
                     notificationJson.put("isUnRead", notification.getIsUnRead());
                     notificationJson.put("vineId", notification.getVineId());
                     notificationJson.put("description", notification.getDescription());
@@ -296,11 +294,11 @@ public class RabbitmqHandler {
 
                             Boolean isUnRead = true;
                             Notification notification = new Notification();
-                            // "weatherAlerts", "/assets/images/notifications/rain.png", isUnRead, vine3
+                            // "weatherAlerts", "src/main/resources/static/images/rain.png", isUnRead, vine3
                             notification.setDescription(map.get(key).get(3).replaceAll("'", ""));
                             notification.setVine(vine3); // Set the vine
                             notification.setType("weatherAlerts"); // Set the type
-                            notification.setAvatar("/public/assets/images/notifications/rain.png"); // Set the avatar
+                            notification.setAvatar("src/main/resources/static/images/rain.png"); // Set the avatar
                             notification.setIsUnRead(isUnRead); // Set the isUnRead
                             notification.setDate(LocalDateTime.now()); // Set the date
                             notification.setVineId(vine3.getId()); // Set the vineId directly
@@ -322,7 +320,6 @@ public class RabbitmqHandler {
                             JSONObject notificationJson = new JSONObject();
                             notificationJson.put("id", notification.getId());
                             notificationJson.put("type", notification.getType());
-                            notificationJson.put("avatar", notification.getAvatar());
                             notificationJson.put("isUnRead", notification.getIsUnRead());
                             notificationJson.put("vineId", notification.getVineId());
                             notificationJson.put("description", notification.getDescription());

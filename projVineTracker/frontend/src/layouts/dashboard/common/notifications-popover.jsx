@@ -23,6 +23,7 @@ import Scrollbar from 'src/components/scrollbar';
 // websocket
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
+import axios from "axios";
 
 // ----------------------------------------------------------------------
 
@@ -41,6 +42,7 @@ export default function NotificationsPopover() {
 
   const user = JSON.parse(localStorage.getItem('user'));
   console.log(user.id);
+  const [image, setImage] = useState(null);
 
   useEffect(() => {
     const init = async () => {
@@ -50,6 +52,19 @@ export default function NotificationsPopover() {
         console.log("Notification: ", notifications);
         const notificationsData = [];
         for (const notification of notifications) {
+          // get notification's avatar
+
+          const image = await axios.get(`${import.meta.env.VITE_APP_SERVER_URL}:8080/vines/notificationImage/${notification.id}`, {
+            responseType: 'arraybuffer',
+          })
+          .then((response) => {
+            let image = btoa(
+              new Uint8Array(response.data)
+                .reduce((data, byte) => data + String.fromCharCode(byte), '')
+            );
+            return `data:;base64,${image}`;
+          });
+
           // console.log("Notification Teste: ",notification);
           notificationsData.push({
             id: notification.id,
@@ -58,7 +73,7 @@ export default function NotificationsPopover() {
             type: '',
             isUnRead: notification.isUnRead,
             createdAt: notification.date,
-            avatar: notification.avatar,
+            avatar: image,
           });
         }
 
@@ -88,6 +103,17 @@ export default function NotificationsPopover() {
 
       // Check if the id is defined before processing the notification
       // if (newNotification.id !== undefined) {
+        const image = await axios.get(`${import.meta.env.VITE_APP_SERVER_URL}:8080/vines/notificationImage/${newNotification.id}`, {
+          responseType: 'arraybuffer',
+        })
+        .then((response) => {
+          let image = btoa(
+            new Uint8Array(response.data)
+              .reduce((data, byte) => data + String.fromCharCode(byte), '')
+          );
+          return `data:;base64,${image}`;
+        });
+
         const newFormattedNotification = {
           id: newNotification.id,
           vineId: newNotification.vineId,
@@ -96,7 +122,7 @@ export default function NotificationsPopover() {
           type: '',
           isUnRead: newNotification.isUnRead,
           createdAt: newNotification.date,
-          avatar: newNotification.avatar,
+          avatar: image,
         };
 
         setLatestNotification(newFormattedNotification);
