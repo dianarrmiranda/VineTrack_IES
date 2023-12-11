@@ -84,11 +84,13 @@ export default function NotificationsPopover() {
 
     const onMessageReceived = async (data) => {
       const newNotification = JSON.parse(data.body);
+      console.log("New Notification in JSON: ", newNotification);
 
       // Check if the id is defined before processing the notification
       // if (newNotification.id !== undefined) {
         const newFormattedNotification = {
           id: newNotification.id,
+          vineId: newNotification.vineId,
           title: await fetchData(`vines/name/${newNotification.vineId}`),
           description: newNotification.description,
           type: '',
@@ -100,18 +102,47 @@ export default function NotificationsPopover() {
         setLatestNotification(newFormattedNotification);
         console.log("New Notification: ", newFormattedNotification);
 
+        console.log("Notifications: ", notifications);
+
+        // from notifications list get the ones that are read
+        setReadNotifications(notifications.filter((notification) => !notification.isUnRead));
+        
+
+
         // Use a function to avoid duplicate notifications
         setUnreadNotifications((prevUnread) => {
           // Check if the notification with the same id already exists
-          if (!prevUnread.some((notification) => notification.id === newFormattedNotification.id)) {
-            return [...prevUnread, newFormattedNotification];
-          }
-          console.log("Unread Notifications: ", prevUnread);
-          return prevUnread;
+
+
+            // if its in the read list, remove it from there
+            // console.log("Descpription: ", newFormattedNotification.description);
+            console.log("Notifications Read: ", readNotifications);
+            if (readNotifications.some((notification) => ((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))) {
+              setReadNotifications((prevRead) =>
+                prevRead.filter((notification) => !((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))
+              );
+
+              setNotifications((prevNotifications) => 
+                prevNotifications.filter((notification) => !((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))
+              );
+
+              console.log("Notification removed from read list");
+            }
+
+            // check if the notification is already in the unread list
+            if (prevUnread.some((notification) => ((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))) {
+              console.log("IT WENT HERE");
+              return prevUnread;
+            }
+
+            setNotifications((prevNotifications) => [newFormattedNotification, ...prevNotifications]);
+            console.log("Notification added to notifications list: " , notifications);
+            setTotalUnRead((prevTotal) => prevTotal + 1);
+            return [newFormattedNotification, ...prevUnread];
+
         });
 
-
-        setTotalUnRead((prevTotal) => prevTotal + 1);
+    
       // }
     };
 
@@ -124,7 +155,7 @@ export default function NotificationsPopover() {
         client.disconnect();
       };
     });
-  }, []);
+  }, [notifications]);
 
 
 
@@ -135,28 +166,24 @@ export default function NotificationsPopover() {
   };
 
   const handleClose = () => {
+    setShowAllNotifications(false);
     setOpen(null);
   };
 
   const handleMarkAllAsRead = () => {
-    setReadNotifications((prevRead) => [
-      ...prevRead,
-      ...unreadNotifications.map((notification) => ({
-        ...notification,
-        isUnRead: false,
-      })),
-    ]);
-
+    unreadNotifications.forEach((notification) => markNotificationAsRead(notification.id));
     setUnreadNotifications([]);
     setTotalUnRead(0);
   };
 
   const handleMarkAsRead = (notificationId) => {
+
     setUnreadNotifications((prevUnread) =>
-      prevUnread.filter((notification) => notification.id !== notificationId)
+    prevUnread.filter((notification) => notification.id !== notificationId)
     );
 
     markNotificationAsRead(notificationId);
+
   };
 
   const markNotificationAsRead = (notificationId) => {
@@ -170,9 +197,11 @@ export default function NotificationsPopover() {
       )
     );
 
+
+
     setReadNotifications((prevRead) => [
-      ...prevRead,
       unreadNotifications.find((notification) => notification.id === notificationId),
+      ...prevRead,
     ]);
   };
 
@@ -239,11 +268,11 @@ export default function NotificationsPopover() {
               </ListSubheader>
             }
           >
-            {readNotifications.map((notification) => (
+            {readNotifications.slice(0, showAllNotifications ? readNotifications.length : 2).map((notification) => (
               <NotificationItem 
-              key={notification.id} 
-              notification={notification} 
-              markAsRead={handleMarkAsRead}
+                key={notification.id} 
+                notification={notification} 
+                markAsRead={handleMarkAsRead}
               />
             ))}
           </List>
