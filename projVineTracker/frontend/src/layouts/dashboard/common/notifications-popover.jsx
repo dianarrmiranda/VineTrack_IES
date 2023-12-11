@@ -89,6 +89,7 @@ export default function NotificationsPopover() {
       // if (newNotification.id !== undefined) {
         const newFormattedNotification = {
           id: newNotification.id,
+          vineId: newNotification.vineId,
           title: await fetchData(`vines/name/${newNotification.vineId}`),
           description: newNotification.description,
           type: '',
@@ -100,29 +101,44 @@ export default function NotificationsPopover() {
         setLatestNotification(newFormattedNotification);
         console.log("New Notification: ", newFormattedNotification);
 
+        console.log("Notifications: ", notifications);
+
+        // from notifications list get the ones that are read
+        //the notification list is coming as []
+        setReadNotifications(notifications.filter((notification) => !notification.isUnRead));
+
+
         // Use a function to avoid duplicate notifications
         setUnreadNotifications((prevUnread) => {
           // Check if the notification with the same id already exists
-          if (!prevUnread.some((notification) => notification.id === newFormattedNotification.id)) {
-            // check if the notification is already in the unread list
-            if (prevUnread.some((notification) => notification.avatar === newFormattedNotification.avatar && notification.description === newFormattedNotification.description)) {
-              return prevUnread;
-            }
+
 
             // if its in the read list, remove it from there
-            if (readNotifications.some((notification) => (notification.avatar === newFormattedNotification.avatar && notification.description === newFormattedNotification.description))) {
+            // console.log("Descpription: ", newFormattedNotification.description);
+            console.log("Notifications Read: ", readNotifications);
+            if (readNotifications.some((notification) => ((notification.description === newFormattedNotification.description) && (notification.vineId === newFormattedNotification.vineId)))) {
               setReadNotifications((prevRead) =>
-                prevRead.filter((notification) => (notification.avatar !== newFormattedNotification.avatar && notification.description !== newFormattedNotification.description))
+                prevRead.filter((notification) => ((notification.description === newFormattedNotification.description) && (notification.vineId === newFormattedNotification.vineId)))
               );
+
+              setNotifications((prevNotifications) => 
+                prevNotifications.filter((notification) => (notification.description !== newFormattedNotification.description && notification.vineId !== newFormattedNotification.vineId))
+              );
+
               console.log("Notification removed from read list");
             }
 
+            // check if the notification is already in the unread list
+            if (prevUnread.some((notification) => ((notification.description === newFormattedNotification.description) && (notification.vineId === newFormattedNotification.vineId)))) {
+              console.log("IT WENT HERE");
+              return prevUnread;
+            }
+
             setNotifications((prevNotifications) => [newFormattedNotification, ...prevNotifications]);
+            console.log("Notification added to notifications list: " , notifications);
             setTotalUnRead((prevTotal) => prevTotal + 1);
             return [...prevUnread, newFormattedNotification];
-          }
-          console.log("Notification already exists");
-          return prevUnread;
+
         });
 
     
@@ -149,6 +165,7 @@ export default function NotificationsPopover() {
   };
 
   const handleClose = () => {
+    setShowAllNotifications(false);
     setOpen(null);
   };
 
@@ -178,6 +195,8 @@ export default function NotificationsPopover() {
         notification.id === notificationId ? { ...notification, isUnRead: false } : notification
       )
     );
+
+
 
     setReadNotifications((prevRead) => [
       unreadNotifications.find((notification) => notification.id === notificationId),

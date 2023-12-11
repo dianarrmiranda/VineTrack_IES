@@ -477,7 +477,7 @@ export default function VineDetailsView() {
 
   const handleInputChangeWaterLimit = (e) => {
     const newValue = e.target.value;
-    setWaterLimit(newValue);
+    setWaterLimit(parseFloat(newValue));
     setErrorWaterLimit(''); // Clear error message on input change
   };
 
@@ -558,7 +558,7 @@ export default function VineDetailsView() {
       .then(response => {
         if (response) {
           console.log("Water Consumption Limit data fetched");
-          setWaterLimit(response);
+          setWaterLimit(parseFloat(response));
         } else {
           console.log("Water Consumption Limit data failed");
         }
