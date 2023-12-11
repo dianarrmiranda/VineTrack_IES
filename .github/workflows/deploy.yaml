@@ -27,4 +27,9 @@ jobs:
 
       - name: Build and up
         run: docker compose -f docker-compose.prod.yml up --build -d
+        env: 
+          MYSQL_ROOT_PASSWORD: ${{secrets.MYSQL_ROOT_PASSWORD}}
+          MYSQL_PASSWORD: ${{secrets.MYSQL_PASSWORD }}
+          RABBITMQ_DEFAULT_PASS: ${{secrets.RABBITMQ_DEFAULT_PASS}}
+
 
