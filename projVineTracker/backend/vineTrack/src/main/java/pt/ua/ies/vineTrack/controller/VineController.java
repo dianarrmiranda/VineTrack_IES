@@ -312,7 +312,8 @@ public class VineController {
             vine.setSize(size);
             vine.setImage("");
             vine.setDate(new Date(date.getTime()));
-            vine.setMaxWaterConsumption(MAX_WATER_CONSUMPTION*vine.getSize()); // default value defined
+            // round two decimal places
+            vine.setMaxWaterConsumption( Math.round((size * MAX_WATER_CONSUMPTION) * 100.0) / 100.0);
             for (Integer id : users) {
                 User user = userService.getUserById(id);
                 if (user.getVines() != null) {
