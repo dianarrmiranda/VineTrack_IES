@@ -94,6 +94,7 @@ services:
       - REACT_APP_SERVER_URL=http://deti-ies-04.ua.pt:3030
     ports:
       - 3030:3030
+      - 80:80
     volumes:
       - ./projVineTracker/frontend:/app
       - modules:/app/node_modules
