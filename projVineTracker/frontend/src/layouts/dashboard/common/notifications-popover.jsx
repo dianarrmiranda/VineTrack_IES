@@ -84,6 +84,7 @@ export default function NotificationsPopover() {
 
     const onMessageReceived = async (data) => {
       const newNotification = JSON.parse(data.body);
+      console.log("New Notification in JSON: ", newNotification);
 
       // Check if the id is defined before processing the notification
       // if (newNotification.id !== undefined) {
@@ -104,8 +105,8 @@ export default function NotificationsPopover() {
         console.log("Notifications: ", notifications);
 
         // from notifications list get the ones that are read
-        //the notification list is coming as []
         setReadNotifications(notifications.filter((notification) => !notification.isUnRead));
+        
 
 
         // Use a function to avoid duplicate notifications
@@ -116,20 +117,20 @@ export default function NotificationsPopover() {
             // if its in the read list, remove it from there
             // console.log("Descpription: ", newFormattedNotification.description);
             console.log("Notifications Read: ", readNotifications);
-            if (readNotifications.some((notification) => ((notification.description === newFormattedNotification.description) && (notification.vineId === newFormattedNotification.vineId)))) {
+            if (readNotifications.some((notification) => ((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))) {
               setReadNotifications((prevRead) =>
-                prevRead.filter((notification) => ((notification.description === newFormattedNotification.description) && (notification.vineId === newFormattedNotification.vineId)))
+                prevRead.filter((notification) => !((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))
               );
 
               setNotifications((prevNotifications) => 
-                prevNotifications.filter((notification) => (notification.description !== newFormattedNotification.description && notification.vineId !== newFormattedNotification.vineId))
+                prevNotifications.filter((notification) => !((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))
               );
 
               console.log("Notification removed from read list");
             }
 
             // check if the notification is already in the unread list
-            if (prevUnread.some((notification) => ((notification.description === newFormattedNotification.description) && (notification.vineId === newFormattedNotification.vineId)))) {
+            if (prevUnread.some((notification) => ((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))) {
               console.log("IT WENT HERE");
               return prevUnread;
             }
@@ -137,7 +138,7 @@ export default function NotificationsPopover() {
             setNotifications((prevNotifications) => [newFormattedNotification, ...prevNotifications]);
             console.log("Notification added to notifications list: " , notifications);
             setTotalUnRead((prevTotal) => prevTotal + 1);
-            return [...prevUnread, newFormattedNotification];
+            return [newFormattedNotification, ...prevUnread];
 
         });
 
@@ -154,7 +155,7 @@ export default function NotificationsPopover() {
         client.disconnect();
       };
     });
-  }, []);
+  }, [notifications]);
 
 
 
