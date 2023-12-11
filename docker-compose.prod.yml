@@ -91,7 +91,7 @@ services:
       context: ./projVineTracker/frontend
       dockerfile: Dockerfile.prod
     environment:
-      - REACT_APP_SERVER_URL=http://deti-ies-04.ua.pt
+      - VITE_APP_SERVER_URL=http://deti-ies-04.ua.pt
     ports:
       - 3030:3030
       - 80:80

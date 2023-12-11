@@ -30,7 +30,7 @@ export default function VineCard({ vine, setVines}) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    axios.get(`${import.meta.env.REACT_APP_SERVER_URL}:8080/vines/image/${vine.id}`, {
+    axios.get(`${import.meta.env.VITE_APP_SERVER_URL}:8080/vines/image/${vine.id}`, {
       responseType: 'arraybuffer',
     })
     .then((response) => {
