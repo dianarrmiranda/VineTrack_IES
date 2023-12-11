@@ -394,6 +394,15 @@ public class VineController {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image);
     }
 
+    @GetMapping(path = "/notificationImage/{id}")
+    public ResponseEntity<byte[]> getNotificationImageById(@PathVariable Integer id) throws IOException{
+        Notification notification = notificationService.getNotificationById(id);
+        Path path = Paths.get(notification.getAvatar());
+        byte[] image = Files.readAllBytes(path);
+
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image);
+    }
+
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<String> deleteVineById(@PathVariable Integer id){
         try {
