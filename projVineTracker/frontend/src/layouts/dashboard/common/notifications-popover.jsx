@@ -104,18 +104,28 @@ export default function NotificationsPopover() {
         setUnreadNotifications((prevUnread) => {
           // Check if the notification with the same id already exists
           if (!prevUnread.some((notification) => notification.id === newFormattedNotification.id)) {
-            setNotifications((prevNotifications) => [newFormattedNotification, ...prevNotifications]);
-            return [...prevUnread, newFormattedNotification];
+            // check if the notification is already in the unread list
+            if (prevUnread.some((notification) => notification.avatar === newFormattedNotification.avatar && notification.description === newFormattedNotification.description)) {
+              return prevUnread;
+            }
 
+            // if its in the read list, remove it from there
+            if (readNotifications.some((notification) => (notification.avatar === newFormattedNotification.avatar && notification.description === newFormattedNotification.description))) {
+              setReadNotifications((prevRead) =>
+                prevRead.filter((notification) => (notification.avatar !== newFormattedNotification.avatar && notification.description !== newFormattedNotification.description))
+              );
+              console.log("Notification removed from read list");
+            }
+
+            setNotifications((prevNotifications) => [newFormattedNotification, ...prevNotifications]);
+            setTotalUnRead((prevTotal) => prevTotal + 1);
+            return [...prevUnread, newFormattedNotification];
           }
-          console.log("Unread Notifications: ", prevUnread);
+          console.log("Notification already exists");
           return prevUnread;
         });
 
-      
-
-
-        setTotalUnRead((prevTotal) => prevTotal + 1);
+    
       // }
     };
 
@@ -149,11 +159,13 @@ export default function NotificationsPopover() {
   };
 
   const handleMarkAsRead = (notificationId) => {
+
     setUnreadNotifications((prevUnread) =>
-      prevUnread.filter((notification) => notification.id !== notificationId)
+    prevUnread.filter((notification) => notification.id !== notificationId)
     );
 
     markNotificationAsRead(notificationId);
+
   };
 
   const markNotificationAsRead = (notificationId) => {
@@ -168,8 +180,8 @@ export default function NotificationsPopover() {
     );
 
     setReadNotifications((prevRead) => [
-      ...prevRead,
       unreadNotifications.find((notification) => notification.id === notificationId),
+      ...prevRead,
     ]);
   };
 
@@ -236,11 +248,11 @@ export default function NotificationsPopover() {
               </ListSubheader>
             }
           >
-            {readNotifications.map((notification) => (
+            {readNotifications.slice(0, showAllNotifications ? readNotifications.length : 2).map((notification) => (
               <NotificationItem 
-              key={notification.id} 
-              notification={notification} 
-              markAsRead={handleMarkAsRead}
+                key={notification.id} 
+                notification={notification} 
+                markAsRead={handleMarkAsRead}
               />
             ))}
           </List>
