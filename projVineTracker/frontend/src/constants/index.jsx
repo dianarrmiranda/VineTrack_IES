@@ -1,1 +1,1 @@
-export const API_BASE_URL = `${process.env.REACT_APP_SERVER_URL}:8080`;
+export const API_BASE_URL = `${import.meta.env.REACT_APP_SERVER_URL}:8080`;
