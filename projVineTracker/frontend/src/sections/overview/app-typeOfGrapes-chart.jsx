@@ -37,7 +37,9 @@ const NoGrapesFoundAnnotation = {
 export default function AppNutritionChart({ title, subheader, chart, ...other }) {
   const theme = useTheme();
   const { colors, series, options } = chart;
-  const chartSeries = series.map((i) => i.value);
+
+  // Check if there are no series data
+  const chartSeries = series.length === 0 ? [100] : series.map((i) => i.value); // Fill with 100% if no data
 
   const chartOptions = useChart({
     chart: {
@@ -46,7 +48,7 @@ export default function AppNutritionChart({ title, subheader, chart, ...other })
       },
     },
     colors,
-    labels: series.map((i) => i.label),
+    labels: series.length === 0 ? ["No types of grapes found"] : series.map((i) => i.label),
     stroke: {
       colors: [theme.palette.background.paper],
     },
@@ -79,6 +81,7 @@ export default function AppNutritionChart({ title, subheader, chart, ...other })
         },
       },
     },
+    // Only add annotation if there are no series data
     ...(series && series.length === 0 ? { annotations: { points: [NoGrapesFoundAnnotation] } } : {}),
     ...options,
   });
@@ -90,6 +93,7 @@ export default function AppNutritionChart({ title, subheader, chart, ...other })
     </Card>
   );
 }
+
 
 AppNutritionChart.propTypes = {
   chart: PropTypes.object,
