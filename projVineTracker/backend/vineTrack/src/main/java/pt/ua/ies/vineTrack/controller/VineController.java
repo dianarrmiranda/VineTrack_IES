@@ -110,10 +110,10 @@ public class VineController {
                  .collect(Collectors.toList())
          );
          while (nutrientsValues.size() < 6) {
-             nutrientsValues.add(0, 0.0);
+             nutrientsValues.add(0, 1.0);
          }
-         if (nutrientsValues.size() > 10) {
-             nutrientsValues = nutrientsValues.subList(nutrientsValues.size() - 10, nutrientsValues.size());
+         if (nutrientsValues.size() > 6) {
+             nutrientsValues = nutrientsValues.subList(nutrientsValues.size() - 6, nutrientsValues.size());
          }
          System.out.println("Vine: " + vineId + " - " + "Nutrients: " + nutrientsValues);
          return nutrientsValues;
@@ -394,7 +394,7 @@ public class VineController {
             Track track3 = new Track("nutrients", LocalDateTime.now(), 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
             trackService.saveTrack(track3);
             trackService.saveTrack(track4);*/
-            Nutrient nutrient = new Nutrient(0.0,0.0,0.0,0.0,0.0,0.0);
+            Nutrient nutrient = new Nutrient(1.0,1.0,1.0,1.0,1.0,0.3);
             nutrientService.saveNutrient(nutrient);
 
             if (!img.isEmpty()){

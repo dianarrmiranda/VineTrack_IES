@@ -47,7 +47,7 @@ public class RabbitmqHandler {
         
         JSONObject params = new JSONObject(message);
         String type = params.getString("sensor");
-        System.out.println("Tipo de sensorrrrrrr:"+ type);
+        System.out.println("Tipo de sensor:"+ type);
 
         switch (type) {
             case "moisture":
@@ -336,7 +336,6 @@ public class RabbitmqHandler {
                 }
                 break;
             case "nutrients":
-                System.out.println("Entrei no RabbitMQ Handler-nutrients");
                 int vineId4 = params.getInt("id");
                 String phase = params.getString("phase");
                 JSONObject nutrientValues = params.getJSONObject("value");
