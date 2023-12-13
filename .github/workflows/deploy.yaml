@@ -25,7 +25,7 @@ jobs:
         run: docker builder prune -a -f
 
       - name: Build and up 
-        run: docker compose -f docker-compose.prod.yml up --build -d --remove-orphans
+        run: docker compose -f docker-compose.prod.yml up --build -d
         env: 
           MYSQL_ROOT_PASSWORD: ${{secrets.MYSQL_ROOT_PASSWORD}}
           MYSQL_PASSWORD: ${{secrets.MYSQL_PASSWORD }}
