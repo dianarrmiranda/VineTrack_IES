@@ -394,8 +394,11 @@ public class VineController {
             Track track3 = new Track("nutrients", LocalDateTime.now(), 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
             trackService.saveTrack(track3);
             trackService.saveTrack(track4);*/
-            Nutrient nutrient = new Nutrient(1.0,1.0,1.0,1.0,1.0,0.3);
+            Nutrient nutrient = new Nutrient(vine, 1.6,0.14,0.65,1.2,0.16,0.3);
             nutrientService.saveNutrient(nutrient);
+
+            Nutrient nutrient2 = new Nutrient(vine,1.6,0.14,0.65,1.2,0.16,0.3);
+            nutrientService.saveNutrient(nutrient2);
 
             if (!img.isEmpty()){
                 try {

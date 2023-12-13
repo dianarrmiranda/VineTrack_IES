@@ -26,14 +26,15 @@ public class Nutrient {
 
     private String phase="flower"; // os nutrientes só têm 2 fases: flower e fruit
 
-    @ManyToMany()
-    @JoinColumn(name = "nutrients", referencedColumnName = "id")
-    private List<Vine> vines;
+    @ManyToOne()
+    @JoinColumn(name = "vine_id", referencedColumnName = "id")
+    private Vine vine;
 
     public Nutrient() {
     }
 
-    public Nutrient(Double nitrogen, Double phosphorus, Double potassium, Double calcium, Double magnesium, Double chloride) {
+    public Nutrient(Vine vine,Double nitrogen, Double phosphorus, Double potassium, Double calcium, Double magnesium, Double chloride) {
+        this.vine = vine;
         Nitrogen = nitrogen;
         Phosphorus = phosphorus;
         Potassium = potassium;
@@ -42,15 +43,6 @@ public class Nutrient {
         Chloride = chloride;
     }
 
-    public Nutrient(Double nitrogen, Double phosphorus, Double potassium, Double calcium, Double magnesium, Double chloride, String phase) {
-        Nitrogen = nitrogen;
-        Phosphorus = phosphorus;
-        Potassium = potassium;
-        Calcium = calcium;
-        Magnesium = magnesium;
-        Chloride = chloride;
-        phase = phase;
-    }
     public Integer getId() {
         return id;
     }
@@ -103,23 +95,15 @@ public class Nutrient {
         return Chloride;
     }
 
-    public List<Vine> getVines() {
-        return vines;
-    }
-
-    public void setVines(List<Vine> vines) {
-        this.vines = vines;
-    }
-
     public void setChloride(Double chloride) {
         Chloride = chloride;
     }
 
-    public String getPhase() {
-        return phase;
+    public Vine getVine() {
+        return vine;
     }
 
-    public void setPhase(String phase) {
-        phase = phase;
+    public void setVine(Vine vine) {
+        this.vine = vine;
     }
 }

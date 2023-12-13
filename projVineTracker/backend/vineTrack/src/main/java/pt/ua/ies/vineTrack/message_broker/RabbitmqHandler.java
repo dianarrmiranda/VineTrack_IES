@@ -337,7 +337,7 @@ public class RabbitmqHandler {
                 break;
             case "nutrients":
                 int vineId4 = params.getInt("id");
-                String phase = params.getString("phase");
+                Vine vine4 = vineService.getVineById(vineId4);
                 JSONObject nutrientValues = params.getJSONObject("value");
                 Double N = nutrientValues.getDouble("Nitrogen");
                 Double Ph = nutrientValues.getDouble("Phosphorus");
@@ -346,7 +346,7 @@ public class RabbitmqHandler {
                 Double Mg = nutrientValues.getDouble("Magnesium");
                 Double Cl = nutrientValues.getDouble("Chloride");
 
-                Nutrient nutrient = new Nutrient(N,Ph,K,Ca,Mg,Cl, phase);
+                Nutrient nutrient = new Nutrient(vine4,N,Ph,K,Ca,Mg,Cl);
                  nutrientService.saveNutrient(nutrient);
                 break;
             default:

@@ -58,11 +58,6 @@ public class Vine {
     @ElementCollection
     private Map<String, Double> areaGrapes = new TreeMap<>();
 
-
-    @Column(nullable = false)
-    @ManyToMany(mappedBy = "vines")
-    private List<Nutrient> Nutrients; //TODO: convém ver como os valores saem daqui
-
     public Integer getId(){
         return id;
     }
@@ -187,12 +182,6 @@ public class Vine {
         this.areaGrapes = areaGrapes;
     }
 
-    public List<Nutrient> getNutrientsList() {
-        return Nutrients;
-    }
-         public void setNutrientsList(List<Nutrient> nutrients) {
-         this.Nutrients = nutrients;
-     }
     @Override
     public String toString() {
         return name;
