@@ -15,17 +15,23 @@ export default function AppView() {
 const [userInfo, setUserInfo] = useState({});
 
   useEffect(() => {
-    const initialize =  async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    user &&
-            fetchData(`users/${user.id}`, user.token).then((res) => {
-              const { id, name, role } = res;
-              const token = user.token;
-              setUserInfo({ id, name, role, token });
-            });
-        };
-        initialize();
-      }, []);
+    const initialize = async () => {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user) {
+        const res = await fetchData(`users/${user.id}`, user.token);
+        if (res) {
+          const { id, name, role } = res;
+          const token = user.token;
+          setUserInfo({ id, name, role, token });
+        } else {
+          console.log('Failed to fetch user data');
+        }
+      } else {
+        console.log('No user data in local storage');
+      }
+    };
+    initialize();
+  }, []);
 
   // get user's vine ids
   const [vineIds, setVineIds] = useState([]);
@@ -113,16 +119,24 @@ const [userInfo, setUserInfo] = useState({});
   const [areaGrapes, setAreaGrapes] = useState([]);
   useEffect(() => {
     const initialize = async () => {
+      if (!vineIds || vineIds.length === 0) {
+        console.log('Vine IDs not available');
+        return;
+      }
+  
       const grapes = await fetchData(`vines/areaGrapes/`, userInfo.token);
-
-      const areaGrapesList = Object.entries(grapes).map(([label, value]) => ({ label, value }));
-
-      setAreaGrapes(areaGrapesList);
+  
+      if (grapes) {
+        const areaGrapesList = Object.entries(grapes).map(([label, value]) => ({ label, value }));
+        console.log("GRAPESS");
+        setAreaGrapes(areaGrapesList);
+      } else {
+        console.log('Failed to fetch area grapes data');
+      }
     };
-
+  
     initialize();
   }, [vineIds]);
-
 
   return (
     <Container maxWidth="xl">

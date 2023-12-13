@@ -7,20 +7,35 @@ import AppHumidityChart from "../app-humidity-chart";
 import AppTemperatureChart from "../app-temperature-chart";
 import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 
-import { fetchData, postData } from "src/utils";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import {fetchData, postData} from "src/utils";
+import {useEffect, useState} from "react";
+import {useParams} from "react-router-dom";
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
-import { Box, Card, CardHeader, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Modal, Stack, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  CardHeader,
+  Modal,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField
+} from "@mui/material";
 import Iconify from "src/components/iconify";
-import { styled } from '@mui/system';
+import {styled} from '@mui/system';
 import clsx from 'clsx';
-import { FormControl, useFormControlContext } from '@mui/base/FormControl';
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import {FormControl, useFormControlContext} from '@mui/base/FormControl';
+import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 
-import { API_BASE_URL } from 'src/constants';
+import {API_BASE_URL} from 'src/constants';
 import axios from "axios";
 
 
@@ -31,7 +46,7 @@ export default function VineDetailsView() {
   const { id } = useParams();
   const [vine, setVine] = useState({});
   
-  const [moistureData, setMoistureData] = useState(null);
+  const [moistureData, setMoistureData] = useState([]);
   const [tempData, setTempData] = useState([]);
   const [weatherAlertsData, setWeatherAlertsData] = useState([]);
 
@@ -73,8 +88,7 @@ export default function VineDetailsView() {
         console.log("Moisture data fetched");
         
         // moisture is a list of doubles
-        const moisture = response;
-        const moistureData = moisture.map((value, index) => {
+        const moistureData = response.map((value, index) => {
           return value;
         });
         setMoistureData(moistureData);
@@ -94,7 +108,6 @@ export default function VineDetailsView() {
           setTempData(labels.map((value, index) => {
             return {[value]: values[index]};
           }).sort((a, b) => Object.keys(b)[0] - Object.keys(a)[0]));
-
           
         } else {
           console.log("Temperature data failed");
@@ -243,7 +256,7 @@ export default function VineDetailsView() {
       });
     });
   }
-  , [id, moistureData], [id, tempData], [id, weatherAlertsData]);
+  , [id, moistureData, tempData, weatherAlertsData]);
 
   console.log("Moisture", moistureData);
   console.log("Temperature", tempData);
@@ -542,7 +555,7 @@ export default function VineDetailsView() {
     const client = Stomp.over(ws);
     client.connect({}, function () {
       client.subscribe('/topic/waterConsumptionWeek', function (data) {
-        if (JSON.parse(data.body).vineId == id) {
+        if (JSON.parse(data.body).vineId === id) {
           console.log("New water consumption weekly data: ", JSON.parse(data.body).waterConsumptionWeekValues);
           // we receive a list of doubles
           const waterConsumptionWeekly = JSON.parse(data.body).waterConsumptionWeekValues;
@@ -575,10 +588,10 @@ export default function VineDetailsView() {
         Overview of {vine.name}
       </Typography>
       <Grid container>
-      <Grid item xs={6}>
+      <Grid  xs={6}>
         <Typography variant="h5" sx={{ mb: 5 }}>Water Consumption Limit: {waterLimit} L</Typography>
         <Grid container alignItems="center" justifyContent="space-between">
-          <Grid item>
+          <Grid >
             <Button
               variant="contained"
               color="inherit"
@@ -590,10 +603,10 @@ export default function VineDetailsView() {
           </Grid>
         </Grid>
       </Grid>
-      <Grid item xs={6} justifyContent="flex-end">
+      <Grid  xs={6} justifyContent="flex-end">
         <Typography variant="h5" sx={{ mb: 5 }}>Production Level</Typography>
         <Grid container alignItems="center">
-          <Grid item >
+          <Grid  >
             <Button
               variant="contained"
               color="inherit"
@@ -691,22 +704,22 @@ export default function VineDetailsView() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {avgTempsByDay.map((value) => (
-                        <TableRow
-                          key={Object.keys(value)[0]}
-                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                        >
-                          <TableCell component="th" scope="row">
-                            {Object.keys(value)[0]}
-                          </TableCell>
-                          <TableCell>{Object.values(value)[0]}º C</TableCell>
-                        </TableRow>
+                      {avgTempsByDay.map((value, index) => (
+                          <TableRow
+                              key={index}
+                              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                          >
+                            <TableCell component="th" scope="row">
+                              {Object.keys(value)[0]}
+                            </TableCell>
+                            <TableCell>{Object.values(value)[0]}º C</TableCell>
+                          </TableRow>
                       ))}
                     </TableBody>
                   </Table>
                 </TableContainer>
                 }
-                {avgTempsByDay.length == 0 && avgTempsByWeek.length == 0 && <Typography variant="body2" sx={{ mb: 1 }}>No Temperatures</Typography>}
+                {avgTempsByDay.length === 0 && avgTempsByWeek.length === 0 && <Typography variant="body2" sx={{ mb: 1 }}>No Temperatures</Typography>}
                 </Box>
                 <Box sx={{ p: 2, pb: 1 }}>
                   {avgTempsByWeek.length > 0 && 
@@ -719,10 +732,10 @@ export default function VineDetailsView() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {avgTempsByWeek.map((value) => (
+                        {avgTempsByWeek.map((value, index) => (
                           <TableRow
-                            key={Object.keys(value)[0]}
-                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                              key={index}
+                              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                           >
                             <TableCell component="th" scope="row">
                               {Object.keys(value)[0]}
@@ -754,9 +767,9 @@ export default function VineDetailsView() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {weatherAlertsData.map((row) => (
+                      {weatherAlertsData.map((row, index) => (
                         <TableRow
-                          key={row.name}
+                          key={index}
                           sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                         >
                           <TableCell component="th" scope="row">
@@ -820,10 +833,10 @@ export default function VineDetailsView() {
           <Card>
 
               <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item>
+                <Grid >
                   <CardHeader title='PH Values' />
                 </Grid>
-                <Grid item sx={{pt: 4, pr: 3}}>
+                <Grid  sx={{pt: 4, pr: 3}}>
                   <Button
                     variant="contained"
                     color="inherit"
@@ -846,10 +859,9 @@ export default function VineDetailsView() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {phValues.map((row) => (
-                        console.log(row),
+                      {phValues.map((row, index) => (
                         <TableRow
-                          key={row.name}
+                          key={index}
                           sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                         >
                           <TableCell component="th" scope="row">

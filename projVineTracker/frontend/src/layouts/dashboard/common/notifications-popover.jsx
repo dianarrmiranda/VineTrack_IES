@@ -71,12 +71,12 @@ export default function NotificationsPopover() {
           });
 
           notificationsData.push({
-            id: notification.id,
+            id: String(notification.id),
             title: await fetchData(`vines/name/${notification.vineId}`, user.token),
             description: notification.description,
             type: '',
             isUnRead: notification.isUnRead,
-            createdAt: notification.date,
+            createdAt: new Date(notification.date),
             avatar: image,
           });
         }
@@ -123,13 +123,13 @@ export default function NotificationsPopover() {
         });
 
         const newFormattedNotification = {
-          id: newNotification.id,
+          id: String(newNotification.id),
           vineId: newNotification.vineId,
           title: await fetchData(`vines/name/${newNotification.vineId}`, user.token),
           description: newNotification.description,
           type: '',
           isUnRead: newNotification.isUnRead,
-          createdAt: newNotification.date,
+          createdAt: new Date(newNotification.date),
           avatar: image,
         };
 

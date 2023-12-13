@@ -44,7 +44,7 @@ export default function AccountPopover() {
   };
 
   const handleClose = () => {
-    router.push("/login");
+    setOpen(null);
   };
 
   const handleLogout = async () => {
