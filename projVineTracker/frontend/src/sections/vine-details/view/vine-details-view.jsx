@@ -85,12 +85,12 @@ export default function VineDetailsView() {
         console.log("Nutrients data fetched");
         console.log("Res: "+ response); // é da mesma estrutura de dados que nutrientsData2
         // nutrients is a list of doubles
-        const nutrientsData = response;
-        // const nutrientsData = nutrients.map((value, index) => {
-        //   return value;
-        // });
+        const nutrients = response;
+        const nutrientsData = nutrients.map((value, index) => {
+          return value;
+        });
         const nutrientsData2 = [2,2,2,3] // remove this data for the generated one
-        setNutrientsData(nutrientsData2);
+        setNutrientsData(nutrientsData);
       } else {
         console.log("Nutrients data failed");
       }
@@ -671,19 +671,19 @@ export default function VineDetailsView() {
           <AppNutritionChart
             title="Nutrition Values"
             chart={{
-              labels: ["Nitrogen", "Phosphorus", "Potassium","Calcium" ,"Magnesium","Chloride"],
+              series: nutrientsData,
+            }}
+              // labels: ["Nitrogen", "Phosphorus", "Potassium","Calcium" ,"Magnesium","Chloride"],
               // series: [{
               //   data: nutrientsData, 
               // }               
               // ],
-                series: [
-                { label: "Nitrogen (N)", value: nutrientsData[0] },
-                { label: "Phosphorus (P)", value: nutrientsData[1] },
-                { label: "Potassium (K)", value: nutrientsData[2] },
-                { label: "Magnesium (Mg)", value: nutrientsData[3] },
-                
-              ],
-            }}
+              //   series: [
+              //   { label: "Nitrogen (N)", value: nutrientsData[0] },
+              //   { label: "Phosphorus (P)", value: nutrientsData[1] },
+              //   { label: "Potassium (K)", value: nutrientsData[2] },
+              //   { label: "Magnesium (Mg)", value: nutrientsData[3] },  
+              // ],
           />
         </Grid>
 
