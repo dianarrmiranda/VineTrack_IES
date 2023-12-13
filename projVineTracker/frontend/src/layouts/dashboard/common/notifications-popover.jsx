@@ -15,7 +15,7 @@ import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 
-import { fetchData, updateData } from 'src/utils';
+import { fetchData } from 'src/utils';
 import { fToNow } from 'src/utils/format-time';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -217,22 +217,30 @@ export default function NotificationsPopover() {
   };
 
   const markNotificationAsRead = (notificationId) => {
-    updateData(`users/markAsRead/${notificationId}`, null, user.token);
 
-    setTotalUnRead((prevTotal) => prevTotal - 1);
-
-    setNotifications((prevNotifications) =>
-      prevNotifications.map((notification) =>
-        notification.id === notificationId ? { ...notification, isUnRead: false } : notification
-      )
-    );
-
-
-
-    setReadNotifications((prevRead) => [
-      unreadNotifications.find((notification) => notification.id === notificationId),
-      ...prevRead,
-    ]);
+    if (notifications.some((notification) => notification.id === notificationId ) && notifications.find((notification) => notification.id === notificationId ).isUnRead) {
+      axios({
+        method: "put",
+        url: `${API_BASE_URL}/users/markAsRead/${notificationId}`,
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      })
+      setTotalUnRead((prevTotal) => prevTotal - 1);
+  
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) =>
+          notification.id === notificationId ? { ...notification, isUnRead: false } : notification
+        )
+      );
+  
+  
+  
+      setReadNotifications((prevRead) => [
+        unreadNotifications.find((notification) => notification.id === notificationId),
+        ...prevRead,
+      ]);
+    }
   };
 
   return (

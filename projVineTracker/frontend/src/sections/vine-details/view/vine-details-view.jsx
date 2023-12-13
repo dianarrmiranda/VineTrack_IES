@@ -7,7 +7,7 @@ import AppHumidityChart from "../app-humidity-chart";
 import AppTemperatureChart from "../app-temperature-chart";
 import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 
-import { fetchData, postData, updateData } from "src/utils";
+import { fetchData, postData } from "src/utils";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import SockJS from "sockjs-client";
@@ -21,6 +21,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import { API_BASE_URL } from 'src/constants';
+import axios from "axios";
 
 
 // ----------------------------------------------------------------------
@@ -271,11 +272,17 @@ export default function VineDetailsView() {
       console.log("Water limit in frontend updated to ", newWaterLimit);
       // Send data to backend
       if (vineId !== undefined && Number.isInteger(vineId)) {
-        const res = updateData(`vines/waterLimit/${vineId}`, { waterLimit: newWaterLimit }, user.token, {
-          headers: {
-            'Content-Type': 'application/json',
+        axios({
+          method: "put",
+          url: `${API_BASE_URL}/vines/waterLimit/${vineId}`,
+          data: {
+            waterLimit: newWaterLimit
           },
-        });
+          headers: {
+            "Content-Type": 'application/json',
+            Authorization: `Bearer ${user.token}`,
+          },
+        })
       } else {
         console.error("Invalid vineId:", vineId);
       }

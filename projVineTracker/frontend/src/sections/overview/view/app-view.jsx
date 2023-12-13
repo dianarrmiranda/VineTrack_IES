@@ -31,6 +31,7 @@ const [userInfo, setUserInfo] = useState({});
   const [vineIds, setVineIds] = useState([]);
   useEffect(() => {
     const initialize = async () => {
+      if (!userInfo.id) return;
       const vineIds = await fetchData(`users/vines/${userInfo.id}`, userInfo.token);
 
       setVineIds(vineIds);
@@ -46,6 +47,7 @@ const [userInfo, setUserInfo] = useState({});
       // waterConsumption is a map of vinName: waterConsumptionValue
       const waterConsumption = {};
       for (const vineId of vineIds) {
+        if (!vineId) continue;
         const vineName = await fetchData(`vines/name/${vineId}`, userInfo.token);
         const vineWaterConsumption = await fetchData(`vines/waterConsumption/${vineId}`, userInfo.token);
         waterConsumption[vineName] = vineWaterConsumption;
@@ -80,6 +82,7 @@ const [userInfo, setUserInfo] = useState({});
     const initialize = async () => {
       const vineProduction = {};
       for (const vineId of vineIds) {
+        if (!vineId) continue;
         const vineName = await fetchData(`vines/name/${vineId}`, userInfo.token);
         const production = await fetchData(`vines/production/${vineId}`, userInfo.token);
      

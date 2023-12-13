@@ -21,14 +21,11 @@ import io.jsonwebtoken.security.Keys;
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    private String jwtSecret= "2e2451df5398ca684885fc188acb8077f78be0809c1e35ac69464712cdfe87d8";
-
-    private int jwtExpirationMs = 14400000;
-
     public String generateJwtToken(Authentication authentication) {
 
         User userPrincipal = (User) authentication.getPrincipal();
 
+        int jwtExpirationMs = 14400000;
         return Jwts.builder()
                    .setSubject((userPrincipal.getEmail()))
                    .setIssuedAt(new Date())
@@ -38,6 +35,7 @@ public class JwtUtils {
     }
 
     private Key key() {
+        String jwtSecret = "2e2451df5398ca684885fc188acb8077f78be0809c1e35ac69464712cdfe87d8";
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 

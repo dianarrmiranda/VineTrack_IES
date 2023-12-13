@@ -95,7 +95,7 @@ export default function RegisterUserView() {
         setPassowrd("");
         setConfirmPassword("");
 
-        localStorage.setItem("user", JSON.stringify({ token: response.token, name: response.name, id: response.id }));
+        localStorage.setItem("user", JSON.stringify({ token: response.data.token, name: response.data.name, id: response.data.id }));
 
         router.replace("/");
         
