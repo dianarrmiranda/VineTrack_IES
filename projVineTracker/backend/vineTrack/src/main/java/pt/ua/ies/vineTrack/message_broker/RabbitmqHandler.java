@@ -138,7 +138,6 @@ public class RabbitmqHandler {
                     this.template.convertAndSend("/topic/waterConsumptionWeek", waterConsumptionWeekJson.toString());
 
                     // check if water consumption is above the limit
-                    double vineSize = vine.getSize();
                     double waterConsumptionLimit = vine.getMaxWaterConsumption();
 
                     // if water consumption is above the limit, send notification
