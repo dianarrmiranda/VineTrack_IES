@@ -10,8 +10,6 @@ const icon = (name) => (
   />
 );
 
-const user = JSON.parse(localStorage.getItem("user"));
-
 const navConfig = [
   {
     title: "Overview",

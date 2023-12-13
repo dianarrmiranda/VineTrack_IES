@@ -16,8 +16,9 @@ import { bgGradient } from "src/theme/css";
 
 import Logo from "src/components/logo";
 import Iconify from "src/components/iconify";
-import { fetchData, postData } from "src/utils";
 import { Alert } from "@mui/material";
+import axios from "axios";
+import { API_BASE_URL } from "src/constants";
 
 // ----------------------------------------------------------------------
 
@@ -38,17 +39,14 @@ export default function RegisterUserView() {
   const [alertEmail, setAlertEmail] = useState(false);
   const [alertName, setAlertName] = useState(false);
   const [alertPasswordMacth, setAlertPasswordMacth] = useState(false);
-  const [alertUsername, setAlertUsername] = useState(false);
-  const [alertUsernameCheck, setAlertUsernameCheck] = useState(false);
   const [alertEmailCheck, setAlertEmailCheck] = useState(false);
 
   const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z])(?=.*[.!@#$%^&*()_+]).{8,}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  const usernameRegex = /^[a-zA-Z0-9]+$/;
 
   const handleName = (event) => {
     setName(event.target.value);
-    if (name.length > 3) { setAlertUsername(false);}
+    if (name.length > 3) { setAlertName(false);}
   };
 
   const handleEmail = (event) => {
@@ -80,24 +78,16 @@ export default function RegisterUserView() {
     if (name.length < 3) { setAlertName(true);}
     else { setAlertName(false);}
 
-    const checkEmail = fetchData(`users/email/${email}`);
-    checkEmail.then((res) => {if (res) { setAlertEmailCheck(true);} else {setAlertEmailCheck(false);}});
-
-
-
     if (passwordRegex.test(password) === true && password === confirmPassword && emailRegex.test(email) === true && name.length >= 3 && alertEmailCheck === false) {
-
-      // Dados no formato raw JSON
-      const res = postData("users", {
-         name: name,
-         email: email,
-         password: password,
-         role: "user",
-      });
-
-
-      res.then(response => {
-        console.log("resRegister ", response);
+      axios({
+        method: "post",
+        url: `${API_BASE_URL}/authentication/register`, 
+        data: {
+          name: name,
+          email: email,
+          password: password
+        },
+      }).then(response => {
         if (response) {
         console.log("Register successful");
         setName("");
@@ -105,9 +95,7 @@ export default function RegisterUserView() {
         setPassowrd("");
         setConfirmPassword("");
 
-        const { id, name } = response;
-
-        localStorage.setItem("user", JSON.stringify({ id, name }));
+        localStorage.setItem("user", JSON.stringify({ token: response.token, name: response.name, id: response.id }));
 
         router.replace("/");
         

@@ -103,18 +103,19 @@ export default function VinesView() {
 
   const [alertNewNameGrape, setAlertNewNameGrape] = useState(false);
   const [alertNewTypeGrape, setAlertNewTypeGrape] = useState(false);
+  
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
       const initialize = async () => {
-        const user = JSON.parse(localStorage.getItem("user"));
         if (user === null ){
           Route.push("/login");
         }
-        user && fetchData(`users/${user.id}`).then((res) => {
+        user && fetchData(`users/${user.id}`, user.token).then((res) => {
           const { vines } = res;
           setVines({vines}.vines);
         })
-        fetchData(`grapes`).then((res) => {
+        fetchData(`grapes`, user.token).then((res) => {
           setGrapes(res);
         })
       }
@@ -247,7 +248,7 @@ export default function VinesView() {
       formData.append("areaGrapes", grapeTypeIds.length > 1 ? JSON.stringify(areaGrapes) : JSON.stringify(gp));
 
 
-      const res = postData("vines", formData);
+      const res = postData("vines", formData, user.token);
 
       res.then((response) => {
         if (response) {
@@ -264,7 +265,7 @@ export default function VinesView() {
           setOpen(false);
           handleClose();
 
-          fetchData(`users/${user.id}`).then((res) => {
+          fetchData(`users/${user.id}`, user.token).then((res) => {
             const { vines } = res;
             setVines({ vines }.vines);
           });
@@ -290,7 +291,7 @@ export default function VinesView() {
       const res = postData("grapes", {
         name: grapeNewName,
         type: grapeNewType
-     });
+     }, user.token);
 
       res.then((response) => {
         if (response) {
@@ -300,7 +301,7 @@ export default function VinesView() {
           setOpen1(false);
           handleClose1();
 
-          fetchData(`grapes`).then((res) => {
+          fetchData(`grapes`, user.token).then((res) => {
             setGrapes(res);
           });
         }

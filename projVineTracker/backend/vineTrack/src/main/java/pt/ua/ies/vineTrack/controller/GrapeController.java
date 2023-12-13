@@ -17,7 +17,7 @@ import pt.ua.ies.vineTrack.service.GrapeService;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping(path = "/grapes")
+@RequestMapping(path = "/api/grapes")
 public class GrapeController {
 
     @Autowired

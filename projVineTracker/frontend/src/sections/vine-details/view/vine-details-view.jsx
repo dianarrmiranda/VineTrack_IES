@@ -20,6 +20,9 @@ import { FormControl, useFormControlContext } from '@mui/base/FormControl';
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
+import { API_BASE_URL } from 'src/constants';
+
+
 // ----------------------------------------------------------------------
 
 export default function VineDetailsView() {
@@ -42,10 +45,11 @@ export default function VineDetailsView() {
 
   const [avgTempsByDay, setAvgTempsByDay] = useState([]);
   const [avgTempsByWeek, setAvgTempsByWeek] = useState([]);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const initialize = async () => {
-      const res = fetchData(`vines/${id}`);
+      const res = fetchData(`vines/${id}`, user.token );
 
       res.then((data) => {
         setVine(data);
@@ -62,7 +66,7 @@ export default function VineDetailsView() {
 
 
   useEffect(() => {
-    const res = fetchData(`vines/moisture/${id}`);
+    const res = fetchData(`vines/moisture/${id}`, user.token);
     res.then((response) => {
       if (response) {
         console.log("Moisture data fetched");
@@ -78,7 +82,7 @@ export default function VineDetailsView() {
       }
     });
 
-    fetchData(`vines/temperature/${id}`)
+    fetchData(`vines/temperature/${id}`, user.token)
       .then(response => {
         if (response) {
           console.log("Temperature data fetched");
@@ -96,7 +100,7 @@ export default function VineDetailsView() {
         }
       });
 
-    fetchData(`vines/weatherAlerts/${id}`)
+    fetchData(`vines/weatherAlerts/${id}`, user.token)
     .then(response => {
       if (response) {
         console.log("Weather Alerts data fetched");
@@ -116,10 +120,9 @@ export default function VineDetailsView() {
       }
     });
   
-    fetchData(`vines/avgTemperatureByDay/${id}`)
+    fetchData(`vines/avgTemperatureByDay/${id}`, user.token)
       .then(response => {
         if (response) {
-          console.log("Average Temperature data fetched");
 
           const labels = Object.keys(response);
           const values = Object.values(response);
@@ -131,10 +134,9 @@ export default function VineDetailsView() {
         }
     });
 
-    fetchData(`vines/avgTemperatureByWeek/${id}`)
+    fetchData(`vines/avgTemperatureByWeek/${id}`, user.token)
       .then(response => {
         if (response) {
-          console.log("Average Temperature data fetched");
 
           const labels = Object.keys(response);
           const values = Object.values(response);
@@ -165,7 +167,7 @@ export default function VineDetailsView() {
       setTempData([]);
       setCurrentDay(today);
     }
-    const ws = new SockJS(`${import.meta.env.VITE_APP_SERVER_URL}:8080/vt_ws`);
+    const ws = new SockJS(`${API_BASE_URL}/vt_ws`);
     const client = Stomp.over(ws);
     client.connect({}, function () {
       client.subscribe('/topic/update', function (data) {
@@ -179,10 +181,9 @@ export default function VineDetailsView() {
               setTempData(newtempData.sort((a, b) => Object.keys(b)[0] - Object.keys(a)[0]));
 
 
-              fetchData(`vines/avgTemperatureByDay/${id}`)
+              fetchData(`vines/avgTemperatureByDay/${id}`, user.token)
                 .then(response => {
                   if (response) {
-                    console.log("Average Temperature data fetched");
         
                     const labels = Object.keys(response);
                     const values = Object.values(response);
@@ -194,11 +195,9 @@ export default function VineDetailsView() {
                   }
               });
               
-              fetchData(`vines/avgTemperatureByWeek/${id}`)
+              fetchData(`vines/avgTemperatureByWeek/${id}`, user.token)
                 .then(response => {
                   if (response) {
-                    console.log("Average Temperature data fetched");
-        
                     const labels = Object.keys(response);
                     const values = Object.values(response);
         
@@ -267,13 +266,12 @@ export default function VineDetailsView() {
       // Validation passed, you can proceed with your form submission logic
       setErrorWaterLimit('');
       setWaterLimit(parseFloat(waterLimit));
-      console.log("Vine id: ", vineId);
       // pass the water limit to a double
       const newWaterLimit = parseFloat(waterLimit);
       console.log("Water limit in frontend updated to ", newWaterLimit);
       // Send data to backend
       if (vineId !== undefined && Number.isInteger(vineId)) {
-        const res = updateData(`vines/waterLimit/${vineId}`, { waterLimit: newWaterLimit }, {
+        const res = updateData(`vines/waterLimit/${vineId}`, { waterLimit: newWaterLimit }, user.token, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -372,7 +370,7 @@ export default function VineDetailsView() {
       // Validation passed, you can proceed with your form submission logic
       setError('');
       // Send data to backend
-      const res = postData(`vines/ph/${id}?value=${value}`);
+      const res = postData(`vines/ph/${id}?value=${value}`, "", user.token);
       res.then((response) => {
         if (response) {
           console.log("PH value added", response);
@@ -391,7 +389,7 @@ export default function VineDetailsView() {
           const allValuesValid = allValues.every((value, index) => {return value >= 2.9 && value <= 3.5});
           if (allValuesValid && newPhValues.length == 5) {
             // if they are, send notification
-            const res = postData(`vines/harvest/${id}`);
+            const res = postData(`vines/harvest/${id}`, "", user.token);
             res.then((response) => {
               if (response) {
                 console.log("Notification sent");
@@ -431,10 +429,7 @@ export default function VineDetailsView() {
     }
 
     if (production > 0 && production && dateProduction) {
-      const res = postData(`vines/production/${id}?value=${production}&date=${dateProduction}`);
-      console.log("p ", production);
-      console.log("d ", dateProduction);
-      console.log("res ", res);
+      const res = postData(`vines/production/${id}?value=${production}&date=${dateProduction}`, "", user.token);
       res.then((response) => {
         if (response) {
           console.log("Production value added", response);
@@ -507,7 +502,7 @@ export default function VineDetailsView() {
   // PH Values
   const [phValues, setPhValues] = useState([]);
   useEffect(() => {
-    fetchData(`vines/ph/${id}`)
+    fetchData(`vines/ph/${id}`, user.token)
       .then(response => {
         if (response) {
           console.log("PH Values data fetched");
@@ -522,7 +517,7 @@ export default function VineDetailsView() {
   // Water Consumption Weekly
   const [waterConsumptionWeekly, setWaterConsumptionWeekly] = useState([]);
   useEffect(() => {
-    fetchData(`vines/waterConsumptionWeek/${id}`)
+    fetchData(`vines/waterConsumptionWeek/${id}`, user.token)
       .then(response => {
         if (response) {
           console.log("Water Consumption Weekly data fetched");
@@ -536,7 +531,7 @@ export default function VineDetailsView() {
 
   // Water Consumption Weekly - websocket
   useEffect(() => {
-    const ws = new SockJS(`${import.meta.env.VITE_APP_SERVER_URL}:8080/vt_ws`);
+    const ws = new SockJS(`${API_BASE_URL}/vt_ws`);
     const client = Stomp.over(ws);
     client.connect({}, function () {
       client.subscribe('/topic/waterConsumptionWeek', function (data) {
@@ -553,8 +548,9 @@ export default function VineDetailsView() {
   , [id, waterConsumptionWeekly]);
 
   // Water Consumption Limit
+  console.log("Water Consumption Limit: ", vineId);
   useEffect(() => {
-    fetchData(`vines/waterLimit/${vineId}`)
+    fetchData(`vines/waterLimit/${id}`, user.token)
       .then(response => {
         if (response) {
           console.log("Water Consumption Limit data fetched");

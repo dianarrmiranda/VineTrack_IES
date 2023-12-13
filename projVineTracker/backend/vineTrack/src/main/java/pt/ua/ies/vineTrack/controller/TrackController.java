@@ -14,7 +14,7 @@ import pt.ua.ies.vineTrack.service.TrackService;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping(path = "/tracks")
+@RequestMapping(path = "/api/tracks")
 public class TrackController {
 
     @Autowired

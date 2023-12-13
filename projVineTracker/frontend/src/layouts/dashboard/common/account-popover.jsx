@@ -57,7 +57,7 @@ export default function AccountPopover() {
   useEffect(() => {
     const initialize = async () => {
       const user = JSON.parse(localStorage.getItem("user"));
-      user && fetchData(`users/${user.id}`).then((res) => {
+      user && fetchData(`users/${user.id}`, user.token).then((res) => {
         const { id, name, role } = res;
         setUserInfo({ id, name, role });
       })
