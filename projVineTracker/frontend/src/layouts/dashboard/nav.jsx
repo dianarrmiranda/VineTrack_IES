@@ -38,7 +38,7 @@ export default function Nav({ openNav, onCloseNav }) {
       if (user === null ){
         Route.push("/login");
       }
-      user && fetchData(`users/${user.id}`).then((res) => {
+      user && fetchData(`users/${user.id}`, user.token).then((res) => {
         const { id, name, role } = res;
         setUserInfo({ id, name, role });
       })

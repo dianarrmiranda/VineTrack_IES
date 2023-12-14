@@ -12,16 +12,23 @@ import { fetchData } from "src/utils";
 
 export default function AppView() {
 
-  const [userInfo, setUserInfo] = useState({});
+const [userInfo, setUserInfo] = useState({});
 
   useEffect(() => {
-    const initialize =  async () => {
+    const initialize = async () => {
       const user = JSON.parse(localStorage.getItem("user"));
-      user &&
-        fetchData(`users/${user.id}`).then((res) => {
+      if (user) {
+        const res = await fetchData(`users/${user.id}`, user.token);
+        if (res) {
           const { id, name, role } = res;
-          setUserInfo({ id, name, role });
-        });
+          const token = user.token;
+          setUserInfo({ id, name, role, token });
+        } else {
+          console.log('Failed to fetch user data');
+        }
+      } else {
+        console.log('No user data in local storage');
+      }
     };
     initialize();
   }, []);
@@ -30,7 +37,9 @@ export default function AppView() {
   const [vineIds, setVineIds] = useState([]);
   useEffect(() => {
     const initialize = async () => {
-      const vineIds = await fetchData(`users/vines/${userInfo.id}`);
+      if (!userInfo.id) return;
+      const vineIds = await fetchData(`users/vines/${userInfo.id}`, userInfo.token);
+
       setVineIds(vineIds);
     };
     initialize();
@@ -44,8 +53,9 @@ export default function AppView() {
       // waterConsumption is a map of vinName: waterConsumptionValue
       const waterConsumption = {};
       for (const vineId of vineIds) {
-        const vineName = await fetchData(`vines/name/${vineId}`);
-        const vineWaterConsumption = await fetchData(`vines/waterConsumption/${vineId}`);
+        if (!vineId) continue;
+        const vineName = await fetchData(`vines/name/${vineId}`, userInfo.token);
+        const vineWaterConsumption = await fetchData(`vines/waterConsumption/${vineId}`, userInfo.token);
         waterConsumption[vineName] = vineWaterConsumption;
       }
       setWaterConsumption(waterConsumption);
@@ -78,8 +88,9 @@ export default function AppView() {
     const initialize = async () => {
       const vineProduction = {};
       for (const vineId of vineIds) {
-        const vineName = await fetchData(`vines/name/${vineId}`);
-        const production = await fetchData(`vines/production/${vineId}`);
+        if (!vineId) continue;
+        const vineName = await fetchData(`vines/name/${vineId}`, userInfo.token);
+        const production = await fetchData(`vines/production/${vineId}`, userInfo.token);
      
         vineProduction[vineName] = production;
 
@@ -108,16 +119,24 @@ export default function AppView() {
   const [areaGrapes, setAreaGrapes] = useState([]);
   useEffect(() => {
     const initialize = async () => {
-      const grapes = await fetchData(`vines/areaGrapes/`);
-
-      const areaGrapesList = Object.entries(grapes).map(([label, value]) => ({ label, value }));
-
-      setAreaGrapes(areaGrapesList);
+      if (!vineIds || vineIds.length === 0) {
+        console.log('Vine IDs not available');
+        return;
+      }
+  
+      const grapes = await fetchData(`vines/areaGrapes/`, userInfo.token);
+  
+      if (grapes) {
+        const areaGrapesList = Object.entries(grapes).map(([label, value]) => ({ label, value }));
+        console.log("GRAPESS");
+        setAreaGrapes(areaGrapesList);
+      } else {
+        console.log('Failed to fetch area grapes data');
+      }
     };
-
+  
     initialize();
   }, [vineIds]);
-
 
   return (
     <Container maxWidth="xl">

@@ -15,7 +15,7 @@ import ListSubheader from '@mui/material/ListSubheader';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 
-import { fetchData, postData, updateData } from 'src/utils';
+import { fetchData } from 'src/utils';
 import { fToNow } from 'src/utils/format-time';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -24,6 +24,7 @@ import Scrollbar from 'src/components/scrollbar';
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
 import axios from "axios";
+import { API_BASE_URL } from 'src/constants';
 
 // ----------------------------------------------------------------------
 
@@ -38,15 +39,14 @@ export default function NotificationsPopover() {
   const handleToggleNotifications = () => {
     setShowAllNotifications(!showAllNotifications);
   };
-  
+      
 
   const user = JSON.parse(localStorage.getItem('user'));
-  console.log(user.id);
   const [image, setImage] = useState(null);
 
   useEffect(() => {
     const init = async () => {
-        const res = await fetchData(`users/notifications/${user.id}`);
+        const res = await fetchData(`users/notifications/${user.id}`, user.token);
         console.log("Notifications fetched");
         const notifications = res;
         console.log("Notification: ", notifications);
@@ -54,8 +54,13 @@ export default function NotificationsPopover() {
         for (const notification of notifications) {
           // get notification's avatar
 
-          const image = await axios.get(`${import.meta.env.VITE_APP_SERVER_URL}:8080/vines/notificationImage/${notification.id}`, {
+          const image = await axios({
+            method: "get",
+            url: `${API_BASE_URL}/vines/notificationImage/${notification.id}`,
             responseType: 'arraybuffer',
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
           })
           .then((response) => {
             let image = btoa(
@@ -65,14 +70,14 @@ export default function NotificationsPopover() {
             return `data:;base64,${image}`;
           });
 
-          // console.log("Notification Teste: ",notification);
           notificationsData.push({
-            id: notification.id,
-            title: await fetchData(`vines/name/${notification.vineId}`),
+            id: String(notification.id),
+            vineId: notification.vineId,
+            title: await fetchData(`vines/name/${notification.vineId}`, user.token),
             description: notification.description,
             type: '',
             isUnRead: notification.isUnRead,
-            createdAt: notification.date,
+            createdAt: new Date(notification.date),
             avatar: image,
           });
         }
@@ -94,17 +99,21 @@ export default function NotificationsPopover() {
   // websocket
   const [latestNotification, setLatestNotification] = useState(null);
   useEffect(() => {
-    const ws = new SockJS(`${import.meta.env.VITE_APP_SERVER_URL}:8080/vt_ws`);
+    const ws = new SockJS(`${API_BASE_URL}/vt_ws`);
     const client = Stomp.over(ws);
 
     const onMessageReceived = async (data) => {
       const newNotification = JSON.parse(data.body);
-      console.log("New Notification in JSON: ", newNotification);
 
       // Check if the id is defined before processing the notification
       // if (newNotification.id !== undefined) {
-        const image = await axios.get(`${import.meta.env.VITE_APP_SERVER_URL}:8080/vines/notificationImage/${newNotification.id}`, {
+        const image = await axios({
+          method: "get",
+          url: `${API_BASE_URL}/vines/notificationImage/${newNotification.id}`,
           responseType: 'arraybuffer',
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
         })
         .then((response) => {
           let image = btoa(
@@ -115,20 +124,17 @@ export default function NotificationsPopover() {
         });
 
         const newFormattedNotification = {
-          id: newNotification.id,
+          id: String(newNotification.id),
           vineId: newNotification.vineId,
-          title: await fetchData(`vines/name/${newNotification.vineId}`),
+          title: await fetchData(`vines/name/${newNotification.vineId}`, user.token),
           description: newNotification.description,
           type: '',
           isUnRead: newNotification.isUnRead,
-          createdAt: newNotification.date,
+          createdAt: new Date(newNotification.date),
           avatar: image,
         };
 
         setLatestNotification(newFormattedNotification);
-        console.log("New Notification: ", newFormattedNotification);
-
-        console.log("Notifications: ", notifications);
 
         // from notifications list get the ones that are read
         setReadNotifications(notifications.filter((notification) => !notification.isUnRead));
@@ -143,6 +149,7 @@ export default function NotificationsPopover() {
             // if its in the read list, remove it from there
             // console.log("Descpription: ", newFormattedNotification.description);
             console.log("Notifications Read: ", readNotifications);
+            console.log("Notifications Unread: ", unreadNotifications);
             if (readNotifications.some((notification) => ((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))) {
               setReadNotifications((prevRead) =>
                 prevRead.filter((notification) => !((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))
@@ -157,7 +164,6 @@ export default function NotificationsPopover() {
 
             // check if the notification is already in the unread list
             if (prevUnread.some((notification) => ((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))) {
-              console.log("IT WENT HERE");
               return prevUnread;
             }
 
@@ -213,22 +219,30 @@ export default function NotificationsPopover() {
   };
 
   const markNotificationAsRead = (notificationId) => {
-    updateData(`users/markAsRead/${notificationId}`, null);
 
-    setTotalUnRead((prevTotal) => prevTotal - 1);
-
-    setNotifications((prevNotifications) =>
-      prevNotifications.map((notification) =>
-        notification.id === notificationId ? { ...notification, isUnRead: false } : notification
-      )
-    );
-
-
-
-    setReadNotifications((prevRead) => [
-      unreadNotifications.find((notification) => notification.id === notificationId),
-      ...prevRead,
-    ]);
+    if (notifications.some((notification) => notification.id === notificationId ) && notifications.find((notification) => notification.id === notificationId ).isUnRead) {
+      axios({
+        method: "put",
+        url: `${API_BASE_URL}/users/markAsRead/${notificationId}`,
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      })
+      setTotalUnRead((prevTotal) => prevTotal - 1);
+  
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) =>
+          notification.id === notificationId ? { ...notification, isUnRead: false } : notification
+        )
+      );
+  
+  
+  
+      setReadNotifications((prevRead) => [
+        unreadNotifications.find((notification) => notification.id === notificationId),
+        ...prevRead,
+      ]);
+    }
   };
 
   return (

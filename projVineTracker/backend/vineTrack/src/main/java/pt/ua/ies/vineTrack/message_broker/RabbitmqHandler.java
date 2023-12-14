@@ -39,7 +39,6 @@ public class RabbitmqHandler {
     private TrackService trackService;
 
     private static final int MAX_NOTIFICATIONS = 10;
-    private static final double MAX_WATER_CONSUMPTION = 0.95; // max of 0.95L per m^2 per day
 
     @RabbitListener(queues = Config.QUEUE_NAME)
     public void receiveMessage(String message) {
@@ -144,7 +143,6 @@ public class RabbitmqHandler {
                     this.template.convertAndSend("/topic/waterConsumptionWeek", waterConsumptionWeekJson.toString());
 
                     // check if water consumption is above the limit
-                    double vineSize = vine.getSize();
                     double waterConsumptionLimit = vine.getMaxWaterConsumption();
 
                     // if water consumption is above the limit, send notification

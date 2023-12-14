@@ -12,6 +12,9 @@ import { Button, IconButton, Modal, Typography } from "@mui/material";
 import Iconify from "src/components/iconify";
 import { deleteData, fetchData } from "src/utils";
 
+import { API_BASE_URL } from 'src/constants';
+
+
 // ----------------------------------------------------------------------
 
       ////{vine.colors.length > 0 && (
@@ -30,8 +33,14 @@ export default function VineCard({ vine, setVines}) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_APP_SERVER_URL}:8080/vines/image/${vine.id}`, {
+    axios({
+      method: "get",
+      url: `${API_BASE_URL}/vines/image/${vine.id}`,
       responseType: 'arraybuffer',
+      headers: {
+        Authorization: `Bearer ${JSON.parse(localStorage.getItem("user")).token}`,
+      },
+    
     })
     .then((response) => {
       let image = btoa(
@@ -92,12 +101,11 @@ export default function VineCard({ vine, setVines}) {
   const handleClose = () => setOpen(false);
 
   const handleDelete = () => {
-    const res = deleteData(`vines/${vine.id}`);
+    const user = JSON.parse(localStorage.getItem("user"));
+    const res = deleteData(`vines/${vine.id}`, user.token);
     res.then((data) => {
-      console.log(data);
       console.log(`Vine ${vine.id} deleted!`);
-      const user = JSON.parse(localStorage.getItem("user"));
-      fetchData(`users/${user.id}`).then((res) => {
+      fetchData(`users/${user.id}`, user.token).then((res) => {
         const { vines } = res;
         setVines({vines}.vines);
       });
