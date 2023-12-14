@@ -83,14 +83,14 @@ export default function VineDetailsView() {
     .then(response => {
       if (response) {
         console.log("Nutrients data fetched");
-        console.log("Res: "+ response); // é da mesma estrutura de dados que nutrientsData2
-        // nutrients is a list of doubles
-        const nutrients = response;
-        const nutrientsData = nutrients.map((value, index) => {
-          return value;
-        });
+        // console.log("Res: "+ response); // é da mesma estrutura de dados que nutrientsData2
+        // // nutrients is a list of doubles
+        // const nutrients = response;
+        // const nutrientsData = nutrients.map((value, index) => {
+        //   return value;
+        // });
         const nutrientsData2 = [2,2,2,3] // remove this data for the generated one
-        setNutrientsData(nutrientsData);
+        setNutrientsData(nutrientsData2);
       } else {
         console.log("Nutrients data failed");
       }
@@ -670,20 +670,21 @@ export default function VineDetailsView() {
         <Grid xs={12} md={6} lg={4}>
           <AppNutritionChart
             title="Nutrition Values"
-            chart={{
-              series: nutrientsData,
-            }}
+            // chart={{
+            //   series: nutrientsData,
+            // }}
               // labels: ["Nitrogen", "Phosphorus", "Potassium","Calcium" ,"Magnesium","Chloride"],
               // series: [{
               //   data: nutrientsData, 
               // }               
               // ],
-              //   series: [
-              //   { label: "Nitrogen (N)", value: nutrientsData[0] },
-              //   { label: "Phosphorus (P)", value: nutrientsData[1] },
-              //   { label: "Potassium (K)", value: nutrientsData[2] },
-              //   { label: "Magnesium (Mg)", value: nutrientsData[3] },  
-              // ],
+              chart={{
+                series: [
+                { label: "Nitrogen (N)", value: nutrientsData[0] },
+                { label: "Phosphorus (P)", value: nutrientsData[1] },
+                { label: "Potassium (K)", value: nutrientsData[2] },
+                { label: "Magnesium (Mg)", value: nutrientsData[3] },  
+              ], }}
           />
         </Grid>
 
