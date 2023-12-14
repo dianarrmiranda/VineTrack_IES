@@ -271,7 +271,7 @@ export default function VineDetailsView() {
     console.log("Handling water limit update...")
 
     if (!waterLimit) {
-      setErrorWaterLimit('Value cannot be empty');
+      setErrorWaterLimit('Value cannot be empty or zero');
     } else if (parseFloat(waterLimit) < 0) {
       setErrorWaterLimit('Value must be positive');
     } else if (isNaN(parseFloat(waterLimit))) {
@@ -492,8 +492,16 @@ export default function VineDetailsView() {
 
   const handleInputChangeWaterLimit = (e) => {
     const newValue = e.target.value;
-    setWaterLimit(parseFloat(newValue));
-    setErrorWaterLimit(''); // Clear error message on input change
+    // if the value is empty, set it to 0
+    if (newValue == '')  { 
+      setWaterLimit(0);
+      setErrorWaterLimit('');
+    }
+
+    else {
+      setWaterLimit(parseFloat(newValue));
+      setErrorWaterLimit(''); // Clear error message on input change
+    }
   };
 
   const renderFormWaterLimit = (
