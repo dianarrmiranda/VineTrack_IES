@@ -68,6 +68,7 @@ export default function NotificationsPopover() {
           // console.log("Notification Teste: ",notification);
           notificationsData.push({
             id: notification.id,
+            vineId: notification.vineId,
             title: await fetchData(`vines/name/${notification.vineId}`),
             description: notification.description,
             type: '',
@@ -143,6 +144,7 @@ export default function NotificationsPopover() {
             // if its in the read list, remove it from there
             // console.log("Descpription: ", newFormattedNotification.description);
             console.log("Notifications Read: ", readNotifications);
+            console.log("Notifications Unread: ", unreadNotifications);
             if (readNotifications.some((notification) => ((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))) {
               setReadNotifications((prevRead) =>
                 prevRead.filter((notification) => !((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))
