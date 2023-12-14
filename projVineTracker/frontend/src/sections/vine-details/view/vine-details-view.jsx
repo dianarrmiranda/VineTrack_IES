@@ -28,7 +28,7 @@ export default function VineDetailsView() {
   const [vine, setVine] = useState({});
   
   const [moistureData, setMoistureData] = useState(null);
-  const [nutrientsData, setNutrientsData] = useState(null);
+  const [nutrientsData, setNutrientsData] = useState([0, 0, 0, 0, 0, 0]);
   const [tempData, setTempData] = useState([]);
   const [weatherAlertsData, setWeatherAlertsData] = useState([]);
 
@@ -83,14 +83,13 @@ export default function VineDetailsView() {
     .then(response => {
       if (response) {
         console.log("Nutrients data fetched");
-        // console.log("Res: "+ response); // é da mesma estrutura de dados que nutrientsData2
-        // // nutrients is a list of doubles
-        // const nutrients = response;
-        // const nutrientsData = nutrients.map((value, index) => {
-        //   return value;
-        // });
-        const nutrientsData2 = [2,2,2,3] // remove this data for the generated one
-        setNutrientsData(nutrientsData2);
+
+        // nutrients is a list of doubles
+        const nutrients = response;
+        const nutrientsData = nutrients.map((value, index) => {
+          return value;
+        });
+        setNutrientsData(nutrientsData);
       } else {
         console.log("Nutrients data failed");
       }
@@ -239,11 +238,9 @@ export default function VineDetailsView() {
             setMoistureData(newMoistureData);
           }
           if (JSON.parse(data.body).sensor == "nutrients") {
-            const newNutrientsData = [...nutrientsData];
-            newNutrientsData.shift();
-            newNutrientsData.push(JSON.parse(data.body).value);
+            const newNutrientsData = JSON.parse(data.body).value;
             console.log("New nutrients data: ", newNutrientsData);
-            setMoistureData(newNutrientsData);
+            setNutrientsData(newNutrientsData);
           }
           if (JSON.parse(data.body).sensor == "weatherAlerts") {
             console.log("New weather alert: ", JSON.parse(data.body).value);
@@ -666,25 +663,19 @@ export default function VineDetailsView() {
             }}
           />
         </Grid>
-
         <Grid xs={12} md={6} lg={4}>
           <AppNutritionChart
             title="Nutrition Values"
-            // chart={{
-            //   series: nutrientsData,
-            // }}
-              // labels: ["Nitrogen", "Phosphorus", "Potassium","Calcium" ,"Magnesium","Chloride"],
-              // series: [{
-              //   data: nutrientsData, 
-              // }               
-              // ],
-              chart={{
-                series: [
-                { label: "Nitrogen (N)", value: nutrientsData[0] },
-                { label: "Phosphorus (P)", value: nutrientsData[1] },
-                { label: "Potassium (K)", value: nutrientsData[2] },
-                { label: "Magnesium (Mg)", value: nutrientsData[3] },  
-              ], }}
+            chart={{
+              series: [
+                 { label: "Calcium (Ca)", value: nutrientsData[0] },
+                { label: "Magnesium (Mg)", value: nutrientsData[1] },
+                { label: "Chloride (Cl)", value: nutrientsData[2] },
+                { label: "Nitrogen (N)", value: nutrientsData[3] },
+                { label: "Potassium (K)", value: nutrientsData[4] },
+                { label: "Phosphorus (P)", value: nutrientsData[5] },
+              ],
+            }}
           />
         </Grid>
 
