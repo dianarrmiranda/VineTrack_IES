@@ -19,8 +19,9 @@ import { bgGradient } from "src/theme/css";
 
 import Logo from "src/components/logo";
 import Iconify from "src/components/iconify";
-import { fetchData } from "src/utils";
 import { Alert } from "@mui/material";
+import { API_BASE_URL } from "src/constants";
+import axios from "axios";
 
 // ----------------------------------------------------------------------
 
@@ -44,15 +45,16 @@ export default function LoginView() {
   const handleClick = async(event) => {
     event.preventDefault();
     try {
-      const res = fetchData(`users/login/${email}/${password}`);
-      res.then((response) => {
+      await axios.post(`${API_BASE_URL}/authentication/login`,{
+        email: email,
+        password: password
+      }).then((response) => {
         if (response) {
           console.log("Login successful");
           setEmail("");
           setPassowrd("");
           setAlertFail(false);
-          const { id, name } = response;
-          localStorage.setItem("user", JSON.stringify({ id, name }));
+          localStorage.setItem("user", JSON.stringify({ token: response.data.token, name: response.data.name, id: response.data.id }));
           router.push("/");
         }else{
           console.log("Login failed");

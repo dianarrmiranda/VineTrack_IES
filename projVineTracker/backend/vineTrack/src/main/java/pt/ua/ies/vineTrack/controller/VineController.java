@@ -23,6 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.RequiredArgsConstructor;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.text.DecimalFormat;
@@ -39,7 +42,8 @@ import java.sql.Date;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping(path = "/vines")
+@RequestMapping(path = "/api/vines")
+@RequiredArgsConstructor
 public class VineController {
     @Autowired
     private VineService vineService;

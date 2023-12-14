@@ -1,8 +1,13 @@
 package pt.ua.ies.vineTrack.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import pt.ua.ies.vineTrack.repository.UserRepo;
 import pt.ua.ies.vineTrack.entity.User;
 
@@ -12,9 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-
 @Service
-public class UserService {
+@AllArgsConstructor
+public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepo userRepo;
@@ -24,8 +29,8 @@ public class UserService {
     
     public User save(User user){
         //Check if user already exists
-        User existingUser = userRepo.findByEmail(user.getEmail());
-        if(existingUser != null){
+        User existingUser = userRepo.findByEmail(user.getEmail()).orElse(null);
+        if(existingUser == null){
             return null;
         }
         return userRepo.save(user);
@@ -39,16 +44,9 @@ public class UserService {
         return userRepo.findAll();
     }
 
-    public User loginUser(String email, String password){
-        User user = userRepo.findByEmail(email);
-        if(user.getPassword().equals(password)){
-            return user;
-        }
-        return null;
-    }
 
-    public User getUserByEmail(String email){
-        return userRepo.findByEmail(email);
+    public  User getUserByEmail(String email){
+        return userRepo.findByEmail(email).orElse(null);
     }
 
     public String deleteUserById(Integer id){
@@ -95,5 +93,12 @@ public class UserService {
         }
         return vinesIds;
     }
+
+    @Override
+    @Transactional
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return userRepo.findByEmail(email).orElseThrow(() ->
+                new UsernameNotFoundException("User Not Found with email: " + email));
+    }
     
-}
+    }

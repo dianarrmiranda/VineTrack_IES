@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping(path = "/users")
+@RequestMapping(path = "/api/users")
 @ResponseStatus(HttpStatus.OK)
 public class UserController {
     @Autowired
@@ -38,7 +38,7 @@ public class UserController {
     @GetMapping()
     public ResponseEntity<List<User>> getAllUsers(){
         try {
-            return ResponseEntity.ok(userService.getAllUsers());
+                        return ResponseEntity.ok(userService.getAllUsers());
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
@@ -46,26 +46,18 @@ public class UserController {
 
     @PostMapping()
     public ResponseEntity<User> addUser(@Valid @RequestBody User user){
-        return ResponseEntity.ok(userService.save(user));
+                return ResponseEntity.ok(userService.save(user));
     }
 
     @GetMapping(path = "/{id}")
     public ResponseEntity<User> viewUser(@PathVariable Integer id){
         try {
             return ResponseEntity.ok(userService.getUserById(id));
-        } catch (Exception e) {
+                    } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
     
-    @GetMapping(path = "/login/{email}/{password}")
-    public ResponseEntity<User> loginUser(@PathVariable String email, @PathVariable String password){
-        try {
-            return ResponseEntity.ok(userService.loginUser(email, password));
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
 
     @GetMapping(path = "/email/{email}")
     public ResponseEntity<User> viewUser(@PathVariable String email){
