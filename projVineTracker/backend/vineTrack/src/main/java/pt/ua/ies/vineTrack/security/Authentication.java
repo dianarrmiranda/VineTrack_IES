@@ -60,6 +60,8 @@ public class Authentication {
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/vt_ws/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/authentication/**").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/api-docs/**").permitAll()
                         .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());
