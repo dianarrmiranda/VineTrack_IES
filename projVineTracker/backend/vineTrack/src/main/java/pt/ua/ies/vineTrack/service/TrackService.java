@@ -49,6 +49,12 @@ public class TrackService {
                     tracks.remove(0);
                 }
             }
+            case "nutrients" -> {
+                while (tracks.size() > 6) {
+                    trackRepo.delete(tracks.get(0));
+                    tracks.remove(0);
+                }
+            }
             case "weatherAlerts" -> {
                 while (tracks.size() > 1) {
                     trackRepo.delete(tracks.get(0));

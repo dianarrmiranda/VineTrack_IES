@@ -10,6 +10,8 @@ import pt.ua.ies.vineTrack.entity.Notification;
 import pt.ua.ies.vineTrack.entity.Track;
 import pt.ua.ies.vineTrack.entity.User;
 import pt.ua.ies.vineTrack.entity.Vine;
+import pt.ua.ies.vineTrack.entity.Nutrient;
+import pt.ua.ies.vineTrack.service.NutrientService;
 import pt.ua.ies.vineTrack.service.GrapeService;
 import pt.ua.ies.vineTrack.service.NotificationService;
 import pt.ua.ies.vineTrack.service.TrackService;
@@ -38,6 +40,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @CrossOrigin("*")
@@ -55,6 +59,8 @@ public class VineController {
     private TrackService trackService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private NutrientService nutrientService;
     @Autowired
     private SimpMessagingTemplate template; // for sending messages to the client through websocket
 
@@ -90,6 +96,25 @@ public class VineController {
         }
         System.out.println("Vine: " + vineId + " - " + "Moisture: " + moistureValues);
         return moistureValues;
+    }
+
+    @GetMapping(path = "/nutrients/{vineId}")
+    public Map<String, Double> getNutrientsByVineId(@PathVariable int vineId){
+         List<Nutrient> Nutrients = nutrientService.getNutrientsByVineId(vineId);
+
+         // finally we need to get only the moisture values
+         Map<String, Double> nutrientsValues = Nutrients.stream()
+         .flatMap(nutrient -> Stream.of(
+             new AbstractMap.SimpleEntry<>("Nitrogen", nutrient.getNitrogen()),
+             new AbstractMap.SimpleEntry<>("Phosphorus", nutrient.getPhosphorus()),
+             new AbstractMap.SimpleEntry<>("Potassium", nutrient.getPotassium()),
+             new AbstractMap.SimpleEntry<>("Calcium", nutrient.getCalcium()),
+             new AbstractMap.SimpleEntry<>("Magnesium", nutrient.getMagnesium()),
+             new AbstractMap.SimpleEntry<>("Chloride", nutrient.getChloride())
+         ))
+         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+         return nutrientsValues;
     }
 
     @GetMapping(path = "/temperature/{vineId}")
@@ -362,6 +387,16 @@ public class VineController {
             Track track1 = new Track("moisture", LocalDateTime.now(), 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
             trackService.saveTrack(track1);
             trackService.saveTrack(track2);
+
+/*            Track track4 = new Track("nutrients", now, 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
+            Track track3 = new Track("nutrients", LocalDateTime.now(), 0.0, vine, now.toLocalTime().toString(), now.toLocalDate().toString());
+            trackService.saveTrack(track3);
+            trackService.saveTrack(track4);*/
+            Nutrient nutrient = new Nutrient(vine, 1.6,0.18,0.65,1.2,0.23,0.3);
+            nutrientService.saveNutrient(nutrient);
+
+            Nutrient nutrient2 = new Nutrient(vine,1.6,0.14,0.65,1.2,0.16,0.3);
+            nutrientService.saveNutrient(nutrient2);
 
             if (!img.isEmpty()){
                 try {

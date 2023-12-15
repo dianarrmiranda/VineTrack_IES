@@ -47,6 +47,7 @@ export default function VineDetailsView() {
   const [vine, setVine] = useState({});
   
   const [moistureData, setMoistureData] = useState([]);
+  const [nutrientsData, setNutrientsData] = useState([]);
   const [tempData, setTempData] = useState([]);
   const [weatherAlertsData, setWeatherAlertsData] = useState([]);
 
@@ -94,6 +95,26 @@ export default function VineDetailsView() {
         setMoistureData(moistureData);
       } else {
         console.log("Moisture data failed");
+      }
+    });
+
+    //{"id": 1, "sensor": "nutrients", "phase": 1, "value": {"Nitrogen": 0.09, "Phosphorus": 0, "Potassium": 0.6799999999999999, "Calcium": 1.15, "Magnesium": 0.0, "Chloride": 0.12}}
+    fetchData(`vines/nutrients/${id}`, user.token)
+    .then(response => {
+      if (response) {
+        console.log("Nutrients data fetched");
+
+        // nutrients is a list of doubles
+        const series = Object.values(response).map((value, index) => {
+          return {
+            label: Object.keys(response)[index],
+            value: value
+          };
+        });
+
+        setNutrientsData(series);
+      } else {
+        console.log("Nutrients data failed");
       }
     });
 
@@ -233,6 +254,16 @@ export default function VineDetailsView() {
             console.log("New moisture data: ", newMoistureData);
             setMoistureData(newMoistureData);
           }
+          if (JSON.parse(data.body).sensor == "nutrients") {
+            const newNutrientsData = JSON.parse(data.body).value;
+            const series = Object.values(newNutrientsData).map((value, index) => {
+              return {
+                label: Object.keys(newNutrientsData)[index],
+                value: value
+              };
+            });
+            setNutrientsData(series);
+          }
           if (JSON.parse(data.body).sensor == "weatherAlerts") {
             console.log("New weather alert: ", JSON.parse(data.body).value);
             
@@ -256,9 +287,10 @@ export default function VineDetailsView() {
       });
     });
   }
-  , [id, moistureData, tempData, weatherAlertsData]);
+  , [moistureData, nutrientsData, tempData, weatherAlertsData]);
 
   console.log("Moisture", moistureData);
+  console.log("Nutrients", nutrientsData);
   console.log("Temperature", tempData);
   console.log("Latest value: ", latestValue);
   console.log("Weather Alerts: ", weatherAlertsData);
@@ -664,17 +696,11 @@ export default function VineDetailsView() {
             }}
           />
         </Grid>
-
         <Grid xs={12} md={6} lg={4}>
           <AppNutritionChart
             title="Nutrition Values"
             chart={{
-              series: [
-                { label: "Nitrogen (N)", value: 48.0 },
-                { label: "Phosphorus (P)", value: 11.3 },
-                { label: "Potassium (K)", value: 21.3 },
-                { label: "Magnesium (Mg)", value: 19.5 },
-              ],
+              series: nutrientsData,
             }}
           />
         </Grid>

@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import pt.ua.ies.vineTrack.entity.Nutrient;
 import pt.ua.ies.vineTrack.entity.Track;
 import pt.ua.ies.vineTrack.entity.Vine;
 import pt.ua.ies.vineTrack.entity.Notification;
+import pt.ua.ies.vineTrack.service.NutrientService;
 import pt.ua.ies.vineTrack.service.TrackService;
 import pt.ua.ies.vineTrack.service.VineService;
 import pt.ua.ies.vineTrack.service.NotificationService;
@@ -27,6 +29,8 @@ public class RabbitmqHandler {
     private SimpMessagingTemplate template; // for sending messages to the client through websocket
     @Autowired
     private VineService vineService;
+    @Autowired
+    private NutrientService nutrientService;
 
     @Autowired
     private NotificationService notificationService;
@@ -42,6 +46,7 @@ public class RabbitmqHandler {
         
         JSONObject params = new JSONObject(message);
         String type = params.getString("sensor");
+        System.out.println("Tipo de sensor:"+ type);
 
         switch (type) {
             case "moisture":
@@ -327,6 +332,22 @@ public class RabbitmqHandler {
                     }
 
                 }
+                break;
+            case "nutrients":
+
+                int vineId4 = params.getInt("id");
+                Vine vine4 = vineService.getVineById(vineId4);
+                JSONObject nutrientValues = params.getJSONObject("value");
+                Double N = nutrientValues.getDouble("Nitrogen");
+                Double Ph = nutrientValues.getDouble("Phosphorus");
+                Double K = nutrientValues.getDouble("Potassium");
+                Double Ca = nutrientValues.getDouble("Calcium");
+                Double Mg = nutrientValues.getDouble("Magnesium");
+                Double Cl = nutrientValues.getDouble("Chloride");
+
+                Nutrient nutrient = new Nutrient(vine4,N,Ph,K,Ca,Mg,Cl);
+                this.template.convertAndSend("/topic/update", message);
+                nutrientService.saveNutrient(nutrient);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + type);

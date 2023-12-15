@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.ArrayList;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -56,8 +57,6 @@ public class Vine {
     private SortedMap<String, Double> productionLiters = new TreeMap<>();   
     @ElementCollection
     private Map<String, Double> areaGrapes = new TreeMap<>();
-
-
 
     public Integer getId(){
         return id;
@@ -187,5 +186,7 @@ public class Vine {
     public String toString() {
         return name;
     }
+
+    // }
 
 }
