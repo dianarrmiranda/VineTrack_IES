@@ -98,23 +98,8 @@ export default function VineDetailsView() {
       }
     });
 
+    //{"id": 1, "sensor": "nutrients", "phase": 1, "value": {"Nitrogen": 0.09, "Phosphorus": 0, "Potassium": 0.6799999999999999, "Calcium": 1.15, "Magnesium": 0.0, "Chloride": 0.12}}
     fetchData(`vines/nutrients/${id}`, user.token)
-    .then(response => {
-      if (response) {
-        console.log("Nutrients data fetched");
-
-        // nutrients is a list of doubles
-        const nutrients = response;
-        const nutrientsData = nutrients.map((value, index) => {
-          return value;
-        });
-        setNutrientsData(nutrientsData);
-      } else {
-        console.log("Nutrients data failed");
-      }
-    });
-
-    fetchData(`vines/nutrients/${id}`)
     .then(response => {
       if (response) {
         console.log("Nutrients data fetched");

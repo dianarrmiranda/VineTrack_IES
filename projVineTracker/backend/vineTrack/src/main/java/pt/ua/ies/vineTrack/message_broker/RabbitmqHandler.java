@@ -334,6 +334,7 @@ public class RabbitmqHandler {
                 }
                 break;
             case "nutrients":
+
                 int vineId4 = params.getInt("id");
                 Vine vine4 = vineService.getVineById(vineId4);
                 JSONObject nutrientValues = params.getJSONObject("value");
@@ -345,7 +346,8 @@ public class RabbitmqHandler {
                 Double Cl = nutrientValues.getDouble("Chloride");
 
                 Nutrient nutrient = new Nutrient(vine4,N,Ph,K,Ca,Mg,Cl);
-                 nutrientService.saveNutrient(nutrient);
+                this.template.convertAndSend("/topic/update", message);
+                nutrientService.saveNutrient(nutrient);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + type);
