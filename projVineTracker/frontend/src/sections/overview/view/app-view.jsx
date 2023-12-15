@@ -127,7 +127,6 @@ const [userInfo, setUserInfo] = useState({});
   
       if (grapes) {
         const areaGrapesList = Object.entries(grapes).map(([label, value]) => ({ label, value }));
-        console.log("GRAPESS");
         setAreaGrapes(areaGrapesList);
       } else {
         console.log('Failed to fetch area grapes data');

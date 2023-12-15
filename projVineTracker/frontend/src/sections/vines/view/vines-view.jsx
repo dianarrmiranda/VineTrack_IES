@@ -284,7 +284,7 @@ export default function VinesView() {
 
       res.then((response) => {
         if (response) {
-          console.log("Register successful");
+          console.log("Register Grape successful");
           setGrapeNewName("");
           setGrapeNewType("");
           setOpen1(false);
