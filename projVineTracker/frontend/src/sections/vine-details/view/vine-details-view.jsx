@@ -46,8 +46,8 @@ export default function VineDetailsView() {
   const { id } = useParams();
   const [vine, setVine] = useState({});
   
-  const [moistureData, setMoistureData] = useState(null);
-  const [nutrientsData, setNutrientsData] = useState([0, 0, 0, 0, 0, 0]);
+  const [moistureData, setMoistureData] = useState([]);
+  const [nutrientsData, setNutrientsData] = useState([]);
   const [tempData, setTempData] = useState([]);
   const [weatherAlertsData, setWeatherAlertsData] = useState([]);
 
@@ -105,11 +105,14 @@ export default function VineDetailsView() {
         console.log("Nutrients data fetched");
 
         // nutrients is a list of doubles
-        const nutrients = response;
-        const nutrientsData = nutrients.map((value, index) => {
-          return value;
+        const series = Object.values(response).map((value, index) => {
+          return {
+            label: Object.keys(response)[index],
+            value: value
+          };
         });
-        setNutrientsData(nutrientsData);
+
+        setNutrientsData(series);
       } else {
         console.log("Nutrients data failed");
       }
@@ -253,8 +256,13 @@ export default function VineDetailsView() {
           }
           if (JSON.parse(data.body).sensor == "nutrients") {
             const newNutrientsData = JSON.parse(data.body).value;
-            console.log("New nutrients data: ", newNutrientsData);
-            setNutrientsData(newNutrientsData);
+            const series = Object.values(newNutrientsData).map((value, index) => {
+              return {
+                label: Object.keys(newNutrientsData)[index],
+                value: value
+              };
+            });
+            setNutrientsData(series);
           }
           if (JSON.parse(data.body).sensor == "weatherAlerts") {
             console.log("New weather alert: ", JSON.parse(data.body).value);
@@ -279,7 +287,7 @@ export default function VineDetailsView() {
       });
     });
   }
-  , [id, moistureData], [id,nutrientsData ] ,[id, tempData], [id, weatherAlertsData]);
+  , [moistureData, nutrientsData, tempData, weatherAlertsData]);
 
   console.log("Moisture", moistureData);
   console.log("Nutrients", nutrientsData);
@@ -692,14 +700,7 @@ export default function VineDetailsView() {
           <AppNutritionChart
             title="Nutrition Values"
             chart={{
-              series: [
-                 { label: "Calcium (Ca)", value: nutrientsData[0] },
-                { label: "Magnesium (Mg)", value: nutrientsData[1] },
-                { label: "Chloride (Cl)", value: nutrientsData[2] },
-                { label: "Nitrogen (N)", value: nutrientsData[3] },
-                { label: "Potassium (K)", value: nutrientsData[4] },
-                { label: "Phosphorus (P)", value: nutrientsData[5] },
-              ],
+              series: nutrientsData,
             }}
           />
         </Grid>

@@ -99,27 +99,21 @@ public class VineController {
     }
 
     @GetMapping(path = "/nutrients/{vineId}")
-    public List<Double> getNutrientsByVineId(@PathVariable int vineId){
+    public Map<String, Double> getNutrientsByVineId(@PathVariable int vineId){
          List<Nutrient> Nutrients = nutrientService.getNutrientsByVineId(vineId);
-         Iterator<Nutrient> iterator2 = Nutrients.iterator();
 
          // finally we need to get only the moisture values
-         List<Double> nutrientsValues = (Nutrients.stream().flatMap(nutrient -> Stream.of(
-                 nutrient.getNitrogen(),
-                 nutrient.getPhosphorus(),
-                 nutrient.getPotassium(),
-                 nutrient.getCalcium(),
-                 nutrient.getMagnesium(),
-                 nutrient.getChloride()))
-                 .collect(Collectors.toList())
-         );
-         while (nutrientsValues.size() < 6) {
-             nutrientsValues.add(0, 1.0);
-         }
-         if (nutrientsValues.size() > 6) {
-             nutrientsValues = nutrientsValues.subList(nutrientsValues.size() - 6, nutrientsValues.size());
-         }
-         System.out.println("Vine: " + vineId + " - " + "Nutrients: " + nutrientsValues);
+         Map<String, Double> nutrientsValues = Nutrients.stream()
+         .flatMap(nutrient -> Stream.of(
+             new AbstractMap.SimpleEntry<>("Nitrogen", nutrient.getNitrogen()),
+             new AbstractMap.SimpleEntry<>("Phosphorus", nutrient.getPhosphorus()),
+             new AbstractMap.SimpleEntry<>("Potassium", nutrient.getPotassium()),
+             new AbstractMap.SimpleEntry<>("Calcium", nutrient.getCalcium()),
+             new AbstractMap.SimpleEntry<>("Magnesium", nutrient.getMagnesium()),
+             new AbstractMap.SimpleEntry<>("Chloride", nutrient.getChloride())
+         ))
+         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
          return nutrientsValues;
     }
 

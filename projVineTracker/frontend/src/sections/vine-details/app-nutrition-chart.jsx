@@ -60,7 +60,7 @@ export default function AppNutritionChart({ title, subheader, chart, ...other })
     tooltip: {
       fillSeriesColor: false,
       y: {
-        formatter: (value) => fNumber(value),
+        formatter: (value) => (Number(value).toFixed(2)),
         title: {
           formatter: (seriesName) => `${seriesName}`,
         },
