@@ -456,6 +456,15 @@ public class VineController {
                 }
             }
 
+            for (Nutrient nutrient : nutrientService.getAllNutrients()){
+                if (nutrient.getVine().getId() == id){
+                    nutrientService.deleteNutrientById(nutrient.getId());
+                }
+            }
+
+            vineService.getVineById(id).getTypeGrap().clear();
+
+
             for (Notification noti : notificationService.getNotificationsByVine(vineService.getVineById(id))){
                 notificationService.deleteNotificationById(noti.getId());
             }
