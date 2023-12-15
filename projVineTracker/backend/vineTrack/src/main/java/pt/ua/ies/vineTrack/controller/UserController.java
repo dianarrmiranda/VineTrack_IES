@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(path = "/api/users")
 @ResponseStatus(HttpStatus.OK)
-@Tag(name = "User", description = "Operations for users")
+@Tag(name = "Users", description = "Operations for users")
 public class UserController {
     @Autowired
     private UserService userService;

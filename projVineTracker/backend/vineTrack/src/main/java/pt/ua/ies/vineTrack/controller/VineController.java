@@ -26,6 +26,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import lombok.RequiredArgsConstructor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -48,6 +56,7 @@ import java.util.stream.Stream;
 @RestController
 @RequestMapping(path = "/api/vines")
 @RequiredArgsConstructor
+@Tag(name = "Vines", description = "Operations for vines")
 public class VineController {
     @Autowired
     private VineService vineService;
@@ -66,14 +75,11 @@ public class VineController {
 
     private static final double MAX_WATER_CONSUMPTION = 0.95; // max of 0.95L per m^2 per day
 
-    @GetMapping(path = "/test")
-    public Track getAllVinesTest(){
-        // Returns the last track
-        List<Track> tracks = vineService.getTracksByVineId(1);
-        return tracks.get(tracks.size() - 1);
-    }
 
     @GetMapping(path = "/moisture/{vineId}")
+    @Operation(summary = "Get the last 10 moisture tracks of a vine")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved moisture tracks")
+    @Parameter(name = "vineId", description = "The id of the vine", required = true, example = "1")
     public List<Double> getMoistureByVineId(@PathVariable int vineId){
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         Iterator<Track> iterator = tracks.iterator();
@@ -99,6 +105,9 @@ public class VineController {
     }
 
     @GetMapping(path = "/nutrients/{vineId}")
+    @Operation(summary = "Retrieve nutrient values for a vine")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved nutrient values")
+    @Parameter(name = "vineId", description = "The id of the vine", required = true, example = "1")
     public Map<String, Double> getNutrientsByVineId(@PathVariable int vineId){
          List<Nutrient> Nutrients = nutrientService.getNutrientsByVineId(vineId);
 
@@ -118,6 +127,9 @@ public class VineController {
     }
 
     @GetMapping(path = "/temperature/{vineId}")
+    @Operation(summary = "Retrieve temperature values for a vine on the current day")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved temperature values")
+    @Parameter(name = "vineId", description = "The id of the vine", required = true, example = "1")
     public Map<String, Double> getTemperatureByVineId(@PathVariable int vineId){
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         Iterator<Track> iterator = tracks.iterator();
@@ -155,6 +167,9 @@ public class VineController {
     }
 
     @GetMapping(path = "/weatherAlerts/{vineId}")
+    @Operation(summary = "Retrieve weather alerts for a vine")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved weather alerts")
+    @Parameter(name = "vineId", description = "The id of the vine", required = true, example = "1")
     public Map<String, List<String>> getWeatherAlertsByVineId(@PathVariable int vineId) throws JsonMappingException, JsonProcessingException{
         List<Track> tracks = vineService.getTracksByVineId(vineId);
         Iterator<Track> iterator = tracks.iterator();
@@ -185,6 +200,9 @@ public class VineController {
     }
 
     @GetMapping(path = "/waterConsumption/{vineId}")
+    @Operation(summary = "Retrieve water consumption values for a vine")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved water consumption values")
+    @Parameter(name = "vineId", description = "The id of the vine", required = true, example = "1")
     public List<Double> getWaterConsumptionByVineId(@PathVariable int vineId){
         List<Track> tracks = vineService.getTracksByVineId(vineId);
 
@@ -217,6 +235,9 @@ public class VineController {
     }
 
     @GetMapping(path = "/avgTemperatureByDay/{vineId}")
+    @Operation(summary = "Retrieve average temperature values by day for a vine")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved average temperature values by day")
+    @Parameter(name = "vineId", description = "The id of the vine", required = true, example = "1")
     public Map<String, Double>  getAvgTemperatureByDayByVineId(@PathVariable int vineId){
         DecimalFormat df = new DecimalFormat("#.##");
 
@@ -301,6 +322,9 @@ public class VineController {
     }
 
     @GetMapping(path = "/avgTemperatureByWeek/{vineId}")
+    @Operation(summary = "Retrieve average temperature values by week for a vine")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved average temperature values by week")
+    @Parameter(name = "vineId", description = "The id of the vine", required = true, example = "1")
     public Map<String, Double> getAvgTemperatureByWeekByVineId(@PathVariable int vineId){
         Vine v = vineService.getVineById(vineId);
         SortedMap<String, Double> avgTempByWeek = v.getAvgTempsByWeek();
@@ -311,6 +335,9 @@ public class VineController {
     }
 
     @GetMapping(path = "/name/{vineId}")
+    @Operation(summary = "Retrieve the name of a vine")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved the name of a vine")
+    @Parameter(name = "vineId", description = "The id of the vine", required = true, example = "1")
     public String getVineNameById(@PathVariable Integer vineId){
         try {
             return vineService.getVineById(vineId).getName();
@@ -321,6 +348,11 @@ public class VineController {
 
 
     @GetMapping()
+    @Operation(summary = "Get all vines")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
     public ResponseEntity<List<Vine>> getAllVines(){
         try {
             return ResponseEntity.ok(vineService.getAllVines());
@@ -331,6 +363,20 @@ public class VineController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Add a vine")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully added"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "name", description = "Vine name", required = true, example = "Example Vine")
+    @Parameter(name = "location", description = "Vine location", required = true, example = "Example Location")
+    @Parameter(name = "city", description = "Vine city", required = true, example = "Example City")
+    @Parameter(name = "size", description = "Vine size", required = true, example = "15000")
+    @Parameter(name = "date", description = "Vine date", required = true, example = "2021-05-05")
+    @Parameter(name = "img", description = "Vine image", required = false, example = "Example Image")
+    @Parameter(name = "users", description = "Vine users", required = true, example = "1")
+    @Parameter(name = "typeGrap", description = "Vine type of grapes", required = true, example = "[1, 2]")
+    @Parameter(name = "areaGrapes", description = "Vine area of grapes", required = true, example = "{\"1\": 10000, \"2\": 500}")
     public ResponseEntity<Vine> addVine(@RequestParam String name, @RequestParam String location, @RequestParam String city, @RequestParam Double size, @RequestParam java.util.Date date, @RequestParam(required = false) MultipartFile img, @RequestParam List<Integer> users, @RequestParam List<Integer> typeGrap, @RequestParam String areaGrapes){
 
         try {
@@ -417,6 +463,12 @@ public class VineController {
     }
 
     @GetMapping(path = "/{id}")
+    @Operation(summary = "Get a vine by id")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "id", description = "Vine id", required = true, example = "1")
     public ResponseEntity<Vine> getVineById(@PathVariable Integer id){
         try {
             return ResponseEntity.ok(vineService.getVineById(id));
@@ -426,7 +478,13 @@ public class VineController {
     }
 
     @GetMapping(path = "/image/{id}")
-    public ResponseEntity<byte[]> getImageById(@PathVariable Integer id) throws IOException{
+    @Operation(summary = "Get a vine image by id")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "id", description = "Vine id", required = true, example = "1")
+        public ResponseEntity<byte[]> getImageById(@PathVariable Integer id) throws IOException{
         Vine vine = vineService.getVineById(id);
         Path path = Paths.get(vine.getImage());
         byte[] image = Files.readAllBytes(path);
@@ -435,6 +493,12 @@ public class VineController {
     }
 
     @GetMapping(path = "/notificationImage/{id}")
+    @Operation(summary = "Get a notification image by id")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "id", description = "Notification id", required = true, example = "1")
     public ResponseEntity<byte[]> getNotificationImageById(@PathVariable Integer id) throws IOException{
         Notification notification = notificationService.getNotificationById(id);
         Path path = Paths.get(notification.getAvatar());
@@ -444,6 +508,12 @@ public class VineController {
     }
 
     @DeleteMapping(path = "/{id}")
+    @Operation(summary = "Delete a vine by id")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully deleted", content = @Content(schema = @Schema(example = "Vine deleted successfully!"))),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "id", description = "Vine id", required = true, example = "1")
     public ResponseEntity<String> deleteVineById(@PathVariable Integer id){
         try {
             for (User user : vineService.getVineById(id).getUsers()) {
@@ -467,6 +537,13 @@ public class VineController {
     }
 
     @PutMapping("/waterLimit/{vineId}")
+    @Operation(summary = "Update the water limit of a vine")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully updated"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "vineId", description = "Vine id", required = true, example = "1")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Water limit", required = true, content = @Content(mediaType = "application/json"))
     public ResponseEntity<Vine> UpdateWaterLimit(@PathVariable int vineId, @RequestBody Map<String, Double> requestBody) {
         try {
             Double waterLimit = requestBody.get("waterLimit");
@@ -483,6 +560,12 @@ public class VineController {
 
 
     @GetMapping("/waterLimit/{vineId}")
+    @Operation(summary = "Get the water limit of a vine")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "vineId", description = "Vine id", required = true, example = "1")
     public ResponseEntity<Double> getWaterLimit(@PathVariable int vineId) {
         try {
             Double waterLimit = vineService.getVineById(vineId).getMaxWaterConsumption();
@@ -495,6 +578,13 @@ public class VineController {
 
 
     @PostMapping(path = "/ph/{vineId}")
+    @Operation(summary = "Add a ph value to a vine")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully added"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "vineId", description = "Vine id", required = true, example = "1")
+    @Parameter(name = "value", description = "Ph value", required = true, example = "1.5")
     public ResponseEntity<Map<String, String>> addPhTrack(@PathVariable Integer vineId, @RequestParam Double value){
         try {
             System.out.println("Received ph value: " + value);
@@ -531,6 +621,12 @@ public class VineController {
     }
 
     @GetMapping(path = "/ph/{vineId}") // gets the date and value of the ph tracks
+    @Operation(summary = "Get the ph values of a vine")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved ph values"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "vineId", description = "Vine id", required = true, example = "1")
     public ResponseEntity<List<Map<String, String>>> getPhTracks(@PathVariable Integer vineId){
         try {
             List<Track> tracks = trackService.getTracksByVineId(vineId);
@@ -562,6 +658,12 @@ public class VineController {
     }
 
     @PostMapping(path = "/harvest/{vineId}")
+    @Operation(summary = "Add a harvest value to a vine")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully added"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "vineId", description = "Vine id", required = true, example = "1")
     public ResponseEntity<String> harvestVine(@PathVariable Integer vineId) {
         // if there is already a harvest notification for this vine, and it is unread, we don't need to send another one
         List<Notification> notifications = notificationService.getNotificationsByVineId(vineId);
@@ -601,6 +703,12 @@ public class VineController {
     }
 
     @GetMapping(path = "/waterConsumptionWeek/{vineId}")
+    @Operation(summary = "Get the water consumption values of a vine for the current week")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved water consumption values"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "vineId", description = "Vine id", required = true, example = "1")
     public ResponseEntity<List<Double>> getWaterConsumptionWeekTracksByVineId(@PathVariable Integer vineId){
         try {
             List<Track> tracks = trackService.getWaterConsumptionWeekTracksByVineId(vineId);
@@ -621,6 +729,12 @@ public class VineController {
 
 
     @GetMapping(path = "production/{vineId}")
+    @Operation(summary = "Get the production levels of a vine")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved production levels"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "vineId", description = "Vine id", required = true, example = "1")
     public ResponseEntity<Map<String, Double>> getProductionLevels(@PathVariable Integer vineId) {
         try {
             Vine vine = vineService.getVineById(vineId);
@@ -632,6 +746,14 @@ public class VineController {
     }
 
     @PostMapping(path = "production/{vineId}")
+    @Operation(summary = "Set the production levels of a vine")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully set production levels"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
+    @Parameter(name = "vineId", description = "Vine id", required = true, example = "1")
+    @Parameter(name = "value", description = "Production value", required = true, example = "1000")
+    @Parameter(name = "date", description = "Production date", required = true, example = "2021-05-05")
     public ResponseEntity<String> setProductionLevels(@PathVariable Integer vineId, @RequestParam Double value, @RequestParam String date) {
         System.out.println("Received production value: " + value + " for vine: " + vineId + " on date: " + date);
 
@@ -649,6 +771,11 @@ public class VineController {
     }
 
     @GetMapping(path = "areaGrapes/")
+    @Operation(summary = "Get the area of grapes for all vines")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved area of grapes"),
+        @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
+    })
     public ResponseEntity<Map<String, Double>> getAreaGrapes() {
         try {
             List<Vine> vines = vineService.getAllVines();

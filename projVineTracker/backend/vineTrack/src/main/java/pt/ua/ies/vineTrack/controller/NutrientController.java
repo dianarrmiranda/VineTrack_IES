@@ -23,7 +23,7 @@ import pt.ua.ies.vineTrack.service.TrackService;
 @CrossOrigin("*")
 @RestController
 @RequestMapping(path = "api/nutrients")
-@Tag(name = "Nutrient", description = "Operations for nutrients")
+@Tag(name = "Nutrients", description = "Operations for nutrients")
 public class NutrientController {
 
     @Autowired
