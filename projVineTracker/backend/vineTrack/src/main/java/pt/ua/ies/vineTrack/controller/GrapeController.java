@@ -33,7 +33,7 @@ public class GrapeController {
     private GrapeService grapeService;
 
     @GetMapping()
-    @Operation(summary = "Get all grapes")
+    @Operation(summary = "Get all types of grapes")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
