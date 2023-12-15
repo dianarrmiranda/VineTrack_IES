@@ -44,11 +44,6 @@ public class UserController {
         }
     }
 
-    @PostMapping()
-    public ResponseEntity<User> addUser(@Valid @RequestBody User user){
-                return ResponseEntity.ok(userService.save(user));
-    }
-
     @GetMapping(path = "/{id}")
     public ResponseEntity<User> viewUser(@PathVariable Integer id){
         try {
