@@ -8,8 +8,6 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import VineCard from "../vine-card";
-import VineSort from "../vine-sort";
-import VineFilters from "../vine-filters";
 import {
   Alert,
   Autocomplete,
@@ -71,7 +69,6 @@ export default function VinesView() {
   const [vines, setVines] = useState([]);
   const [grapes, setGrapes] = useState([]);
 
-  const [openFilter, setOpenFilter] = useState(false);
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -121,14 +118,6 @@ export default function VinesView() {
       }
       initialize();
     }, []);
-
-  const handleOpenFilter = () => {
-    setOpenFilter(true);
-  };
-
-  const handleCloseFilter = () => {
-    setOpenFilter(false);
-  };
 
   const handleChangeTypeGrapes = (event) => {
     
@@ -295,7 +284,7 @@ export default function VinesView() {
 
       res.then((response) => {
         if (response) {
-          console.log("Register successful");
+          console.log("Register Grape successful");
           setGrapeNewName("");
           setGrapeNewType("");
           setOpen1(false);
@@ -343,15 +332,7 @@ export default function VinesView() {
         justifyContent="flex-end"
         sx={{ mb: 5 }}
       >
-        <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
-          <VineFilters
-            openFilter={openFilter}
-            onOpenFilter={handleOpenFilter}
-            onCloseFilter={handleCloseFilter}
-          />
 
-          <VineSort />
-        </Stack>
       </Stack>
 
       <Grid container spacing={3}>

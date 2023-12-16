@@ -73,7 +73,6 @@ export default function VineDetailsView() {
         setVineId(data.id);
         setSize(data.size);
         setWaterLimit(data.maxWaterConsumption)
-        console.log("Vine data fetched: ", data);
       });
     }
 
@@ -86,9 +85,6 @@ export default function VineDetailsView() {
     const res = fetchData(`vines/moisture/${id}`, user.token);
     res.then((response) => {
       if (response) {
-        console.log("Moisture data fetched");
-        
-        // moisture is a list of doubles
         const moistureData = response.map((value, index) => {
           return value;
         });
@@ -102,9 +98,6 @@ export default function VineDetailsView() {
     fetchData(`vines/nutrients/${id}`, user.token)
     .then(response => {
       if (response) {
-        console.log("Nutrients data fetched");
-
-        // nutrients is a list of doubles
         const series = Object.values(response).map((value, index) => {
           return {
             label: Object.keys(response)[index],
@@ -120,9 +113,7 @@ export default function VineDetailsView() {
 
     fetchData(`vines/temperature/${id}`, user.token)
       .then(response => {
-        if (response) {
-          console.log("Temperature data fetched");
-          
+        if (response) {          
           const labels = Object.keys(response);
           const values = Object.values(response);
 
@@ -137,9 +128,7 @@ export default function VineDetailsView() {
 
     fetchData(`vines/weatherAlerts/${id}`, user.token)
     .then(response => {
-      if (response) {
-        console.log("Weather Alerts data fetched");
-      
+      if (response) {      
         const labels = Object.keys(response);
         const values = Object.values(response);
         setWeatherAlertsData(labels.map((value, index) => {
@@ -242,16 +231,12 @@ export default function VineDetailsView() {
         
                   }
               });
-            }
-
-            console.log("New temperature data: ", newtempData);
-            
+            }            
           }
           if (JSON.parse(data.body).sensor == "moisture") {
             const newMoistureData = [...moistureData];
             newMoistureData.shift();
             newMoistureData.push(JSON.parse(data.body).value);
-            console.log("New moisture data: ", newMoistureData);
             setMoistureData(newMoistureData);
           }
           if (JSON.parse(data.body).sensor == "nutrients") {
@@ -264,9 +249,7 @@ export default function VineDetailsView() {
             });
             setNutrientsData(series);
           }
-          if (JSON.parse(data.body).sensor == "weatherAlerts") {
-            console.log("New weather alert: ", JSON.parse(data.body).value);
-            
+          if (JSON.parse(data.body).sensor == "weatherAlerts") {            
             const obj =  JSON.parse(data.body).value;
             const json = obj.replace(/'/g, '"');
             const obj2 = JSON.parse(json);
@@ -289,18 +272,8 @@ export default function VineDetailsView() {
   }
   , [moistureData, nutrientsData, tempData, weatherAlertsData]);
 
-  console.log("Moisture", moistureData);
-  console.log("Nutrients", nutrientsData);
-  console.log("Temperature", tempData);
-  console.log("Latest value: ", latestValue);
-  console.log("Weather Alerts: ", weatherAlertsData);
-  console.log("Average Temperature by day: ", avgTempsByDay);
-
-
   const handleUpdateWaterLimit = (e) => {
     e.preventDefault();
-
-    console.log("Handling water limit update...")
 
     if (!waterLimit) {
       setErrorWaterLimit('Value cannot be empty or zero');
@@ -314,7 +287,6 @@ export default function VineDetailsView() {
       setWaterLimit(parseFloat(waterLimit));
       // pass the water limit to a double
       const newWaterLimit = parseFloat(waterLimit);
-      console.log("Water limit in frontend updated to ", newWaterLimit);
       // Send data to backend
       if (vineId !== undefined && Number.isInteger(vineId)) {
         axios({
@@ -425,7 +397,6 @@ export default function VineDetailsView() {
       const res = postData(`vines/ph/${id}?value=${value}`, "", user.token);
       res.then((response) => {
         if (response) {
-          console.log("PH value added", response);
           const newPhValues = [...phValues];
           // put the new value in the first position
           newPhValues.unshift(response);
@@ -580,7 +551,6 @@ export default function VineDetailsView() {
     fetchData(`vines/waterConsumptionWeek/${id}`, user.token)
       .then(response => {
         if (response) {
-          console.log("Water Consumption Weekly data fetched");
           setWaterConsumptionWeekly(response);
         } else {
           console.log("Water Consumption Weekly data failed");
@@ -596,7 +566,6 @@ export default function VineDetailsView() {
     client.connect({}, function () {
       client.subscribe('/topic/waterConsumptionWeek', function (data) {
         if (JSON.parse(data.body).vineId === id) {
-          console.log("New water consumption weekly data: ", JSON.parse(data.body).waterConsumptionWeekValues);
           // we receive a list of doubles
           const waterConsumptionWeekly = JSON.parse(data.body).waterConsumptionWeekValues;
           setWaterConsumptionWeekly(waterConsumptionWeekly);
@@ -608,12 +577,10 @@ export default function VineDetailsView() {
   , [id, waterConsumptionWeekly]);
 
   // Water Consumption Limit
-  console.log("Water Consumption Limit: ", vineId);
   useEffect(() => {
     fetchData(`vines/waterLimit/${id}`, user.token)
       .then(response => {
         if (response) {
-          console.log("Water Consumption Limit data fetched");
           setWaterLimit(parseFloat(response));
         } else {
           console.log("Water Consumption Limit data failed");
@@ -1028,21 +995,6 @@ export default function VineDetailsView() {
           </Card>
         </Grid>
       </Grid>
-
-      {/* BOM PARA USAR NOUTRO SITIO
-        <Grid xs={12} md={6} lg={8}>
-          <AppTasks
-            title="Tasks"
-            list={[
-              { id: '1', name: 'Create FireStone Logo' },
-              { id: '2', name: 'Add SCSS and JS files if required' },
-              { id: '3', name: 'Stakeholder Meeting' },
-              { id: '4', name: 'Scoping & Estimations' },
-              { id: '5', name: 'Sprint Showcase' },
-            ]}
-          />
-        </Grid>
-            */}
     </Container>
   );
 }

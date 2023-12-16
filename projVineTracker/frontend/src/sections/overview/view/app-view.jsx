@@ -4,7 +4,6 @@ import Typography from "@mui/material/Typography";
 
 import AppNutritionChart from "../app-typeOfGrapes-chart";
 import AppHumidityChart from "../app-production-chart";
-import AppEnvironmentalImpactChart from "../app-environmentalimpact-chart";
 import { useEffect, useState } from "react";
 import { fetchData } from "src/utils";
 // ----------------------------------------------------------------------
@@ -128,7 +127,6 @@ const [userInfo, setUserInfo] = useState({});
   
       if (grapes) {
         const areaGrapesList = Object.entries(grapes).map(([label, value]) => ({ label, value }));
-        console.log("GRAPESS");
         setAreaGrapes(areaGrapesList);
       } else {
         console.log('Failed to fetch area grapes data');
@@ -199,50 +197,6 @@ const [userInfo, setUserInfo] = useState({});
         </Grid>
       </Grid>
 
-      <Typography variant="h5" sx={{ mb: 5 }}>
-        Environmental Impact
-      </Typography>
-
-      <Grid container spacing={3}>
-        <Grid xs={12} md={6} lg={8}>
-          <AppEnvironmentalImpactChart
-            title="Environmental Impact Total"
-            subheader={`By Usage per Month`}
-            chart={{
-              labels: [
-                "01/01/2023",
-                "02/01/2023",
-                "03/01/2023",
-                "04/01/2023",
-                "05/01/2023",
-                "06/01/2023",
-                "07/01/2023",
-                "08/01/2023",
-                "09/01/2023",
-                "10/01/2023",
-                "11/01/2023",
-              ],
-              series: [
-              ],
-            }}
-          />
-        </Grid>
-      </Grid>
-
-      {/* BOM PARA USAR NOUTRO SITIO
-        <Grid xs={12} md={6} lg={8}>
-          <AppTasks
-            title="Tasks"
-            list={[
-              { id: '1', name: 'Create FireStone Logo' },
-              { id: '2', name: 'Add SCSS and JS files if required' },
-              { id: '3', name: 'Stakeholder Meeting' },
-              { id: '4', name: 'Scoping & Estimations' },
-              { id: '5', name: 'Sprint Showcase' },
-            ]}
-          />
-        </Grid>
-            */}
     </Container>
   );
 }

@@ -47,9 +47,7 @@ export default function NotificationsPopover() {
   useEffect(() => {
     const init = async () => {
         const res = await fetchData(`users/notifications/${user.id}`, user.token);
-        console.log("Notifications fetched");
         const notifications = res;
-        console.log("Notification: ", notifications);
         const notificationsData = [];
         for (const notification of notifications) {
           // get notification's avatar
@@ -147,9 +145,6 @@ export default function NotificationsPopover() {
 
 
             // if its in the read list, remove it from there
-            // console.log("Descpription: ", newFormattedNotification.description);
-            console.log("Notifications Read: ", readNotifications);
-            console.log("Notifications Unread: ", unreadNotifications);
             if (readNotifications.some((notification) => ((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))) {
               setReadNotifications((prevRead) =>
                 prevRead.filter((notification) => !((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))
@@ -158,8 +153,6 @@ export default function NotificationsPopover() {
               setNotifications((prevNotifications) => 
                 prevNotifications.filter((notification) => !((notification.avatar === newFormattedNotification.avatar) && (notification.vineId === newFormattedNotification.vineId)))
               );
-
-              console.log("Notification removed from read list");
             }
 
             // check if the notification is already in the unread list
@@ -168,7 +161,6 @@ export default function NotificationsPopover() {
             }
 
             setNotifications((prevNotifications) => [newFormattedNotification, ...prevNotifications]);
-            console.log("Notification added to notifications list: " , notifications);
             setTotalUnRead((prevTotal) => prevTotal + 1);
             return [newFormattedNotification, ...prevUnread];
 

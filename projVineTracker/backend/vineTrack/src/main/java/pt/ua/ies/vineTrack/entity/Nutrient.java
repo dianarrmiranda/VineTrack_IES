@@ -2,8 +2,6 @@ package pt.ua.ies.vineTrack.entity;
 
 import jakarta.persistence.*;
 
-import java.util.List;
-
 @Entity
 @Table(name = "nutrient")
 public class Nutrient {

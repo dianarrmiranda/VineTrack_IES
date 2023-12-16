@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import pt.ua.ies.vineTrack.entity.Nutrient;
-import pt.ua.ies.vineTrack.entity.Track;
 import pt.ua.ies.vineTrack.service.NutrientService;
-import pt.ua.ies.vineTrack.service.TrackService;
 
 @CrossOrigin("*")
 @RestController

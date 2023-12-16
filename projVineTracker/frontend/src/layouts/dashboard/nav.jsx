@@ -95,29 +95,8 @@ export default function Nav({ openNav, onCloseNav }) {
         spacing={3}
         sx={{ pt: 5, borderRadius: 2, position: "relative" }}
       >
-        <Box
-          component="img"
-          src="/assets/illustrations/illustration_avatar.png"
-          sx={{ width: 100, position: "absolute", top: -50 }}
-        />
 
-        <Box sx={{ textAlign: "center" }}>
-          <Typography variant="h6">Do you need help?</Typography>
 
-          <Typography
-            variant="body2"
-            sx={{ color: "text.secondary", mt: 1 }}
-          ></Typography>
-        </Box>
-
-        <Button
-          href="https://material-ui.com/store/items/minimal-dashboard/"
-          target="_blank"
-          variant="contained"
-          color="inherit"
-        >
-          Get Help
-        </Button>
       </Stack>
     </Box>
   );
