@@ -357,7 +357,6 @@ class Generator:
 
                 if len(info) == 0:
                     continue
-                print("Info:",info) # O info vai ter o id, a fase e os nutrientes da tabela nutrient
                 info = info[0]
                 phase = info[-1]
                 # Nutrientes vai ser do tipo [ (Nitrogen, 0.5), (Phosphorus, 0.5), (Potassium, 0.5), (Calcium, 0.5), (Magnesium, 0.5), (Chloride, 0.5) ]
@@ -369,11 +368,9 @@ class Generator:
                     "Magnesium": info[5],
                     "Chloride": info[6]
                 }
-                print("Nutrients: ", nutrients)
                 self.cursor = self.connection.cursor()
                 self.cursor.execute(f'SELECT * FROM nutrient WHERE vine_id = {self.id} ORDER BY id DESC LIMIT 2') # TODO: este select vai buscar sempre os mesmos valores, acho eu
                 values = self.cursor.fetchall()
-                print("VAl::",values)
 
                 idealPFlower = { "Nitrogen": [1.6,2.7],"Phosphorus": [0.14, 0.55],"Potassium": [0.65, 1.3],"Calcium": [1.2, 2.2],"Magnesium": [0.16, 0.55],"Chloride": [0.5]} 
                 idealPFruit = { "Nitrogen": [1.5,2.4],"Phosphorus": [0.12, 0.45],"Potassium": [0.55, 1.05],"Calcium": [1.5, 2.4],"Magnesium": [0.2, 0.6],"Chloride": [0.5]}
