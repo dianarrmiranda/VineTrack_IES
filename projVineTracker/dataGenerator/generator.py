@@ -140,7 +140,7 @@ class Generator:
 
                     elif values[1][-2] - values[0][-2] > 0:
                         # vai aumentar até cheagar ao valor de humidade ideal
-                        ideal = {'bud': [70, 80], 'flower': [80, 90], 'fruit': [80, 90], 'maturity': [60, 70]}
+                        ideal = {'bud': [70, 80], 'flower': [80, 90], 'fruit': [80, 90], 'ripen': [60, 70]}
 
                         idealValues = ideal[phase]
 

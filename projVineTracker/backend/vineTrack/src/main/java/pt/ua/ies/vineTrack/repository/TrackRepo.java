@@ -34,4 +34,7 @@ public interface TrackRepo extends JpaRepository<Track, Integer> {
 
     @Query("SELECT t FROM Track t WHERE t.type = 'waterConsumptionWeek' AND t.vine.id = ?1")
     List<Track> getWaterConsumptionWeekTracksByVineId(int vineId);
+
+    @Query("SELECT t FROM Track t WHERE t.type = 'reset' AND t.vine.id = ?1 ORDER BY t.date DESC")
+    List<Track> getLastResetTrackByVineId(int vineId);
 }

@@ -94,4 +94,8 @@ public class TrackService {
     public List<Track> getWaterConsumptionWeekTracksByVineId(int vineId) {
         return trackRepo.getWaterConsumptionWeekTracksByVineId(vineId);
     }
+
+    public List<Track> getLastResetTrackByVineId(int vineId) {
+        return trackRepo.getLastResetTrackByVineId(vineId);
+    }
 }

@@ -20,6 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.WeekFields;
 import java.util.*;
 
@@ -74,6 +76,60 @@ public class RabbitmqHandler {
                 Track track = new Track(type, date, value, vine, t.toString(), d.toString());
 
                 trackService.saveTrack(track);
+
+                // evolve the vine
+                // get the last reset track
+                List<Track> lastResetTrack = trackService.getLastResetTrackByVineId(vineId);
+                // if there is no reset track, the start date is the date of the creation of the vine
+                Date startDate = lastResetTrack.isEmpty() ? vine.getDate() : Date.from(lastResetTrack.get(0).getDate().atZone(ZoneId.systemDefault()).toInstant());
+                // make it a LocalDate
+                LocalDate startDateLocalDate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+                System.out.println("startDateLocalDate: " + startDateLocalDate);
+                System.out.println("d: " + d);
+                // display how many days have passed since the creation of the vine
+                System.out.println("Days since the creation of the vine: " + ChronoUnit.DAYS.between(startDateLocalDate, d));
+
+                // if the phase is 'bud' and it has been 2 weeks since the creation of the vine, evolve to 'flower'
+                if (vine.getPhase().equals("bud")) {
+                    // the current date is d
+                    // if the difference between the two dates is 14 days or more, evolve to 'flower'
+                    if (!d.isBefore(startDateLocalDate.plusDays(14))) {
+                        vine.setPhase("flower");
+                        vineService.save(vine);
+                    }
+                }
+                // if the phase is 'flower' and it has been 6 weeks since the creation of the vine, evolve to 'fruit'
+                if (vine.getPhase().equals("flower")) {
+                    // the current date is d
+                    // if the difference between the two dates is 42 days or more, evolve to 'fruit'
+                    if (!d.isBefore(startDateLocalDate.plusDays(56))) { // 14 + 42 = 56
+                        vine.setPhase("fruit");
+                        vineService.save(vine);
+                    }
+                }
+                // if the phase is 'fruit' and it has been 2 months since the creation of the vine, evolve to 'ripen'
+                if (vine.getPhase().equals("fruit")) {
+                    // the current date is d
+                    // if the difference between the two dates is 60 days or more, evolve to 'ripen'
+                    if (!d.isBefore(startDateLocalDate.plusDays(116))) { // 56 + 60 = 116
+                        vine.setPhase("ripen");
+                        vineService.save(vine);
+                    }
+                }
+                // if the phase is 'ripen' and it has been 2 months since the creation of the vine, evolve to 'bud'
+                if (vine.getPhase().equals("ripen")) {
+                    // the current date is d
+                    // if the difference between the two dates is 60 days or more, evolve to 'bud'
+                    if (!d.isBefore(startDateLocalDate.plusDays(176))) { // 116 + 60 = 176
+                        vine.setPhase("bud");
+                        vineService.save(vine);
+
+                        // create a new track indicating that the vine has been reset
+                        Track resetTrack = new Track("reset", date, 0, vine, t.toString(), d.toString());
+                        trackService.saveTrack(resetTrack);
+                    }
+                }
 
                 // only save the 10 most recent moisture tracks for each vine
                 trackService.removeOldTracks("moisture", vineId);
