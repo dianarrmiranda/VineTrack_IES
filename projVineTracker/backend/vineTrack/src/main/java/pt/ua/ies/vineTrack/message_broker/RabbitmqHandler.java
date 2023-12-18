@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.WeekFields;
 import java.util.*;
 
@@ -84,6 +85,11 @@ public class RabbitmqHandler {
                 // make it a LocalDate
                 LocalDate startDateLocalDate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
+                System.out.println("startDateLocalDate: " + startDateLocalDate);
+                System.out.println("d: " + d);
+                // display how many days have passed since the creation of the vine
+                System.out.println("Days since the creation of the vine: " + ChronoUnit.DAYS.between(startDateLocalDate, d));
+
                 // if the phase is 'bud' and it has been 2 weeks since the creation of the vine, evolve to 'flower'
                 if (vine.getPhase().equals("bud")) {
                     // the current date is d
@@ -121,6 +127,7 @@ public class RabbitmqHandler {
 
                         // create a new track indicating that the vine has been reset
                         Track resetTrack = new Track("reset", date, 0, vine, t.toString(), d.toString());
+                        trackService.saveTrack(resetTrack);
                     }
                 }
 
