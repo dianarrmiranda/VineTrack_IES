@@ -3,6 +3,7 @@ package pt.ua.ies.vineTrack.controller;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.method.P;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pt.ua.ies.vineTrack.entity.Grape;
@@ -779,15 +780,15 @@ public class VineController {
         }
     }
 
-    @GetMapping(path = "areaGrapes/")
+    @GetMapping(path = "areaGrapes/{userId}")
     @Operation(summary = "Get the area of grapes for all vines")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved area of grapes"),
         @ApiResponse(responseCode = "404", description = "Not found", content = @Content),
     })
-    public ResponseEntity<Map<String, Double>> getAreaGrapes() {
+    public ResponseEntity<Map<String, Double>> getAreaGrapes(@PathVariable Integer userId) {
         try {
-            List<Vine> vines = vineService.getAllVines();
+            List<Vine> vines = userService.getUserById(userId).getVines();
             Map<String, Double> areaGrapes  = new HashMap<>();
             double totalArea = 0;
             for (Vine vine : vines) {

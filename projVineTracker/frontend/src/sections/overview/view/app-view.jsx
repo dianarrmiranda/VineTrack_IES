@@ -123,7 +123,7 @@ const [userInfo, setUserInfo] = useState({});
         return;
       }
   
-      const grapes = await fetchData(`vines/areaGrapes/`, userInfo.token);
+      const grapes = await fetchData(`vines/areaGrapes/${userInfo.id}`, userInfo.token);
   
       if (grapes) {
         const areaGrapesList = Object.entries(grapes).map(([label, value]) => ({ label, value }));
