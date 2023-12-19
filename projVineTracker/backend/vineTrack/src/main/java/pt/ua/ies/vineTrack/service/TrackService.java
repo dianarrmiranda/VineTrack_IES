@@ -80,7 +80,7 @@ public class TrackService {
 
         // get the waterConsumption tracks older than 7 days ago using column day
         List<Track> oldWaterConsumptionTracks = trackRepo.getOldWaterConsumptionTracks(lastTrackDate.minusDays(7));
-        trackRepo.deleteAll(oldWaterConsumptionTracks);
+//        trackRepo.deleteAll(oldWaterConsumptionTracks);
     }
 
     public List<Track> getLastTrackByVineId(Integer vineId) {

@@ -85,11 +85,6 @@ public class RabbitmqHandler {
                 // make it a LocalDate
                 LocalDate startDateLocalDate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-                System.out.println("startDateLocalDate: " + startDateLocalDate);
-                System.out.println("d: " + d);
-                // display how many days have passed since the creation of the vine
-                System.out.println("Days since the creation of the vine: " + ChronoUnit.DAYS.between(startDateLocalDate, d));
-
                 // if the phase is 'bud' and it has been 2 weeks since the creation of the vine, evolve to 'flower'
                 if (vine.getPhase().equals("bud")) {
                     // the current date is d
